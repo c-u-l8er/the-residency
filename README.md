@@ -42,8 +42,20 @@ the name.
 Open `index.html` in a browser. That's it.
 
 - **Inside Claude:** auth is handled for you — just watch it run.
-- **Local file:** click the key button to paste an Anthropic API key. It stays in the
-  browser tab and is sent only to `api.anthropic.com`. No key is stored in this repo.
+- **Local file:** click the key button (⚷) to paste an Anthropic API key. It stays in the
+  browser tab (in-memory `USER_KEY`, never persisted or committed) and is sent only to
+  `api.anthropic.com`.
+
+  The key must be a **Console API key** (`sk-ant-...` from
+  [console.anthropic.com](https://console.anthropic.com)). The page calls the Messages API
+  directly with an `x-api-key` header (`anthropic-dangerous-direct-browser-access: true`),
+  so a Claude.ai/subscription OAuth login will *not* work here — only a Console key.
+
+  **Without a reachable key the residency still runs** in `offline templates` mode: residents
+  post deterministic, in-character, source-grounded lines instead of model output (the status
+  badge shows `offline templates`). This is also what you'll see in any sandboxed/headless
+  browser that can't reach `api.anthropic.com` (CORS / no auth), e.g. a preview harness — the
+  `Failed to fetch` is expected, not a bug. Add a Console key to switch to live Sonnet.
 
 Let it run a few minutes: residents open threads, cite real `ic32.c` / `swarm.js` /
 `FINDINGS.md` lines, occasionally measure interaction counts via the live runtime, and
