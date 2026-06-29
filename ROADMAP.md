@@ -105,6 +105,9 @@ The only work that matters until the findings are proven reliable.
 # measured baselines, not targets pulled from the air.
 gate0:
   board_lift:         "> 0       # board finding_precision minus single-agent's; must be positive"
+  # RUN 1 (box-and-box @353d1679, n=6): board_lift = -0.33 → FAIL. board 0.42 vs single 0.75.
+  # Board lost to confident-wrong fabrication (herding); single critic committed & fabricated less.
+  # Redesign deliberation before hardening. See EVIDENCE/gate0.md. n small (1 corpus); calibrate over 3-4.
 gate1:
   finding_precision:  ">= 0.75   # findings that survive human verification"
   citation_accuracy:  ">= 0.95   # references that check out as stated"
