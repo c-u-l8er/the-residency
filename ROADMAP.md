@@ -131,6 +131,17 @@ gate0:
   #   window → single FABRICATED confidently, board+H3 retreated honestly ("insufficient evidence").
   #   VERDICT after 2 corpora: keep the SINGLE CRITIC as deployed default; H3 is a board-repair, not a
   #   board-advantage. Before a 4th corpus: FIX SRC_CAP truncation + use a more discriminating thread set.
+  # RUN 1.4 (Gate 0.4, box-and-box cross-file threads c1-c4; tests H4 COVERAGE PANEL + calibration; n=4):
+  #   board_lift(H3 vs single) = 1.0 - 1.0 = 0.0 → TIE A THIRD TIME, now on threads BUILT to favor coverage.
+  #   H4 (one resident/rung, finding=union) is FALSIFIED as a board advantage: coverage board (B') LOSES
+  #   (-0.25) AND under-covers the soloist (3.25 vs 2.25 distinct files cited). The single critic, merely
+  #   TOLD "read across files", matched precision and out-covered the panel. New named failure: the coverage
+  #   panel fabricates cross-file COUPLINGS (c1 "owned by norm.mjs"; c2 "before the bridge runs") the source
+  #   never makes. H3 repaired both (+0.25, like prior). FIXED SRC_CAP (windowed source) — and this DEFLATED
+  #   Gate 0.3's p3 win: with decisive lines back in-window the soloist did NOT fabricate, so the
+  #   "structure converts fabrication->abstention" edge was largely a truncation-bug artifact. See gate0_4.md.
+  #   VERDICT after 3 runs (precision -0.33->-0.25->+0.125->0.0->0.0): GATE 0 CLOSES NEGATIVE. Do not harden
+  #   the board. Keep H3 as the one validated lever but apply it to the SOLOIST's findings, not to prop a board.
 gate1:
   finding_precision:  ">= 0.75   # findings that survive human verification"
   citation_accuracy:  ">= 0.95   # references that check out as stated"
