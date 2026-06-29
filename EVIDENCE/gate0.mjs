@@ -26,7 +26,7 @@ const REPO = 'c-u-l8er/AmpersandBoxDesign';
 const REF = '353d1679a799bd4b6f0bea0dc126ddbe085462cc';
 const PREFIX = 'box-and-box/';
 const RAW = `https://raw.githubusercontent.com/${REPO}/${REF}/${PREFIX}`;
-const DOMAIN = 'the box-and-box project — the [&] Protocol governance kernel: an eight-rung modality ladder (alethic → axiological → deontic → temporal → reflexive → epistemic → strategic → resource) tied by one bridge that runs feasible ▸ permitted ▸ best over an un-weakenable safety floor, with 117 property-tested laws';
+const DOMAIN = 'the box-and-box project — the [&] Protocol governance kernel: an eight-rung modality ladder (alethic → axiological → deontic → temporal → reflexive → epistemic → strategic → resource) tied by one bridge that runs feasible ▸ permitted ▸ best over an un-weakenable safety floor, with 116 property-tested laws'; // count corrected 117→116 (README is authoritative); the original gate0 transcript carried 117 — see gate0_2 transcript where the auditor itself flagged it
 const SOURCE_NOUN = 'the box-and-box kernel';
 const CITE = '`bridge.mjs`, `value.mjs`, `govern.mjs`, `test/laws.mjs`';
 

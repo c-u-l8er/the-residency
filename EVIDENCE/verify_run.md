@@ -27,13 +27,15 @@ than to prop up a board — exactly the standing recommendation from Gate 0 clos
 ## Acceptance verdict (Gate 0 briefing, Action 1)
 
 - **Quality bar — PASS.** `soloist + H3` (1.0) ≥ `soloist alone` (0.75), and no over-deny regression.
-- **Cost bar (≤2×) — PARTIAL, honestly.** The measured run used **always-revise** = **3×** every
-  thread (soloist + falsify + revise). The *audit* (falsify) — the part that flags fabrications —
-  is **+1 call = 2×**. The *repair* (revise) is the 3rd call and only earns its keep when the audit
-  flags something (c2 was clean and paid for a wasted revise). **Fix shipped:** `verify()` now gates
-  revise on a non-clean audit by default — clean findings cost **2×**, flagged findings **3×**
-  (this run would average **2.75×**: c2 → 2×, c1/c3/c4 → 3×). To hit a flat ≤2× one would fold
-  audit+repair into a single call; not done, flagged as follow-up.
+- **Cost bar (≤2×) — PARTIAL, honestly.** The **measured** run used **always-revise** = a flat
+  **3× every thread** (soloist + falsify + revise). The *audit* (falsify) — the part that flags
+  fabrications — is **+1 call = 2×**. The *repair* (revise) is the 3rd call and only earns its keep
+  when the audit flags something (c2 was clean and paid for a wasted revise). **Fix shipped:**
+  `verify()` now gates revise on a non-clean audit by default — clean findings cost **2×**, flagged
+  findings **3×**. The **2.75× figure is a PROJECTION, not a measurement** — it is what *this* run
+  *would* have averaged under the gate (c2 → 2×, c1/c3/c4 → 3×); the transcript on disk is still
+  3×/3×/3×/3×, because it predates the gate. A re-run is needed to measure the gated cost. To hit a
+  flat ≤2× one would fold audit+repair into a single call; not done, flagged as follow-up.
 
 ## Mechanical notes
 
@@ -55,10 +57,34 @@ than to prop up a board — exactly the standing recommendation from Gate 0 clos
   decisive cross-file lines up front; on a weaker retrieval setup the soloist would fabricate more and
   the verify lift would likely be larger, not smaller.
 - This is a verification pass over **one model**; it is not a claim about heterogeneous multi-agent.
+- **The regression guard is FILE-granular, not LINE-granular.** `droppedTerms` checks that every
+  query *term* survives windowing, and the named-file pin guarantees a decisive *file* is in-window.
+  It does **not** guarantee a decisive *line within an in-window file* survives if that line shares
+  all its terms with other surviving lines. The test fixture conveniently couples term-survival to
+  line-survival; real corpora may not. Treat "no decisive line truncated" as a file-level claim.
+- **The selection-crowding bug means the earlier gates ran on a worse substrate.** Before the
+  named-file pin (this run), a 19 KB README + a low-signal index could push a decisive code file
+  entirely out of the prompt (this retroactively explains Gate 0.4's c2 "before the bridge runs"
+  fabrication — `bridge.mjs` was never in c2's window). So the board-vs-soloist gates were partly
+  measuring retrieval starvation, not debate. **The board was never cleanly tested** on this
+  substrate; do not over-read the −0.33 → 0.0 trend as a clean verdict on deliberation itself. The
+  honest standing claim is narrower: *on the substrate we now have, a board did not beat a verified
+  soloist* — not *debate cannot help under any retrieval setup*.
 
 ## Standing conclusion
 
-`producer + verify-entailment` is validated as the residency's default findings mechanism: it lifted
-a strong soloist from 0.75 → 1.0 precision with no over-deny regression, at 2× cost on clean findings
-and 3× when a repair is actually needed. **Ship it as the default; keep the board behind a research
-flag.** Follow-up: fold falsify+revise into one call to make the flagged-finding case 2× as well.
+`producer + verify-entailment` is **confirmed in direction** as the residency's default findings
+mechanism — **on n = 4, adjudicated by an unblinded same-model (Claude) judge**, NOT independently
+validated. With that calibration: it lifted a strong soloist from 0.75 → 1.0 precision with no
+over-deny regression, at 2× cost on clean findings and 3× when a repair is actually needed. **Ship
+it as the default; keep the board behind a research flag.**
+
+**The non-circularity upgrade (shipped after this run).** The single largest caveat above is
+"adjudicator = Claude, the same family as producer and auditor." `verify-entailment.mjs` now carries
+a **deterministic, model-free layer**: every claim that reduces to a static grep-able fact (e.g. the
+c1 overclaim *"supervise imports norm.mjs / shared envelope"*) is decided by `fileImports` /
+`fileCalls` over the real file text — **no model in the loop** — and OVERRIDES the model verdict.
+This closes the Claude-grades-Claude loop exactly on the claims where it matters most. It would have
+caught the c1 fabrication deterministically. (Interpretive claims still fall to the model auditor.)
+Follow-up: fold falsify+revise into one call to make the flagged-finding case 2× as well; and re-run
+to *measure* the gated cost and the mechanical-layer hit rate (both are projections right now).

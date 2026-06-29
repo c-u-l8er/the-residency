@@ -139,7 +139,148 @@ export function verifyCites(cites, { corpusByPath, fileset }) {
   };
 }
 
-// ---------- prompts (faithful to the validated Gate 0.2/0.4 H3+H6) ----------
+// ---------- deterministic, model-free entailment (the non-circular signal) ----------
+// The critic's upgrade: where an entailment check reduces to a STATIC, grep-able fact about the
+// source, decide it WITHOUT a model in the loop. This closes the Claude-grades-Claude circularity
+// exactly on the claims where closing it matters most, and reserves model-judged entailment for
+// the genuinely interpretive claims. Mechanical verdicts are AUTHORITATIVE and override the model.
+//
+// Soundness discipline: a mechanical check emits a verdict ONLY in the direction it can prove
+// completely from file text. Imports are complete (grep over the whole file sees every import),
+// so BOTH directions are sound. A literal-default check can only PROVE absence (a real
+// falsification), never that a present token is actually the default — so it stays silent on
+// presence and lets the model judge. Anything it cannot decide soundly, it leaves to falsify().
+const escapeRe = (s) => String(s).replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+const moduleBase = (f) => String(f).replace(/.*\//, '').replace(/\.(?:mjs|js|ts)$/, '');
+
+// Does `text` import the module named by `targetFile` (by path basename)? Covers
+// `import … from '…/norm.mjs'`, `import('…/norm.mjs')`, and `require('…/norm.mjs')`.
+export function fileImports(text, targetFile) {
+  const base = escapeRe(moduleBase(targetFile));
+  const re = new RegExp(
+    `(?:import\\b[^\\n;]*?\\bfrom|\\brequire\\s*\\(|\\bimport\\s*\\()\\s*['"][^'"]*\\b${base}(?:\\.(?:mjs|js|ts))?['"]`,
+    'm',
+  );
+  return re.test(String(text));
+}
+
+// Does `text` contain a CALL SITE of `fnName` (excluding its own definition)? Conservative:
+// skips `function name(` / `class name(`; an arrow/const-assigned def `const name = (` does not
+// match `name(` at all. Residual limitation: a class/object METHOD definition `name(args){…}`
+// can read as a call — noted; acceptable for the supervise/escalate-style claims this targets.
+export function fileCalls(text, fnName) {
+  const t = String(text);
+  const re = new RegExp(`\\b${escapeRe(fnName)}\\s*\\(`, 'g');
+  let m;
+  while ((m = re.exec(t))) {
+    const before = t.slice(Math.max(0, m.index - 24), m.index);
+    if (/\b(?:function|class)\s+$/.test(before)) continue; // a definition, not a call
+    return true;
+  }
+  return false;
+}
+
+// split into clauses on newlines, semicolons, and SENTENCE periods — a period is only a boundary
+// when followed by whitespace or end-of-string, so filename dots (supervise.mjs) stay intact.
+const _CLAUSES = (text) =>
+  String(text || '')
+    .split(/[\n;]+|\.(?=\s|$)/)
+    .map((s) => s.trim())
+    .filter(Boolean);
+const _NEG = /\b(?:never|not|no longer|does ?n['’]?t|do ?n['’]?t|cannot|can ?not|without|nor|none)\b/i;
+const _FILES = (s) => [...new Set((s.match(/[A-Za-z][\w-]*\.(?:mjs|js|ts)/g) || []))];
+
+// Pull grep-able structural assertions out of a finding's prose. Conservative: only patterns that
+// map cleanly to a static fact are emitted; everything else falls through to the model.
+export function extractMechanicalClaims(text) {
+  const out = [];
+  const seen = new Set();
+  const push = (a) => {
+    const k = `${a.kind}|${a.subject || ''}|${a.object}|${a.polarity}`;
+    if (!seen.has(k)) (seen.add(k), out.push(a));
+  };
+  for (const cl of _CLAUSES(text)) {
+    const neg = _NEG.test(cl);
+    const files = _FILES(cl);
+    if (/\bimports?\b|\bimporting\b/i.test(cl) && files.length >= 2) {
+      push({ kind: 'import', subject: files[0], object: files[1], polarity: !neg, span: cl });
+    }
+    if (/\bcalls?\b|\binvok\w*\b|\bcalling\b/i.test(cl) && files.length >= 1) {
+      const fnM = cl.match(/\b([A-Za-z_]\w*)\s*\(\s*\)/) || cl.match(/\b(?:calls?|invokes?)\s+(?:the\s+)?`?([A-Za-z_]\w*)`?/i);
+      if (fnM) push({ kind: 'call', subject: files[0], object: fnM[1], polarity: !neg, span: cl });
+    }
+    const defM = cl.match(/\bdefaults?\s+to\s+`?([A-Za-z_][\w-]*)`?/i) || cl.match(/\bdefault\b[^.]*?\bis\s+`?([A-Za-z_][\w-]*)`?/i);
+    if (defM && files.length >= 1) push({ kind: 'default', subject: files[0], object: defM[1], polarity: !neg, span: cl });
+  }
+  return out;
+}
+
+// Decide the extracted assertions deterministically against the real corpus text.
+// Returns verdict objects shaped like the model's, tagged source:'mechanical'.
+export function mechanicalChecks(findingText, { corpusByPath } = {}) {
+  if (!corpusByPath) return [];
+  const results = [];
+  for (const a of extractMechanicalClaims(findingText)) {
+    const src = corpusByPath[a.subject];
+    if (!src) continue; // subject file not in corpus — cannot decide; leave to the model
+    if (a.kind === 'import') {
+      const has = fileImports(src, a.object);
+      const ok = has === a.polarity;
+      results.push({
+        verdict: ok ? 'ENTAILED' : 'NOT_ENTAILED',
+        claim: a.span,
+        evidence: `[mechanical] ${a.subject} ${has ? 'DOES' : 'does NOT'} import ${a.object} (grep over full file)`,
+        source: 'mechanical',
+        assertion: a,
+      });
+    } else if (a.kind === 'call') {
+      const has = fileCalls(src, a.object);
+      const ok = has === a.polarity;
+      results.push({
+        verdict: ok ? 'ENTAILED' : 'NOT_ENTAILED',
+        claim: a.span,
+        evidence: `[mechanical] ${a.subject} ${has ? 'has a call site for' : 'never calls'} ${a.object}() (grep, def excluded)`,
+        source: 'mechanical',
+        assertion: a,
+      });
+    } else if (a.kind === 'default') {
+      // sound only in the ABSENCE direction: if the literal token is nowhere in the file, a
+      // "defaults to <token>" claim is falsified. Presence does NOT prove default → stay silent.
+      const present = new RegExp(`\\b${escapeRe(a.object)}\\b`).test(src);
+      if (!present && a.polarity) {
+        results.push({
+          verdict: 'NOT_ENTAILED',
+          claim: a.span,
+          evidence: `[mechanical] token "${a.object}" does not occur in ${a.subject} (grep) — cannot be its default`,
+          source: 'mechanical',
+          assertion: a,
+        });
+      }
+    }
+  }
+  return results;
+}
+
+// Merge mechanical verdicts over model verdicts: a mechanical NOT_ENTAILED suppresses any model
+// ENTAILED that names the same object token, and mechanical verdicts are prepended as the
+// authoritative record. Object tokens are matched on the module/function base name.
+export function mechanicalMerge(modelVerdicts, mech) {
+  if (!mech || !mech.length) return modelVerdicts;
+  const refuted = mech
+    .filter((m) => m.verdict === 'NOT_ENTAILED')
+    .map((m) => moduleBase(m.assertion.object).toLowerCase());
+  const kept = modelVerdicts.filter((v) => {
+    if (v.verdict !== 'ENTAILED') return true;
+    const t = String(v.claim).toLowerCase();
+    return !refuted.some((o) => o && t.includes(o));
+  });
+  return [
+    ...mech.map((m) => ({ verdict: m.verdict, claim: m.claim, evidence: m.evidence, source: 'mechanical' })),
+    ...kept,
+  ];
+}
+
+// ---------- prompts (faithful to the Gate 0.2/0.4 H3+H6 producers — see calibration note) ----------
 export const FINDING_FMT = `
 FORMAT — reply with EXACTLY these labels, each starting its own line (literal labels + colon, NOT markdown headers):
 TYPE: finding
@@ -170,8 +311,10 @@ Rules:
   line that truly entails the claim. Do NOT be charitable.`;
 
 // ---------- the verifier (H3 falsify → H6 commit-revision) ----------
-// deps: { call(system,user), buildSrc(query)->string, domain, srcLabel? }
-export function createVerifier({ call, buildSrc, domain }) {
+// deps: { call(system,user), buildSrc(query)->string, domain, corpusByPath? }
+// If `corpusByPath` (path -> file text) is supplied, every claim that reduces to a static
+// grep-able fact is decided DETERMINISTICALLY (no model) and overrides the model verdict.
+export function createVerifier({ call, buildSrc, domain, corpusByPath }) {
   async function falsify(question, finding) {
     const src = buildSrc(`${question} ${finding.claim} ${finding.body}`);
     const sys = `you are a meticulous, adversarial code/spec reader auditing a finding about ${domain}.${VERDICT_FMT}${src}`;
@@ -179,15 +322,19 @@ export function createVerifier({ call, buildSrc, domain }) {
       .map((c) => `  ${c.file} :: "${c.quote}"`)
       .join('\n')}\n\nTry to break each material claim against the real source. Emit VERDICT lines only.`;
     const raw = await call(sys, usr);
-    const verdicts = [];
+    const modelVerdicts = [];
     for (const line of raw.split('\n')) {
       const m = line.match(
         /^[\s\-*]*VERDICT:\s*(ENTAILED|NOT_ENTAILED|HEDGE_UNWARRANTED)\s*::\s*([\s\S]+?)\s*::\s*([\s\S]+?)\s*$/i,
       );
-      if (m) verdicts.push({ verdict: m[1].toUpperCase(), claim: m[2].trim(), evidence: m[3].trim() });
+      if (m) modelVerdicts.push({ verdict: m[1].toUpperCase(), claim: m[2].trim(), evidence: m[3].trim(), source: 'model' });
     }
+    // deterministic, model-free layer (the non-circular signal) — authoritative where it fires
+    const findingText = `${finding.claim}\n${finding.body}\n${finding.cites.map((c) => `${c.file} :: ${c.quote}`).join('\n')}`;
+    const mechanical = mechanicalChecks(findingText, { corpusByPath });
+    const verdicts = mechanicalMerge(modelVerdicts, mechanical);
     const counts = verdicts.reduce((a, v) => ((a[v.verdict] = (a[v.verdict] || 0) + 1), a), {});
-    return { raw, verdicts, counts };
+    return { raw, verdicts, modelVerdicts, mechanical, counts };
   }
 
   async function revise(question, finding, falsifier, { authorName = 'the reviewer' } = {}) {

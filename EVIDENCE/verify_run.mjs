@@ -7,7 +7,10 @@
  *
  * Acceptance bar (Gate 0 briefing, Action 1):
  *   · soloist + H3 ≥ soloist alone on precision (hand-adjudicated against source, in verify_run.md)
- *   · ≤ 2× cost (this stage adds exactly 2 calls/thread: falsify + revise → 3 total vs 1)
+ *   · cost: falsify is +1 call (2× — the audit that flags fabrications); revise is the 3rd call
+ *     (3×) and is GATED on a flagged audit, so a CLEAN finding costs 2× and a flagged one 3×.
+ *     NOTE: the committed transcript was produced under the old always-revise default = 3× on all
+ *     4 threads. The gated 2×/3× split is a code change, not yet a measured run (see verify_run.md).
  *   · NO regression into the over-deny failure mode on IN-WINDOW source: if the falsifier marks
  *     a TRUE claim NOT_ENTAILED while the decisive line is in-window, that is the failure to catch.
  *
@@ -181,7 +184,10 @@ async function main() {
   await hydrate();
   process.stderr.write(`[verify] ${CORPUS.length} files live. threads: ${tids.join(', ')}\n`);
 
-  const verifier = createVerifier({ call, buildSrc, domain: DOMAIN });
+  // corpusByPath enables the DETERMINISTIC, model-free layer: claims that reduce to a static
+  // grep-able fact (e.g. "supervise.mjs never imports norm.mjs") are decided without a model and
+  // override the model verdict — the non-circular precision signal that closes Claude-grades-Claude.
+  const verifier = createVerifier({ call, buildSrc, domain: DOMAIN, corpusByPath: CORPUS_BY_PATH });
   const outPath = new URL('./verify_run.transcript.json', import.meta.url);
   let out = {
     meta: {
@@ -189,7 +195,7 @@ async function main() {
       ref: REF,
       model_via_proxy: 'claude (harness)',
       design: 'Action 1 acceptance: SOLOIST -> verify-entailment (H3 falsify + H6 revise). NO board. cross-file threads c1-c4, windowed source.',
-      cost_note: '3 calls/thread (soloist + falsify + revise) = exactly the ≤2× cost the bar allows',
+      cost_note: 'THIS transcript: 3 calls/thread (soloist + falsify + revise) = 3× on all 4 threads (produced under the OLD always-revise default). The shipped verify() now GATES revise on a flagged audit → clean=2×, flagged=3× (a code change, not measured here). Do not read 3× here as the steady-state cost.',
       adjudication: 'precision is HUMAN-adjudicated in verify_run.md; this transcript carries only mechanical signals (verify_rate, verdict counts, window_audit).',
       generated: new Date().toISOString(),
       threads: tids,

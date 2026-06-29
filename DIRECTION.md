@@ -59,14 +59,21 @@ loop**. That is the only layer none of the existing portfolio components address
 > falsified; the single critic out-covered the panel). The one component that helped
 > *every* time it ran was a stance-free **entailment audit** (H3): "does this source line
 > *entail* this claim?", not "does a quoted string exist?" — worth +0.125–0.25 wherever
-> applied. That audit is **not** a board feature; it runs on any producer. So the
-> validated mechanism is **`producer + verification gate`**, shipped as
-> `EVIDENCE/verify-entailment.mjs` (pinned by `verify-entailment.test.mjs`). The board is
-> retained behind a research flag only. **Caveat:** every agent ran on one model
-> (`claude-sonnet-4-6`) via one local harness — so this is a verdict on a model *debating
-> itself*, which a verification pass beats anyway; it is **not** a verdict on heterogeneous
-> multi-agent (different models, decorrelated errors), which the zero-budget constraint
-> puts out of scope to test.
+> applied. That audit is **not** a board feature; it runs on any producer. So the mechanism
+> **confirmed in direction** (n = 4, lift +0.25 on a soloist, adjudicated by an unblinded
+> same-model judge — confirmed in direction, *not* independently validated) is
+> **`producer + verification gate`**, shipped as `EVIDENCE/verify-entailment.mjs` (pinned by
+> `verify-entailment.test.mjs`). That gate now carries a **deterministic, model-free layer**:
+> claims that reduce to a static grep-able fact are decided without a model and override the
+> model verdict — the non-circular signal that closes the Claude-grades-Claude loop where it
+> matters. The board is retained behind a research flag only. **Caveats:** (1) every agent
+> ran on one model (`claude-sonnet-4-6`) via one local harness — a verdict on a model
+> *debating itself*, which a verification pass beats anyway; **not** a verdict on
+> heterogeneous multi-agent (different models, decorrelated errors), which the zero-budget
+> constraint puts out of scope. (2) A late-found **selection-crowding** bug meant the earlier
+> gates ran on a worse retrieval substrate (a decisive file could be crowded out of the
+> prompt entirely), so **the board was never cleanly tested** — read the −0.33 → 0.0 trend as
+> "a board did not beat a verified soloist *on this substrate*," not as "debate cannot help."
 
 **Findings are the API of the residency; everything else is implementation.**
 Whether the residency uses agents, a single critic, symbolic reasoning, TRVM, or

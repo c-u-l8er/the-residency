@@ -4,7 +4,7 @@
     "ref": "353d1679a799bd4b6f0bea0dc126ddbe085462cc",
     "model_via_proxy": "claude (harness)",
     "design": "Action 1 acceptance: SOLOIST -> verify-entailment (H3 falsify + H6 revise). NO board. cross-file threads c1-c4, windowed source.",
-    "cost_note": "3 calls/thread (soloist + falsify + revise) = exactly the ≤2× cost the bar allows",
+    "cost_note": "THIS run: 3 calls/thread (soloist + falsify + revise) = 3x on ALL 4 threads (produced under the old always-revise default). The shipped verify() now gates revise on a flagged audit -> clean=2x, flagged=3x; that split is a code change, NOT measured in this transcript. Do not read 3x here as the steady-state cost, and it is NOT <=2x.",
     "adjudication": "precision is HUMAN-adjudicated in verify_run.md; this transcript carries only mechanical signals (verify_rate, verdict counts, window_audit).",
     "generated": "2026-06-29T18:35:23.758Z",
     "threads": [

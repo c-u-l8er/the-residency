@@ -146,10 +146,18 @@ gate0:
   #   stage EVIDENCE/verify-entailment.mjs (H3 falsify + H6 commit-revise), pinned by verify-entailment.test.mjs
   #   (the source-truncation regression: 9/9), acceptance harness verify_run.mjs. ACCEPTANCE RUN (soloist+H3,
   #   NO board, box-and-box c1-c4, n=4): finding_precision soloist 0.75 -> verified 1.0 = VERIFY LIFT +0.25,
-  #   ZERO over-deny regression (c2/c4 already 1.0 left untouched). Quality bar PASS. Cost: always-revise = 3x;
-  #   revise now GATED on a flagged audit -> clean findings 2x, flagged 3x (avg 2.75x here). Bonus fix: pin
-  #   files the question names by filename -> bridge.mjs back in c2, score.mjs in c4 (Gate 0.4 selection
-  #   crowding partly explains the c2 "before the bridge runs" fabrication — that file was never in-window).
+  #   ZERO over-deny regression (c2/c4 already 1.0 left untouched). Quality bar PASS. CALIBRATION (per 2nd
+  #   critique): this is CONFIRMED IN DIRECTION on n=4 by an UNBLINDED SAME-MODEL (Claude) judge — NOT
+  #   independently validated; do not call the pipeline "validated default", call it "confirmed default".
+  #   Cost: the COMMITTED transcript is always-revise = a flat 3x on all 4 (NOT <=2x); revise now GATED on a
+  #   flagged audit -> clean 2x, flagged 3x; the "avg 2.75x" is a PROJECTION over this run, not a measurement
+  #   (needs a re-run). Bonus fix: pin files the question names by filename -> bridge.mjs back in c2, score.mjs
+  #   in c4. SELECTION-CROWDING means the earlier gates ran on a worse substrate -> the BOARD WAS NEVER CLEANLY
+  #   TESTED; read -0.33->0.0 as "board didn't beat a verified soloist ON THIS SUBSTRATE", not "debate can't help".
+  #   THE UPGRADE (2nd critique, highest priority): verify-entailment.mjs now has a DETERMINISTIC, MODEL-FREE
+  #   layer (fileImports/fileCalls/mechanicalChecks) — claims reducible to a static grep-able fact are decided
+  #   with NO model and OVERRIDE the model verdict (would have caught the c1 "imports norm.mjs" fabrication
+  #   deterministically). Closes the Claude-grades-Claude loop where it matters. Tests now 23/23.
   #   See EVIDENCE/verify_run.md. Default mechanism is now producer+verify-entailment; board stays research-only.
 gate1:
   finding_precision:  ">= 0.75   # findings that survive human verification"
