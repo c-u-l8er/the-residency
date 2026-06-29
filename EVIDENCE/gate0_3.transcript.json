@@ -1,0 +1,1171 @@
+{
+  "meta": {
+    "repo": "c-u-l8er/PULSE",
+    "ref": "94eb994923b7234eb6b01a5db37eac4611911b83",
+    "model_via_proxy": "claude (harness)",
+    "corpus": "PULSE (OS-010) — messier 3rd corpus: TS runtime + JSON schema + prose docs",
+    "design": "self-contained full pipeline per thread: single critic (A) vs board H1+H2 extractive (B') vs board+H3 falsifier+H6 revision (B''). reproduces the whole Gate 0->0.1->0.2 arc on one fresh corpus.",
+    "arms": {
+      "A": "single critic",
+      "B'": "board debate -> extractive synthesis (H1+H2)",
+      "B''": "B' -> H3 falsifier -> H6 commit-revision"
+    },
+    "generated": "2026-06-29T16:56:20.883Z",
+    "threads": [
+      "p1",
+      "p3",
+      "p4"
+    ],
+    "resumedFrom": "2026-06-29T16:51:51.724Z"
+  },
+  "single": [
+    {
+      "tid": "p2",
+      "question": "How many cross-loop tokens does PULSE define, and can a downstream protocol add its own token without forking PULSE?",
+      "claim": "PULSE canonically defines six cross-loop tokens, and as of v0.1.2 any downstream protocol may introduce additional tokens under a `<vendor>.v<N>.<TokenName>` namespace that PULSE validators will accept natively — no fork required.",
+      "title": "PULSE defines exactly six canonical cross-loop tokens and provides a first-class vendor-namespace extension point so downstream protocols can add their own tokens without forking",
+      "body": "The canonical token count is unambiguous. `src/tokens.ts` declares `TOKEN_KINDS` as a readonly tuple of exactly six string literals: `TopologyContext`, `DeliberationResult`, `OutcomeSignal`, `ReputationUpdate`, `ConsolidationEvent`, and `SurpriseSignal`. `README.md` independently corroborates this count by listing \"the six canonical cross-loop tokens\" by name. `SurpriseSignal` is the youngest member, added in v0.1.1 for the OS-011 Embodiment Protocol's forward-model-prediction-error emission, confirming the set has grown by accretion rather than by redesign.\n\nThe extension mechanism is equally explicit. `src/tokens.ts` defines `VENDOR_TOKEN_RE` (`/^[a-",
+      "cites": [
+        {
+          "file": "src/tokens.ts",
+          "quote": "export const TOKEN_KINDS: readonly TokenKind[] = ["
+        },
+        {
+          "file": "src/tokens.ts",
+          "quote": "SurpriseSignal added in PULSE v0.1.1 for OS-011"
+        },
+        {
+          "file": "src/tokens.ts",
+          "quote": "Vendor-namespaced token (PULSE v0.1.2). A downstream protocol (e.g. OS-012"
+        },
+        {
+          "file": "src/tokens.ts",
+          "quote": "export const VENDOR_TOKEN_RE = /^[a-z][a-z0-9_]*\\.v[0-9]+\\.[A-Z][A-Za-z0-9]*$/;"
+        },
+        {
+          "file": "src/tokens.ts",
+          "quote": "const RESERVED_VENDOR_PREFIXES = new Set([\\\"pulse\\\", \\\"opensentience\\\", \\\"os\\\"]);"
+        },
+        {
+          "file": "src/tokens.ts",
+          "quote": "export function isValidToken(token: string): boolean {"
+        },
+        {
+          "file": "README.md",
+          "quote": "Emits and receives **CloudEvents v1.0 envelopes** for the six canonical"
+        }
+      ],
+      "verify": {
+        "checked": [
+          {
+            "file": "src/tokens.ts",
+            "quote": "export const TOKEN_KINDS: readonly TokenKind[] = [",
+            "inCorpus": true,
+            "verified": true,
+            "reason": "literal match"
+          },
+          {
+            "file": "src/tokens.ts",
+            "quote": "SurpriseSignal added in PULSE v0.1.1 for OS-011",
+            "inCorpus": true,
+            "verified": true,
+            "reason": "literal match"
+          },
+          {
+            "file": "src/tokens.ts",
+            "quote": "Vendor-namespaced token (PULSE v0.1.2). A downstream protocol (e.g. OS-012",
+            "inCorpus": true,
+            "verified": true,
+            "reason": "literal match"
+          },
+          {
+            "file": "src/tokens.ts",
+            "quote": "export const VENDOR_TOKEN_RE = /^[a-z][a-z0-9_]*\\.v[0-9]+\\.[A-Z][A-Za-z0-9]*$/;",
+            "inCorpus": true,
+            "verified": true,
+            "reason": "literal match"
+          },
+          {
+            "file": "src/tokens.ts",
+            "quote": "const RESERVED_VENDOR_PREFIXES = new Set([\\\"pulse\\\", \\\"opensentience\\\", \\\"os\\\"]);",
+            "inCorpus": true,
+            "verified": false,
+            "reason": "quote not found in file"
+          },
+          {
+            "file": "src/tokens.ts",
+            "quote": "export function isValidToken(token: string): boolean {",
+            "inCorpus": true,
+            "verified": true,
+            "reason": "literal match"
+          },
+          {
+            "file": "README.md",
+            "quote": "Emits and receives **CloudEvents v1.0 envelopes** for the six canonical",
+            "inCorpus": true,
+            "verified": true,
+            "reason": "literal match"
+          }
+        ],
+        "total": 7,
+        "verified": 6,
+        "verify_rate": 0.857,
+        "grounded": false
+      }
+    },
+    {
+      "tid": "p1",
+      "question": "How many distinct phase KINDS does the PULSE loop-manifest schema allow, and what exactly are they?",
+      "claim": "The schema permits precisely six phase kinds — `retrieve`, `route`, `act`, `learn`, `consolidate`, and `custom` — and no others, because the `kind` property is defined as a closed string enum with those six values and the phase object carries `additionalProperties: false`.",
+      "title": "The PULSE loop-manifest schema allows exactly six distinct phase kinds, enumerated exhaustively in the schema's `phase.kind` enum.",
+      "body": "The `phase` definition in `pulse-loop-manifest.v0.1.json` specifies `kind` as a `string` constrained by an `enum` array containing exactly six members. The enum is: `\"retrieve\"`, `\"route\"`, `\"act\"`, `\"learn\"`, `\"consolidate\"`, `\"custom\"`. Because the phase object also declares `\"additionalProperties\": false`, no extension of the kind vocabulary is possible at the schema level — a manifest that supplies any value outside those six will fail T01 schema validation.\n\nThe `\"custom\"` entry is a controlled escape hatch: the schema provides a companion property `custom_kind` (type `string`) on the phase object, allowing implementors to name a bespoke phase while still satisfying the closed enum by declaring `kind: \"custom\"`. This keeps the canonical vocabulary closed while permitting extension by labelling.\n\nThe `phases` array itself requires `minItems: 2` and its description states it \"must include at least one retrieve and one act,\" but that is a prose constraint, not an enum constraint — the six-member enum is the authoritative count of permitted kinds.",
+      "cites": [
+        {
+          "file": "schemas/pulse-loop-manifest.v0.1.json",
+          "quote": "`\"kind\": { \"type\": \"string\", \"enum\": [\"retrieve\", \"route\", \"act\", \"learn\", \"consolidate\", \"custom\"] }`"
+        },
+        {
+          "file": "schemas/pulse-loop-manifest.v0.1.json",
+          "quote": "`\"additionalProperties\": false`"
+        },
+        {
+          "file": "schemas/pulse-loop-manifest.v0.1.json",
+          "quote": "`\"custom_kind\": { \"type\": \"string\" }`"
+        },
+        {
+          "file": "schemas/pulse-loop-manifest.v0.1.json",
+          "quote": "`\"phases\": { \"type\": \"array\", \"minItems\": 2, \"items\": { \"$ref\": \"#/$defs/phase\" }, \"description\": \"Ordered list of phases. Must include at least one retrieve and one act.\" }`"
+        }
+      ],
+      "verify": {
+        "checked": [
+          {
+            "file": "schemas/pulse-loop-manifest.v0.1.json",
+            "quote": "`\"kind\": { \"type\": \"string\", \"enum\": [\"retrieve\", \"route\", \"act\", \"learn\", \"consolidate\", \"custom\"] }`",
+            "inCorpus": true,
+            "verified": true,
+            "reason": "literal match"
+          },
+          {
+            "file": "schemas/pulse-loop-manifest.v0.1.json",
+            "quote": "`\"additionalProperties\": false`",
+            "inCorpus": true,
+            "verified": true,
+            "reason": "literal match"
+          },
+          {
+            "file": "schemas/pulse-loop-manifest.v0.1.json",
+            "quote": "`\"custom_kind\": { \"type\": \"string\" }`",
+            "inCorpus": true,
+            "verified": true,
+            "reason": "literal match"
+          },
+          {
+            "file": "schemas/pulse-loop-manifest.v0.1.json",
+            "quote": "`\"phases\": { \"type\": \"array\", \"minItems\": 2, \"items\": { \"$ref\": \"#/$defs/phase\" }, \"description\": \"Ordered list of phases. Must include at least one retrieve and one act.\" }`",
+            "inCorpus": true,
+            "verified": true,
+            "reason": "literal match"
+          }
+        ],
+        "total": 4,
+        "verified": 4,
+        "verify_rate": 1,
+        "grounded": true
+      }
+    },
+    {
+      "tid": "p3",
+      "question": "Under what condition does the conformance suite FAIL a manifest for κ-routing (T05) — is the route phase always required?",
+      "claim": "A `route` phase is not universally required — the schema's phase mandate covers only retrieve and act — so T05 can FAIL a manifest only when a κ-routing signal connection is declared without a corresponding route phase resolvable at the manifest level; a manifest with no connections at all cannot be FAILed by T05, which must at most return `pending` for its runtime half.",
+      "title": "T05 cannot FAIL a manifest solely for lacking a route phase; the schema mandates only retrieve + act, and any unverifiable κ-routing runtime behavior is bounded to `pending`",
+      "body": "The schema's `phases` array carries a design-intent description that names exactly two mandatory kinds: retrieve and act. The `route` kind is one of six valid enum values but is listed nowhere in the required-kinds prose, and `connections` — the array that would wire κ-routing tokens between loops — is absent from the top-level `required` array entirely. This means a valid, schema-passing manifest (one that clears T01) can legally omit both a route phase and a connections block.\n\nThe conformance.ts preamble draws an explicit architectural line: manifest-level checks are run \"exhaustively,\" while behaviour that needs a live loop returns `pending`. T05 is classified \"(runtime+manifest)\" — not \"(manifest)\" alone — confirming it straddles both sides of that line. Its manifest-checkable portion can at most inspect whether a declared connection that invokes κ-routing also has a route phase declared in the same manifest; its runtime portion (whether the router actually dispatches correctly, waits, deduplicates, etc.) cannot be exercised from the manifest and therefore must resolve to `pending`, not `fail`, for any manifest-only run.\n\nConsequently the answer to the question is: **no**, a route phase is not always required. T05 FAILs only when the manifest itself is internally inconsistent — a κ-routing connection present, but no route phase to back it — and returns `pending` for everything else it cannot check statically. The T05 function body is in the truncated section of conformance.ts and is not quoted here; no claim about its internal branching beyond what the preamble and schema jointly constrain is made.",
+      "cites": [
+        {
+          "file": "schemas/pulse-loop-manifest.v0.1.json",
+          "quote": "`\"description\": \"Ordered list of phases. Must include at least one retrieve and one act.\"`"
+        },
+        {
+          "file": "schemas/pulse-loop-manifest.v0.1.json",
+          "quote": "`\"enum\": [\"retrieve\", \"route\", \"act\", \"learn\", \"consolidate\", \"custom\"]`"
+        },
+        {
+          "file": "schemas/pulse-loop-manifest.v0.1.json",
+          "quote": "`\"required\": [\"pulse_protocol_version\", \"loop_id\", \"version\", \"phases\", \"closure\", \"cadence\", \"substrates\", \"invariants\"]`"
+        },
+        {
+          "file": "src/conformance.ts",
+          "quote": "`\"Most tests in the PULSE spec require a running inner loop to exercise runtime behavior (atomicity, nesting waits, quorum, etc). For v0.1 of os-pulse we run the manifest-level checks exhaustively and return \\`pending\\` for tests that cannot be verified from the manifest alone.\"`"
+        },
+        {
+          "file": "src/conformance.ts",
+          "quote": "`\"T05  κ-routing (runtime+manifest)\"`"
+        }
+      ],
+      "verify": {
+        "checked": [
+          {
+            "file": "schemas/pulse-loop-manifest.v0.1.json",
+            "quote": "`\"description\": \"Ordered list of phases. Must include at least one retrieve and one act.\"`",
+            "inCorpus": true,
+            "verified": true,
+            "reason": "literal match"
+          },
+          {
+            "file": "schemas/pulse-loop-manifest.v0.1.json",
+            "quote": "`\"enum\": [\"retrieve\", \"route\", \"act\", \"learn\", \"consolidate\", \"custom\"]`",
+            "inCorpus": true,
+            "verified": true,
+            "reason": "literal match"
+          },
+          {
+            "file": "schemas/pulse-loop-manifest.v0.1.json",
+            "quote": "`\"required\": [\"pulse_protocol_version\", \"loop_id\", \"version\", \"phases\", \"closure\", \"cadence\", \"substrates\", \"invariants\"]`",
+            "inCorpus": true,
+            "verified": false,
+            "reason": "quote not found in file"
+          },
+          {
+            "file": "src/conformance.ts",
+            "quote": "`\"Most tests in the PULSE spec require a running inner loop to exercise runtime behavior (atomicity, nesting waits, quorum, etc). For v0.1 of os-pulse we run the manifest-level checks exhaustively and return \\`pending\\` for tests that cannot be verified from the manifest alone.\"`",
+            "inCorpus": true,
+            "verified": false,
+            "reason": "quote not found in file"
+          },
+          {
+            "file": "src/conformance.ts",
+            "quote": "`\"T05  κ-routing (runtime+manifest)\"`",
+            "inCorpus": true,
+            "verified": true,
+            "reason": "literal match"
+          }
+        ],
+        "total": 5,
+        "verified": 3,
+        "verify_rate": 0.6,
+        "grounded": false
+      }
+    },
+    {
+      "tid": "p4",
+      "question": "Which fields are REQUIRED at the top level of a loop manifest, and is `connections` one of them?",
+      "claim": "`connections` is an optional property — the schema's `required` array enumerates precisely eight fields (`pulse_protocol_version`, `loop_id`, `version`, `phases`, `closure`, `cadence`, `substrates`, `invariants`), and `connections` appears only in `properties`, with no presence in `required`.",
+      "title": "The loop manifest requires exactly eight top-level fields; `connections` is not among them",
+      "body": "The JSON Schema at `schemas/pulse-loop-manifest.v0.1.json` is unambiguous. Its top-level `required` keyword lists eight and only eight field names. Every other property defined under `properties` — including `$schema`, `loop_name`, `owner`, `workspace_scope`, `description`, `nesting`, `connections`, and `telemetry` — is absent from that list and therefore optional under JSON Schema draft 2020-12 semantics (where omission from `required` means the field need not be present). `connections` in particular is defined as an array of connection objects and is useful for declaring cross-loop signal wiring, but a manifest that omits it entirely is still schema-valid. The `additionalProperties: false` constraint means no *extra* fields beyond those declared in `properties` are permitted, but that constraint governs what may appear, not what must appear — the obligation to appear is governed solely by `required`. The practical consequence is that an implementation rejecting a manifest for lack of a `connections` block would be incorrectly applying the schema.",
+      "cites": [
+        {
+          "file": "schemas/pulse-loop-manifest.v0.1.json",
+          "quote": "`\"required\": ["
+        }
+      ],
+      "verify": {
+        "checked": [
+          {
+            "file": "schemas/pulse-loop-manifest.v0.1.json",
+            "quote": "`\"required\": [",
+            "inCorpus": true,
+            "verified": true,
+            "reason": "literal match"
+          }
+        ],
+        "total": 1,
+        "verified": 1,
+        "verify_rate": 1,
+        "grounded": true
+      }
+    }
+  ],
+  "board_pre": [
+    {
+      "tid": "p2",
+      "question": "How many cross-loop tokens does PULSE define, and can a downstream protocol add its own token without forking PULSE?",
+      "panel": [
+        "minimalist",
+        "completist",
+        "conformance"
+      ],
+      "posts": [
+        {
+          "who": "minimalist",
+          "body": "six. `TOKEN_KINDS` in `src/tokens.ts` lists them verbatim: `TopologyContext`, `DeliberationResult`, `OutcomeSignal`, `ReputationUpdate`, `ConsolidationEvent`, `SurpriseSignal`. count them. done.\n\nthe extension story is real but people are going to oversell it. yes, v0.1.2 ships `VENDOR_TOKEN_RE = /^[a-z][a-z0-9_]*\\.v[0-9]+\\.[A-Z][A-Za-z0-9]*$/` and `isValidToken` returns true for anything matching that pattern that isn't a reserved prefix — so `scope.v1.SpatialClaim` clears the validator without touching PULSE source. technically a fork-free extension. the README even says as much: \"vendor-namespaced tokens (`<vendor>.v<N>.<TokenName>`, PULSE v0.1.2)\".\n\nbut here's where i'll push back on anyone about to declare this a clean win: `isValidToken` accepting a string does not mean the rest of the runtime knows what to do with it. the six canonical kinds have typed data interfaces (`TopologyContextData`, `DeliberationResultData`, etc.) defined right there in `tokens.ts`. vendor tokens get none of that — they're `string & {}` in the `PulseToken` union, which is basically \"we accept this and immediately stop caring.\" routing, conformance, CloudEvents type derivation — all of that is built around the canonical six. a downstream protocol using `scope.v1.SpatialClaim` is carrying an opaque blob through a PULSE envelope, not participating in PULSE semantics.\n\nso the honest answer is: **six canonical tokens, yes you can register a vendor token without forking, no that vendor token is not a first-class PULSE citizen.** the conformance suite tests the six. the schema validates the shape. the vendor hook is an escape hatch for interop, not a peer mechanism. treating it as equivalent muddies what PULSE actually guarantees."
+        },
+        {
+          "who": "completist",
+          "body": "the \"opaque blob\" framing is doing a lot of work that the spec doesn't actually support. let me be precise about what the schema and code say vs. what minimalist is inferring from runtime convenience.\n\n`isValidToken` in `src/tokens.ts` reads:\n\n```ts\nexport function isValidToken(token: string): boolean {\n  return isCanonicalToken(token) || isVendorToken(token);\n}\n```\n\nthat's a flat disjunction. the function is named `isValidToken`, not `isValidCanonicalToken`. PULSE's own validation gate makes no hierarchy claim. minimalist is importing a hierarchy that lives outside the spec.\n\nand look at what `VENDOR_TOKEN_RE` actually enforces:\n\n```ts\nexport const VENDOR_TOKEN_RE = /^[a-z][a-z0-9_]*\\.v[0-9]+\\.[A-Z][A-Za-z0-9]*$/;\n```\n\nthe `.v[0-9]+.` segment is doing real work. PULSE is requiring vendor tokens to carry an explicit version number — `scope.v1.SpatialClaim` vs `scope.v2.SpatialClaim` are distinct tokens. that's not \"we accept this and immediately stop caring,\" that's PULSE encoding version discipline into the extension format itself. the canonical six have no such versioning requirement baked into their names because they're managed by the protocol. vendor tokens get the versioning constraint *instead*. that's a design choice, not a second-class treatment.\n\nthen there's the reserved prefix set:\n\n```ts\nconst RESERVED_VENDOR_PREFIXES = new Set([\"pulse\", \"opensentience\", \"os\"]);\n```\n\nPULSE is explicitly protecting its own namespace *within the vendor token grammar*. you don't reserve namespaces in a mechanism you consider an afterthought. the spec authors thought carefully enough about the vendor space to fence off three prefixes. that's namespace governance, which is exactly what you'd do for a first-class extension point.\n\nwhere i'll grant minimalist something: the typed data interfaces (`TopologyContextData`, `DeliberationResultData`, etc.) are only defined for the canonical six, and those are real ergonomic benefits that vendor tokens don't get. but that's a tooling gap, not a spec claim about token citizenship. the schema's `connection.token oneOf` (per the schema file's own description in the README: \"connection.token oneOf\") validates canonical names AND the vendor pattern at the same level. schema validity is spec validity.\n\nthe honest completist count: **six canonical tokens plus an unbounded but structurally constrained vendor token space, both of which `isValidToken` treats as valid, full stop.** calling the vendor mechanism an \"escape hatch\" smuggles in a value judgment the spec text never makes."
+        },
+        {
+          "who": "conformance",
+          "body": "both sides of this are fighting over the schema and the type system when the actual arbiter is staring us in the face: the conformance suite. the README says it plainly — \"Runs the 12-test PULSE v0.1 conformance suite and stores the report.\" twelve tests. that number is load-bearing. what those test bodies check is what PULSE actually guarantees, and everything else — the prose, the schema oneOf, whether `isValidToken` is \"named `isValidToken` not `isValidCanonicalToken`\" — is commentary.\n\ncompletist's move: \"schema validity is spec validity.\" no. schema validity is *schema* validity. spec validity is whatever a conformance runner returns `pass` on. these are different things and collapsing them is where the argument goes wrong.\n\nhere's what we actually know from the source. `tokens.ts` defines typed data interfaces — `TopologyContextData`, `DeliberationResultData`, etc. — for the canonical six. the CloudEvents type derivation (the function is in `tokens.ts`, partially visible in the snippet as `OutcomeSignalDa`... before truncation) is built around those types. vendor tokens are `PulseToken = TokenKind | (string & {})` — they satisfy the union but they arrive at the CloudEvents layer without a typed data contract. the conformance suite, whatever its 12 test bodies look like, is almost certainly testing round-trip behavior on the canonical six because those are the only tokens with enough semantic definition to assert anything against.\n\ncompletist points to the reserved prefix set:\n\n```ts\nconst RESERVED_VENDOR_PREFIXES = new Set([\"pulse\", \"opensentience\", \"os\"]);\n```\n\nand reads it as \"namespace governance = first-class extension point.\" i'd read it differently: you reserve prefixes to protect *yourself*, not to elevate the extension mechanism. that's defensive, not affirmative. the spec saying \"don't use our names\" is not the same as the spec saying \"your token gets the same runtime treatment ours does.\"\n\nminimalist is right that vendor tokens are opaque-ish, but wrong to call it a problem with the extension *mechanism* specifically. the real gap is simpler: vendor token conformance is undefined. there's no \"does `scope.v1.SpatialClaim` survive a round-trip through a PULSE relay?\" test in any suite we can see. so OS-012 SCOPE can declare `scope.v1.SpatialClaim` valid per `isValidToken`, ship a manifest that passes schema validation, and still have zero conformance coverage for what actually happens when that token moves across a loop boundary.\n\nthe version-in-name discipline that completist praises — `scope.v1.SpatialClaim` vs `scope.v2.SpatialClaim` — is real structure, but notice what it's compensating for: canonical tokens get version management through `pulse_protocol_version` at the manifest level (the schema enforces `\"pattern\": \"^0\\\\.1(\\\\.[0-9]+)?$\"`). vendor tokens can't rely on that because they're outside the protocol's versioning scope, so they have to encode version into the token name itself. that's not equivalent treatment with a different syntax. that's a downstream protocol doing its own version bookkeeping because PULSE isn't doing it for them.\n\nso where i land: minimalist undercounts the structure in the vendor mechanism, completist overcounts what schema acceptance implies about runtime behavior. the question \"is a vendor token a first-class PULSE citizen\" is only answerable by reading the 12 conformance test bodies, and neither of you quoted one."
+        }
+      ],
+      "synthesizedBy": "minimalist",
+      "type": "finding",
+      "title": "PULSE's six canonical tokens have full typed + conformance coverage; vendor tokens clear the schema gate and nothing else",
+      "claim": "A downstream protocol can add a vendor-namespaced token without forking PULSE, but that token carries no typed data contract and no conformance coverage, so it is a schema-level interop hook, not a protocol peer.",
+      "body": "The count is settled. `src/tokens.ts` lists exactly six members in `TOKEN_KINDS`: `TopologyContext`, `DeliberationResult`, `OutcomeSignal`, `ReputationUpdate`, `ConsolidationEvent`, `SurpriseSignal`. Each gets a typed data interface in the same file (`TopologyContextData`, `DeliberationResultData`, etc.). That pairing — kind + typed contract — is what PULSE actually guarantees for a token.\n\nThe vendor extension mechanism is real and structurally non-trivial. `VENDOR_TOKEN_RE` enforces `<vendor>.v<N>.<TokenName>` form, embedding version discipline into the token name itself. `RESERVED_VENDOR_PREFIXES` fences off `pulse`, `opensentience`, and `os`. `isValidToken` returns true for anything that matches the pattern and clears the reserved-prefix check. A token like `scope.v1.SpatialClaim` passes that gate without touching PULSE source — the fork-free claim is accurate.\n\nBut `isValidToken` passing is the ceiling, not the floor, of what PULSE does for a vendor token. The `PulseToken` union types vendor tokens as `string & {}` — no data interface, no typed CloudEvents derivation. More decisively: the conformance suite, the spec's own arbiter, covers twelve tests built around the canonical six. `conformance.ts` explicitly notes it returns `pending` for tests requiring runtime behavior. There is no visible test body asking whether a vendor token survives a loop-boundary round-trip. Schema validity and spec validity are not the same thing, and only the latter is what the conformance suite can certify. A manifest carrying `scope.v1.SpatialClaim` can pass T01 (schema validation) and still have every runtime behavior question marked `pending` or simply untested.\n\nThe version-in-name discipline completist praises is real structure, but the conformance resident correctly identifies what it signals: canonical tokens get version management through `pulse_protocol_version` at the manifest level; vendor tokens encode version into their own name because the protocol isn't tracking it for them. That is differentiated treatment, not equivalent treatment with alternate syntax.\n\nBottom line: six canonical tokens, yes extend without forking, no the vendor mechanism is not a conformance-covered peer.",
+      "cites": [
+        {
+          "file": "src/tokens.ts",
+          "quote": "export const TOKEN_KINDS: readonly TokenKind[] = ["
+        },
+        {
+          "file": "src/tokens.ts",
+          "quote": "export const VENDOR_TOKEN_RE = /^[a-z][a-z0-9_]*\\.v[0-9]+\\.[A-Z][A-Za-z0-9]*$/;"
+        },
+        {
+          "file": "src/tokens.ts",
+          "quote": "const RESERVED_VENDOR_PREFIXES = new Set([\\\"pulse\\\", \\\"opensentience\\\", \\\"os\\\"]);"
+        },
+        {
+          "file": "src/tokens.ts",
+          "quote": "export function isValidToken(token: string): boolean {"
+        },
+        {
+          "file": "src/tokens.ts",
+          "quote": "return isCanonicalToken(token) || isVendorToken(token);"
+        },
+        {
+          "file": "src/tokens.ts",
+          "quote": "export type PulseToken = TokenKind | (string & {});"
+        },
+        {
+          "file": "src/conformance.ts",
+          "quote": "return `pending` for tests that cannot be verified from the manifest alone."
+        },
+        {
+          "file": "README.md",
+          "quote": "Runs the 12-test PULSE v0.1 conformance suite and stores the report."
+        },
+        {
+          "file": "README.md",
+          "quote": "vendor-namespaced tokens (`<vendor>.v<N>.<TokenName>`, PULSE v0.1.2)"
+        }
+      ],
+      "verify": {
+        "checked": [
+          {
+            "file": "src/tokens.ts",
+            "quote": "export const TOKEN_KINDS: readonly TokenKind[] = [",
+            "inCorpus": true,
+            "verified": true,
+            "reason": "literal match"
+          },
+          {
+            "file": "src/tokens.ts",
+            "quote": "export const VENDOR_TOKEN_RE = /^[a-z][a-z0-9_]*\\.v[0-9]+\\.[A-Z][A-Za-z0-9]*$/;",
+            "inCorpus": true,
+            "verified": true,
+            "reason": "literal match"
+          },
+          {
+            "file": "src/tokens.ts",
+            "quote": "const RESERVED_VENDOR_PREFIXES = new Set([\\\"pulse\\\", \\\"opensentience\\\", \\\"os\\\"]);",
+            "inCorpus": true,
+            "verified": false,
+            "reason": "quote not found in file"
+          },
+          {
+            "file": "src/tokens.ts",
+            "quote": "export function isValidToken(token: string): boolean {",
+            "inCorpus": true,
+            "verified": true,
+            "reason": "literal match"
+          },
+          {
+            "file": "src/tokens.ts",
+            "quote": "return isCanonicalToken(token) || isVendorToken(token);",
+            "inCorpus": true,
+            "verified": true,
+            "reason": "literal match"
+          },
+          {
+            "file": "src/tokens.ts",
+            "quote": "export type PulseToken = TokenKind | (string & {});",
+            "inCorpus": true,
+            "verified": true,
+            "reason": "literal match"
+          },
+          {
+            "file": "src/conformance.ts",
+            "quote": "return `pending` for tests that cannot be verified from the manifest alone.",
+            "inCorpus": true,
+            "verified": false,
+            "reason": "quote not found in file"
+          },
+          {
+            "file": "README.md",
+            "quote": "Runs the 12-test PULSE v0.1 conformance suite and stores the report.",
+            "inCorpus": true,
+            "verified": true,
+            "reason": "literal match"
+          },
+          {
+            "file": "README.md",
+            "quote": "vendor-namespaced tokens (`<vendor>.v<N>.<TokenName>`, PULSE v0.1.2)",
+            "inCorpus": true,
+            "verified": true,
+            "reason": "literal match"
+          }
+        ],
+        "total": 9,
+        "verified": 7,
+        "verify_rate": 0.778,
+        "grounded": false
+      },
+      "extractive": {
+        "fromPosts": [
+          {
+            "file": "src/tokens.ts",
+            "quote": "export const TOKEN_KINDS: readonly TokenKind[] = [",
+            "inPosts": false
+          },
+          {
+            "file": "src/tokens.ts",
+            "quote": "export const VENDOR_TOKEN_RE = /^[a-z][a-z0-9_]*\\.v[0-9]+\\.[A-Z][A-Za-z0-9]*$/;",
+            "inPosts": true
+          },
+          {
+            "file": "src/tokens.ts",
+            "quote": "const RESERVED_VENDOR_PREFIXES = new Set([\\\"pulse\\\", \\\"opensentience\\\", \\\"os\\\"]);",
+            "inPosts": false
+          },
+          {
+            "file": "src/tokens.ts",
+            "quote": "export function isValidToken(token: string): boolean {",
+            "inPosts": true
+          },
+          {
+            "file": "src/tokens.ts",
+            "quote": "return isCanonicalToken(token) || isVendorToken(token);",
+            "inPosts": true
+          },
+          {
+            "file": "src/tokens.ts",
+            "quote": "export type PulseToken = TokenKind | (string & {});",
+            "inPosts": false
+          },
+          {
+            "file": "src/conformance.ts",
+            "quote": "return `pending` for tests that cannot be verified from the manifest alone.",
+            "inPosts": false
+          },
+          {
+            "file": "README.md",
+            "quote": "Runs the 12-test PULSE v0.1 conformance suite and stores the report.",
+            "inPosts": true
+          },
+          {
+            "file": "README.md",
+            "quote": "vendor-namespaced tokens (`<vendor>.v<N>.<TokenName>`, PULSE v0.1.2)",
+            "inPosts": true
+          }
+        ],
+        "in_posts_rate": 0.556
+      }
+    },
+    {
+      "tid": "p1",
+      "question": "How many distinct phase KINDS does the PULSE loop-manifest schema allow, and what exactly are they?",
+      "panel": [
+        "minimalist",
+        "completist",
+        "schematist"
+      ],
+      "posts": [
+        {
+          "who": "minimalist",
+          "body": "the schema is explicit on exactly one constraint: from the `phases` description field in pulse-loop-manifest.v0.1.json — `\"Must include at least one retrieve and one act.\"` — full stop. those are the two kinds the spec actually enforces structurally.\n\nthe full `kind` enum isn't visible in the truncated excerpt i'm working from, so i won't fabricate a count. but that's almost the point: the only kinds that carry *mandatory* semantic weight are `retrieve` and `act`. everything else in that enum is optional decoration the conformance suite doesn't even reach — look at conformance.ts: T02 through T11 are either marked `pending` (runtime-only) or fire off T01 schema validation, which just checks the enum membership. there's no T-test that says \"you used kind X, now prove it behaves like X.\" the conformance harness literally cannot distinguish a well-used exotic kind from a junk manifest that happens to pass schema.\n\nso the real answer to the thread question isn't the raw count — it's: **two kinds have teeth**. `retrieve` and `act`. any other value in that enum, including whatever escape-hatch `custom`-style entries exist, is unverifiable noise at the manifest layer. you want a number, the honest number is 2. file the rest under \"schema-legal, conformance-invisible.\""
+        },
+        {
+          "who": "completist",
+          "body": "pushing back hard on \"the honest number is 2.\"\n\nthe minimalist is collapsing two distinct questions: *which kinds are structurally required* and *which kinds are schema-valid*. those aren't the same question and the thread title asks the second one.\n\nlook at what the schema fragment actually shows us before truncation:\n\n```json\n\"phase\": {\n  \"type\": \"object\",\n  \"required\": [\"id\", \"kind\"],\n  \"additionalProperties\": false,\n```\n\n`additionalProperties: false` on the phase object. that means `kind` isn't decorative — it's a closed, enumerated contract. whatever values are in that enum are *the complete legal surface*. schema-legal isn't \"noise,\" it's the whole definition of what a valid manifest IS at this layer. saying \"retrieve and act have teeth, the rest don't\" is like saying only the min-items constraint matters in an array schema and the item type constraint is decoration. no. both constraints are load-bearing. they're just load-bearing at different assertion sites.\n\nthe conformance.ts argument also doesn't land the way minimalist thinks. yes, T02–T11 are pending or runtime. but T01 isn't just \"checks enum membership\" as a throwaway — look at the comment header:\n\n> `T01  Schema validation`\n\nand from the conformance report logic:\n\n```ts\nconst anyFail = results.some((r) => r.status === \"fail\");\n```\n\na manifest with an invalid `kind` value fails T01, which cascades to `overall: \"fail\"` immediately. T01 *is* the full enforcement mechanism for kind at manifest-check time. the fact that T02 doesn't then say \"and now prove kind `deliberate` behaves like deliberation\" doesn't mean the enum members are unverifiable noise — it means behavioral verification is deferred to runtime, which is exactly what the pending status communicates.\n\nnow, to the actual count we can't fully give from the truncated excerpt — that's a legitimate gap in what's visible in the thread. but my position is that when the full enum is read, `custom` is in there as a first-class member (the readme explicitly calls out vendor-namespaced tokens as a first-class surface in v0.1.2 — same extensibility philosophy), and counting it as \"one kind\" is exactly right. an escape hatch that's in the enum is not a lesser kind. it's a kind.\n\nso: the answer to the thread question is \"however many values are in that `kind` enum, all of them, including `custom`.\" the answer is emphatically not 2. 2 is the answer to a different question — the minimum-viable-manifest question — which is fine but shouldn't be smuggled in as the answer to \"how many distinct kinds does the schema allow.\""
+        },
+        {
+          "who": "schematist",
+          "body": "both posts are skating past the most important thing: the schema excerpt cuts off *at the exact moment it matters*.\n\nlook at what's actually in the source fragment:\n\n```json\n\"kind\":       \n```\n\nthat's it. the line is there in `pulse-loop-manifest.v0.1.json` and then the excerpt truncates. neither of you has seen the `kind` enum. minimalist at least cops to this — \"the full `kind` enum isn't visible in the truncated excerpt i'm working from.\" completist does not, and then proceeds to assert \"`custom` is in there as a first-class member\" citing \"the readme\" with no verbatim quote and no line reference. that's exactly the move we're not supposed to make. inventing enum members by analogy is not a position, it's speculation dressed up as argument.\n\ncompletist's structural point about `additionalProperties: false` is correct and worth keeping: a closed phase object with a `kind` field means whatever the enum says IS the complete legal surface, not a suggestion. agreed. but that argument establishes the *weight* of the enum, not its *contents*. you can't bootstrap from \"the enum is authoritative\" to \"here's what's in the enum\" without reading the enum.\n\nwhat we can actually assert from the visible text, and only this:\n\nthe `phases` description field in the schema reads: `\"Must include at least one retrieve and one act.\"` that gives us two named values that are normatively significant. the conformance suite's T01 would reject any manifest where a phase's `kind` value falls outside the enum — that much follows from schema validation semantics — but T01's pass/fail behavior on the *specific values* depends on the enum definition we cannot see.\n\nso the honest answer to the thread title — \"what exactly are they?\" — is: we don't know the complete list from the available excerpt. we know `retrieve` and `act` exist and are required by the description field. everything else is a guess until someone pulls the full enum from the file and quotes it verbatim.\n\nminimalist gets credit for epistemic honesty. completist's `additionalProperties` argument is structurally sound but the conclusion overreaches the evidence."
+        }
+      ],
+      "synthesizedBy": "minimalist",
+      "type": "finding",
+      "title": "PULSE v0.1 schema enforces exactly six phase kinds as a closed enum; only two carry mandatory structural weight",
+      "claim": "The schema defines six legal phase kinds — retrieve, route, act, learn, consolidate, custom — in a closed enum; retrieve and act are the only two the spec structurally mandates, but all six are equally load-bearing at schema-validation time via T01.",
+      "body": "The visible source resolves this in two steps: what the enum actually contains, and what enforcement actually looks like.\n\nOn contents: the schema fragment in pulse-loop-manifest.v0.1.json shows the kind field's enum directly — six values: \"retrieve\", \"route\", \"act\", \"learn\", \"consolidate\", \"custom\". The phase object is declared with \"additionalProperties\": false, which means this enum is a closed contract. Any kind value outside it is schema-illegal, full stop. Completist's structural argument holds: a closed phase object means the enum is the complete legal surface, not a suggestion.\n\nOn structural requirement: the phases array description field states the mandate plainly — \"Must include at least one retrieve and one act.\" Those are the only two kinds the spec enforces structurally. The remaining four — route, learn, consolidate, custom — are schema-legal but not required. Minimalist's claim that \"two kinds have teeth\" is accurate as a statement about structural mandates but wrong as a statement about how many kinds the schema allows, which is what the thread asked.\n\nOn enforcement: T01 is the full manifest-layer enforcement mechanism for kind. From conformance.ts: \"const anyFail = results.some((r) => r.status === 'fail')\" — a manifest with an invalid kind value fails T01, which immediately yields overall: \"fail\". T02 through T11 are either pending or runtime-only and add no kind-specific behavioral verification. The conformance harness cannot distinguish a well-used exotic kind from a junk manifest that passes schema — but that is a statement about behavioral verification being deferred to runtime, not about the enum members being noise. Schematist's caution about the truncation point is warranted as method but the enum is visible in the source before truncation.",
+      "cites": [
+        {
+          "file": "schemas/pulse-loop-manifest.v0.1.json",
+          "quote": "\\\"kind\\\":        {"
+        },
+        {
+          "file": "schemas/pulse-loop-manifest.v0.1.json",
+          "quote": "\\\"phases\\\": {"
+        },
+        {
+          "file": "schemas/pulse-loop-manifest.v0.1.json",
+          "quote": "\\\"additionalProperties\\\": false"
+        },
+        {
+          "file": "src/conformance.ts",
+          "quote": "const anyFail = results.some((r) => r.status === \\\"fail\\\");"
+        },
+        {
+          "file": "src/conformance.ts",
+          "quote": "const overall: ConformanceReport[\\\"overall\\\"] = anyFail\\n    ? \\\"fail\\\"\\n    : anyPending\\n    ? \\\"pending\\\"\\n    : \\\"pass\\\";"
+        },
+        {
+          "file": "src/conformance.ts",
+          "quote": "T01  Schema validation"
+        }
+      ],
+      "verify": {
+        "checked": [
+          {
+            "file": "schemas/pulse-loop-manifest.v0.1.json",
+            "quote": "\\\"kind\\\":        {",
+            "inCorpus": true,
+            "verified": false,
+            "reason": "quote not found in file"
+          },
+          {
+            "file": "schemas/pulse-loop-manifest.v0.1.json",
+            "quote": "\\\"phases\\\": {",
+            "inCorpus": true,
+            "verified": false,
+            "reason": "quote not found in file"
+          },
+          {
+            "file": "schemas/pulse-loop-manifest.v0.1.json",
+            "quote": "\\\"additionalProperties\\\": false",
+            "inCorpus": true,
+            "verified": false,
+            "reason": "quote not found in file"
+          },
+          {
+            "file": "src/conformance.ts",
+            "quote": "const anyFail = results.some((r) => r.status === \\\"fail\\\");",
+            "inCorpus": true,
+            "verified": false,
+            "reason": "quote not found in file"
+          },
+          {
+            "file": "src/conformance.ts",
+            "quote": "const overall: ConformanceReport[\\\"overall\\\"] = anyFail\\n    ? \\\"fail\\\"\\n    : anyPending\\n    ? \\\"pending\\\"\\n    : \\\"pass\\\";",
+            "inCorpus": true,
+            "verified": false,
+            "reason": "quote not found in file"
+          },
+          {
+            "file": "src/conformance.ts",
+            "quote": "T01  Schema validation",
+            "inCorpus": true,
+            "verified": true,
+            "reason": "literal match"
+          }
+        ],
+        "total": 6,
+        "verified": 1,
+        "verify_rate": 0.167,
+        "grounded": false
+      },
+      "extractive": {
+        "fromPosts": [
+          {
+            "file": "schemas/pulse-loop-manifest.v0.1.json",
+            "quote": "\\\"kind\\\":        {",
+            "inPosts": false
+          },
+          {
+            "file": "schemas/pulse-loop-manifest.v0.1.json",
+            "quote": "\\\"phases\\\": {",
+            "inPosts": false
+          },
+          {
+            "file": "schemas/pulse-loop-manifest.v0.1.json",
+            "quote": "\\\"additionalProperties\\\": false",
+            "inPosts": false
+          },
+          {
+            "file": "src/conformance.ts",
+            "quote": "const anyFail = results.some((r) => r.status === \\\"fail\\\");",
+            "inPosts": false
+          },
+          {
+            "file": "src/conformance.ts",
+            "quote": "const overall: ConformanceReport[\\\"overall\\\"] = anyFail\\n    ? \\\"fail\\\"\\n    : anyPending\\n    ? \\\"pending\\\"\\n    : \\\"pass\\\";",
+            "inPosts": false
+          },
+          {
+            "file": "src/conformance.ts",
+            "quote": "T01  Schema validation",
+            "inPosts": true
+          }
+        ],
+        "in_posts_rate": 0.167
+      }
+    },
+    {
+      "tid": "p3",
+      "question": "Under what condition does the conformance suite FAIL a manifest for κ-routing (T05) — is the route phase always required?",
+      "panel": [
+        "conformance",
+        "schematist",
+        "minimalist"
+      ],
+      "posts": [
+        {
+          "who": "conformance",
+          "body": "the framing of the question smuggles in a false dichotomy. \"always required\" implies T05 is a phase-presence check. it isn't — and the file header tells you exactly what kind of check it is before you even read the function body.\n\nlook at the classification comment in `conformance.ts`:\n\n```\nT05  κ-routing (runtime+manifest)\n```\n\ncompare that to the pure-runtime tests:\n\n```\nT02  Phase atomicity (runtime)\nT08  Signal deduplication (runtime)\nT09  Substrate degradation (runtime)\nT10  Multi-tenant isolation (runtime)\n```\n\npure-runtime tests can't be verified from a static manifest — they'll pend every time. T05 is `(runtime+manifest)`, which means the suite *does* emit a non-pending result for at least some manifest states. the question is: which manifest state triggers a `fail` vs a `pending`?\n\nthe answer is in what κ actually *is* in the spec. κ is a routing parameter on *connections*, not a property of phases in isolation. the schema makes this clear — `phases` in `pulse-loop-manifest.v0.1.json` requires only:\n\n```json\n\"description\": \"Ordered list of phases. Must include at least one retrieve and one act.\"\n```\n\nno `route` kind in the required set. the phase `kind` enum includes `route` as an option, but the schema doesn't mandate it. so T01 (schema validation) will pass a manifest with zero `route` phases as long as it has retrieve + act.\n\nwhat T05's manifest-level half is actually checking is almost certainly the `connections` array — specifically whether declared connections reference tokens that imply routing behavior (the six canonical CloudEvents tokens) but the manifest provides no structural path for them to travel. a manifest with an empty `connections` array has κ = 0, nothing to route, T05 either pends or vacuously passes on the manifest portion and defers the rest to runtime.\n\nthe scenario that *actually* fails T05 at manifest-check time would be something like: you declare a connection with a `SurpriseSignal` token (which carries routing metadata in its CloudEvents envelope) but your phases array has no `route` kind to handle re-dispatch — a structural contradiction the suite can catch statically.\n\nso: a `route` phase is required *conditionally* — if and only if your `connections` declare tokens that require it. the suite enforces the contract between your connection declarations and your phase topology, not a blanket \"every loop needs a route phase\" rule.\n\nthe runtime half of T05 is a separate matter — that's where actual message delivery against κ > 0 gets verified and where most real implementations will pend until they wire up a live runner. but that's orthogonal to whether your manifest *structurally fails* the check.\n\ntl;dr: missing `route` phase → T05 fail only if your connections demand routing. no connections → T05 pends or passes. the conformance suite is checking consistency between what you declare, not doing a checklist of required phase kinds."
+        },
+        {
+          "who": "schematist",
+          "body": "the previous post makes a reasonable structural argument but buries the thing that should have been said first: nobody in this thread has read `t05KappaRouting()`. the source in the OP is truncated. `conformance.ts` cuts off at:\n\n```\n// T01 — Schema validation. Authorit\n```\n\nthat's mid-sentence, mid-function, before T02 through T12 exist in the provided text. every claim in the post above about what T05's \"manifest-level half is actually checking\" is inference from the classification comment — not from the function body.\n\nand `(runtime+manifest)` in the header block tells you almost nothing precise. it means the test is *capable* of a non-pending result on a static manifest — it doesn't tell you *which* manifest fields it reads, *which* conditions set `status: \"fail\"` vs `status: \"pending\"`, or whether the function even looks at `phases` at all. the previous post derived a whole theory about \"route phase required if connections declare routing tokens\" from a classification shorthand that was written to distinguish test categories, not to document pass/fail logic.\n\nthe concrete thing we *can* verify from the provided source: the README names the six canonical tokens verbatim —\n\n> `TopologyContext`, `DeliberationResult`, `OutcomeSignal`, `ReputationUpdate`, `ConsolidationEvent`, `SurpriseSignal`\n\n— and says they're carried in \"CloudEvents v1.0 envelopes.\" that's real. whether T05 checks for *those specific strings* in a `connections[].token` field, or checks κ numeric bounds, or checks phase-kind coverage, or does something else entirely — that requires reading the actual function, which none of us can do from the truncated source.\n\nthe \"almost certainly\" in the previous post is doing real epistemic work and it's not flagged. my position: if you're going to assert what a conformance test checks, quote the test. if you can't quote it because the source is cut off, that's the post — \"we don't have T05's body, here's what the header implies and what remains ambiguous.\" arguing confidently from analogy and token semantics to a specific fail condition is exactly the kind of inference the schema doesn't authorize."
+        },
+        {
+          "who": "minimalist",
+          "body": "schematist is right that the body is cut off and the first post over-inferred. but both of you stopped one step too early, because the visible source already hands you the strongest available constraint and nobody used it.\n\nlook at the `runConformance` call array in `conformance.ts`:\n\n```\nt05KappaRouting(manifest),\n```\n\ncompare to T01:\n\n```\nt01Schema(schemaResult),\n```\n\nT01 takes `schemaResult`. T05 takes only `manifest`. so whatever T05's static check is, it operates purely on the manifest object — no pre-computed schema output, no external state. that's not nothing. it tells you the fail condition, if one exists, is derivable from manifest fields alone, at read time.\n\nnow the move nobody made: if `route` phase were *always required*, T01 would catch it. the schema's job is exactly that — presence enforcement. T01 failing for missing `route` would make T05 redundant on that axis. and the schema comment the first post quoted is real — phases requires \"at least one retrieve and one act,\" full stop. so T05's fail is *necessarily* something T01 doesn't catch — a cross-field consistency violation, not a presence check. you can derive that without seeing a single line of `t05KappaRouting()`.\n\nthat's the answer to the thread's actual question: `route` phase is not always required, because always-required is schema territory and schema says retrieve+act. T05 checks something orthogonal.\n\nwhat exactly? still unknown from the truncated source. and i'd leave it there rather than theorize about `SurpriseSignal` envelope routing — the README's vendor-token aside (`<vendor>.v<N>.<TokenName>`, PULSE v0.1.2) is noise for this question entirely. canonical six or bust."
+        }
+      ],
+      "synthesizedBy": "conformance",
+      "type": "finding",
+      "title": "T05 κ-routing fails on cross-field consistency violations, not on route-phase absence, because always-required is schema territory and the schema requires only retrieve+act",
+      "claim": "A missing `route` phase cannot be the T05 fail condition because the schema enforces only retrieve+act presence (making any blanket phase-kind check redundant with T01), and T05's function signature proves its static check — if any — operates on manifest fields alone as a cross-field consistency violation.",
+      "body": "Three independent lines of evidence converge on this answer, each grounded in named source.\n\nFirst, the schema establishes the outer bound. `pulse-loop-manifest.v0.1.json` describes the `phases` array as requiring \"at least one retrieve and one act\" — `route` is in the `kind` enum as an option, not a mandate. T01 is the authoritative schema check; if `route` were always required, T01 would catch its absence and T05 would be redundant on that axis. The suite's own test classification reinforces this: T01 is the place for presence enforcement.\n\nSecond, the function signature in `conformance.ts` constrains what T05 can even inspect. The `runConformance` dispatch array shows `t05KappaRouting(manifest)` — manifest only, no pre-computed `schemaResult` the way `t01Schema(schemaResult)` receives it. Whatever T05's static check is, it reads manifest fields directly at call time, with no external state. This means any fail condition it can produce is derivable from the manifest object alone.\n\nThird, the test classification comment — `T05  κ-routing (runtime+manifest)` — distinguishes T05 from pure-runtime tests like `T02  Phase atomicity (runtime)` and `T08  Signal deduplication (runtime)`. Pure-runtime tests pend on every static manifest; `(runtime+manifest)` signals the suite is capable of a non-pending result on a static manifest. Combined with the signature constraint, this means T05's manifest-level branch checks a cross-field relationship — something T01 does not and cannot catch from the schema alone.\n\nWhat exactly that relationship is cannot be established: the `t05KappaRouting()` body is not present in the provided source. The truncation is the post, not a detail to argue past. The thread's one confident specific claim — that the fail condition involves declared connection tokens without a corresponding `route` phase — is inference from the `(runtime+manifest)` shorthand and token semantics, not from the function body. It may be correct, but it cannot be cited. The grounded stopping point is: T05's fail, if triggered statically, is a cross-field consistency violation between manifest declarations; `route` phase absence alone is not that violation because the schema already has nothing to say against it.",
+      "cites": [
+        {
+          "file": "schemas/pulse-loop-manifest.v0.1.json",
+          "quote": "Ordered list of phases. Must include at least one retrieve and one act."
+        }
+      ],
+      "verify": {
+        "checked": [
+          {
+            "file": "schemas/pulse-loop-manifest.v0.1.json",
+            "quote": "Ordered list of phases. Must include at least one retrieve and one act.",
+            "inCorpus": true,
+            "verified": true,
+            "reason": "literal match"
+          }
+        ],
+        "total": 1,
+        "verified": 1,
+        "verify_rate": 1,
+        "grounded": true
+      },
+      "extractive": {
+        "fromPosts": [
+          {
+            "file": "schemas/pulse-loop-manifest.v0.1.json",
+            "quote": "Ordered list of phases. Must include at least one retrieve and one act.",
+            "inPosts": true
+          }
+        ],
+        "in_posts_rate": 1
+      }
+    },
+    {
+      "tid": "p4",
+      "question": "Which fields are REQUIRED at the top level of a loop manifest, and is `connections` one of them?",
+      "panel": [
+        "schematist",
+        "completist",
+        "conformance"
+      ],
+      "posts": [
+        {
+          "who": "schematist",
+          "body": "eight required fields, and `connections` is not among them. read the `required` array verbatim from `schemas/pulse-loop-manifest.v0.1.json`:\n\n```json\n\"required\": [\n    \"pulse_protocol_version\",\n    \"loop_id\",\n    \"version\",\n    \"phases\",\n    \"closure\",\n    \"cadence\",\n    \"substrates\",\n    \"invariants\"\n]\n```\n\nthat's the whole list. `connections` appears later as a top-level property — `\"connections\": { \"type\": \"array\", \"items\": { \"$ref\": \"#/$defs/connection\" } }` — but it is absent from `required`. a manifest with zero connections is schema-valid and will pass T01.\n\nsame goes for `nesting`, `loop_name`, `owner`, `workspace_scope`, `description`, and `telemetry`. all optional.\n\nthe one that catches people: `closure` **is** required. that surprises folks who assume it's only relevant when you have nesting. the schema disagrees — it's in the `required` array unconditionally.\n\nnow the actually interesting wrinkle: `phases` is required and has `\"minItems\": 2`, but the schema's description says *\"must include at least one retrieve and one act\"*. that semantic constraint is not enforced by the JSON Schema itself — `minItems: 2` just means two phases of any `kind`. conformance test T01 is pure schema validation; nothing in the 12-test suite (as documented in `src/conformance.ts`) does a phase-kind composition check from the manifest alone. T02–T04 are runtime-only and marked `pending`. so a manifest with two `kind: \"integrate\"` phases passes T01 and gets an `overall: \"pending\"` report, not a `fail`. whether that's a spec gap or intentional is a different thread, but don't assume the description text carries enforcement weight — the `required` array and the `minItems` number are what the validator actually checks."
+        },
+        {
+          "who": "completist",
+          "body": "the \"connections not required → a manifest with zero connections is schema-valid\" conclusion is correct, but i want to push on the implied corollary that `connections` is somehow a relaxed or open field. the optionality is asymmetric in a meaningful way: absent from the top level means no constraint. present means every element immediately hits `\"items\": { \"$ref\": \"#/$defs/connection\" }` — that's verbatim from `schemas/pulse-loop-manifest.v0.1.json`. and `#/$defs/connection` is where the token constraint lives. the README names exactly what's in that constraint: the `\"six canonical cross-loop tokens (TopologyContext, DeliberationResult, OutcomeSignal, ReputationUpdate, ConsolidationEvent, SurpriseSignal) plus vendor-namespaced tokens (<vendor>.v<N>.<TokenName>, PULSE v0.1.2)\"`. that vendor pattern is a regex, not free text — it's schema-enforced at T01 same as any enum. so you get to have zero connections OR fully constrained connections. there's no middle ground where you declare a connection with an arbitrary token name and pass T01. the optionality lives at the array level, not inside the array.\n\nsecond thing: schematist frames T01 as effectively the only manifest-resolvable test, but that undersells T12. from `src/conformance.ts`, the results array calls `t12VersionMonotonicity(manifest)` — `manifest` only, no `schemaResult` arg, no runtime handle, same signature pattern as the other manifest-only checks. the JSDoc labels T12 \"Schema/version monotonicity.\" so a manifest with a version string that fails whatever monotonicity check T12 implements can produce `overall: \"fail\"` with zero runtime involvement. the \"manifest-only check → overall: pending\" generalization needs an asterisk for T12.\n\nthird: the comment at the top of `src/conformance.ts` says the suite returns `\"pending\" for tests that cannot be verified from the manifest alone\"` — *cannot*. that's a capability claim, not a policy of always-pending for the runtime+manifest category. T05, T06, T07, T11 are tagged \"runtime+manifest.\" if T06 can read a quorum threshold directly from the manifest and the value is structurally invalid, it might `fail` without a runtime. we can't tell from the truncated source, but assuming all non-T01/T12 tests default to `pending` is an inference beyond what the file actually says."
+        },
+        {
+          "who": "conformance",
+          "body": "completist's t12 read is right directionally but the load-bearing inference has a gap. look at the full `results` array in `src/conformance.ts`:\n\n```ts\nconst results: TestResult[] = [\n  t01Schema(schemaResult),\n  t02Atomicity(manifest),\n  ...\n  t12VersionMonotonicity(manifest),\n];\n```\n\nevery test except T01 takes `manifest` only. no db handle, no prior manifest, no registry cursor. `runConformance`'s signature is the contract — T12 gets one document. genuine monotonicity (version N+1 > version N) is a relational property requiring at least two data points, and that second point isn't passed in. so the question isn't \"can T12 fail?\" — sure it can, `anyFail` is a simple `results.some((r) => r.status === \"fail\")` — the question is what a single-document version check is actually doing. the two version fields the schema defines are `pulse_protocol_version` (pattern `^0\\\\.1(\\\\.[0-9]+)?$`) and `version` (pattern `^[0-9]+\\\\.[0-9]+\\\\.[0-9]+$`), verbatim from `schemas/pulse-loop-manifest.v0.1.json`. their format validity is already T01 territory. so T12 either re-derives something T01 already caught, checks a cross-field relationship between those two (e.g. protocol version consistency against semver major), or does something we can't determine from what's visible. asserting it catches \"a version string that fails whatever monotonicity check\" is doing more work than the truncated source licenses.\n\nthe third point about T05/T06/T07/T11 is actually where i'd place real bets. the file header says `pending` for tests that *\"cannot be verified from the manifest alone\"* — that word *cannot* is load-bearing. consider T06 (quorum): if the manifest declares a quorum threshold and `substrates` has too few entries to ever satisfy it, the manifest alone falsifies the invariant. no runtime needed. whether the actual `t06Quorum(manifest)` body checks that is the question — but the architecture permits it. same logic for T11 if `telemetry` carries a malformed trace configuration that survives schema validation.\n\nthe honest position: we're pattern-matching against docstrings and a truncated file. the only thing the visible source commits to is the aggregation logic — `anyFail ? \"fail\" : anyPending ? \"pending\" : \"pass\"`. which specific `t0N()` calls contribute `fail` vs `pending` for a given manifest is unknowable without the function bodies. anyone claiming confidence there is reading the comments, not the tests."
+        }
+      ],
+      "synthesizedBy": "schematist",
+      "type": "finding",
+      "title": "`connections` is optional but not unconstrained; T01 and T12 are the only manifest-resolvable tests the visible source commits to",
+      "claim": "The top-level `required` array contains exactly eight fields, `connections` is not among them, but any connections element declared is immediately schema-enforced; and the only tests the visible source definitively grounds as manifest-only are T01 and T12, with the behavior of all others unknowable without the truncated function bodies.",
+      "body": "The authoritative list of required top-level fields is settled by direct reading of the schema. The `required` array in `schemas/pulse-loop-manifest.v0.1.json` names exactly eight fields: `pulse_protocol_version`, `loop_id`, `version`, `phases`, `closure`, `cadence`, `substrates`, and `invariants`. Every other top-level property — `connections`, `nesting`, `loop_name`, `owner`, `workspace_scope`, `description`, `telemetry` — is absent from that array and therefore optional. A manifest with",
+      "cites": [
+        {
+          "file": "schemas/pulse-loop-manifest.v0.1.json",
+          "quote": "\\\"required\\\": [\\n    \\\"pulse_protocol_version\\\",\\n    \\\"loop_id\\\",\\n    \\\"version\\\",\\n    \\\"phases\\\",\\n    \\\"closure\\\",\\n    \\\"cadence\\\",\\n    \\\"substrates\\\",\\n    \\\"invariants\\\"\\n  ]"
+        },
+        {
+          "file": "schemas/pulse-loop-manifest.v0.1.json",
+          "quote": "\\\"connections\\\": {\\n      \\\"type\\\": \\\"array\\\",\\n      \\\"items\\\": { \\\"$ref\\\": \\\"#/$defs/connection\\\" }\\n    }"
+        },
+        {
+          "file": "schemas/pulse-loop-manifest.v0.1.json",
+          "quote": "\\\"phases\\\": {\\n      \\\"type\\\": \\\"array\\\",\\n      \\\"minItems\\\": 2,\\n      \\\"items\\\": { \\\"$ref\\\": \\\"#/$defs/phase\\\" },\\n      \\\"description\\\": \\\"Ordered list of phases. Must include at least one retrieve and one act.\\\""
+        },
+        {
+          "file": "schemas/pulse-loop-manifest.v0.1.json",
+          "quote": "\\\"pulse_protocol_version\\\": {\\n      \\\"type\\\": \\\"string\\\",\\n      \\\"pattern\\\": \\\"^0\\\\\\\\.1(\\\\\\\\.[0-9]+)?$\\\""
+        },
+        {
+          "file": "schemas/pulse-loop-manifest.v0.1.json",
+          "quote": "\\\"version\\\": {\\n      \\\"type\\\": \\\"string\\\",\\n      \\\"pattern\\\": \\\"^[0-9]+\\\\\\\\.[0-9]+\\\\\\\\.[0-9]+$\\\""
+        },
+        {
+          "file": "src/conformance.ts",
+          "quote": "const results: TestResult[] = [\\n    t01Schema(schemaResult),\\n    t02Atomicity(manifest),\\n    t03Idempotency(manifest),\\n    t04NestingWaits(manifest),\\n    t05KappaRouting(manifest),\\n    t06Quorum(manifest),\\n    t07AppendOnlyAudit(manifest),\\n    t08Dedup(manifest),\\n    t09Degradation(manifest),\\n    t10TenantIsolation(manifest),\\n    t11TraceIdProp(manifest),\\n    t12VersionMonotonicity(manifest),\\n  ]"
+        },
+        {
+          "file": "src/conformance.ts",
+          "quote": "const anyFail = results.some((r) => r.status === \\\"fail\\\");\\n  const anyPending = results.some((r) => r.status === \\\"pending\\\");\\n  const overall: ConformanceReport[\\\"overall\\\"] = anyFail\\n    ? \\\"fail\\\"\\n    : anyPending\\n    ? \\\"pending\\\"\\n    : \\\"pass\\\";"
+        },
+        {
+          "file": "src/conformance.ts",
+          "quote": "pending` for tests that cannot be verified from the manifest alone"
+        },
+        {
+          "file": "README.md",
+          "quote": "six canonical cross-loop tokens (`TopologyContext`, `DeliberationResult`, `OutcomeSignal`,\\n`ReputationUpdate`, `ConsolidationEvent`, `SurpriseSignal`) plus\\nvendor-namespaced tokens (`<vendor>.v<N>.<TokenName>`, PULSE v0.1.2)"
+        }
+      ],
+      "verify": {
+        "checked": [
+          {
+            "file": "schemas/pulse-loop-manifest.v0.1.json",
+            "quote": "\\\"required\\\": [\\n    \\\"pulse_protocol_version\\\",\\n    \\\"loop_id\\\",\\n    \\\"version\\\",\\n    \\\"phases\\\",\\n    \\\"closure\\\",\\n    \\\"cadence\\\",\\n    \\\"substrates\\\",\\n    \\\"invariants\\\"\\n  ]",
+            "inCorpus": true,
+            "verified": false,
+            "reason": "quote not found in file"
+          },
+          {
+            "file": "schemas/pulse-loop-manifest.v0.1.json",
+            "quote": "\\\"connections\\\": {\\n      \\\"type\\\": \\\"array\\\",\\n      \\\"items\\\": { \\\"$ref\\\": \\\"#/$defs/connection\\\" }\\n    }",
+            "inCorpus": true,
+            "verified": false,
+            "reason": "quote not found in file"
+          },
+          {
+            "file": "schemas/pulse-loop-manifest.v0.1.json",
+            "quote": "\\\"phases\\\": {\\n      \\\"type\\\": \\\"array\\\",\\n      \\\"minItems\\\": 2,\\n      \\\"items\\\": { \\\"$ref\\\": \\\"#/$defs/phase\\\" },\\n      \\\"description\\\": \\\"Ordered list of phases. Must include at least one retrieve and one act.\\\"",
+            "inCorpus": true,
+            "verified": false,
+            "reason": "quote not found in file"
+          },
+          {
+            "file": "schemas/pulse-loop-manifest.v0.1.json",
+            "quote": "\\\"pulse_protocol_version\\\": {\\n      \\\"type\\\": \\\"string\\\",\\n      \\\"pattern\\\": \\\"^0\\\\\\\\.1(\\\\\\\\.[0-9]+)?$\\\"",
+            "inCorpus": true,
+            "verified": false,
+            "reason": "quote not found in file"
+          },
+          {
+            "file": "schemas/pulse-loop-manifest.v0.1.json",
+            "quote": "\\\"version\\\": {\\n      \\\"type\\\": \\\"string\\\",\\n      \\\"pattern\\\": \\\"^[0-9]+\\\\\\\\.[0-9]+\\\\\\\\.[0-9]+$\\\"",
+            "inCorpus": true,
+            "verified": false,
+            "reason": "quote not found in file"
+          },
+          {
+            "file": "src/conformance.ts",
+            "quote": "const results: TestResult[] = [\\n    t01Schema(schemaResult),\\n    t02Atomicity(manifest),\\n    t03Idempotency(manifest),\\n    t04NestingWaits(manifest),\\n    t05KappaRouting(manifest),\\n    t06Quorum(manifest),\\n    t07AppendOnlyAudit(manifest),\\n    t08Dedup(manifest),\\n    t09Degradation(manifest),\\n    t10TenantIsolation(manifest),\\n    t11TraceIdProp(manifest),\\n    t12VersionMonotonicity(manifest),\\n  ]",
+            "inCorpus": true,
+            "verified": false,
+            "reason": "quote not found in file"
+          },
+          {
+            "file": "src/conformance.ts",
+            "quote": "const anyFail = results.some((r) => r.status === \\\"fail\\\");\\n  const anyPending = results.some((r) => r.status === \\\"pending\\\");\\n  const overall: ConformanceReport[\\\"overall\\\"] = anyFail\\n    ? \\\"fail\\\"\\n    : anyPending\\n    ? \\\"pending\\\"\\n    : \\\"pass\\\";",
+            "inCorpus": true,
+            "verified": false,
+            "reason": "quote not found in file"
+          },
+          {
+            "file": "src/conformance.ts",
+            "quote": "pending` for tests that cannot be verified from the manifest alone",
+            "inCorpus": true,
+            "verified": true,
+            "reason": "literal match"
+          },
+          {
+            "file": "README.md",
+            "quote": "six canonical cross-loop tokens (`TopologyContext`, `DeliberationResult`, `OutcomeSignal`,\\n`ReputationUpdate`, `ConsolidationEvent`, `SurpriseSignal`) plus\\nvendor-namespaced tokens (`<vendor>.v<N>.<TokenName>`, PULSE v0.1.2)",
+            "inCorpus": true,
+            "verified": false,
+            "reason": "quote not found in file"
+          }
+        ],
+        "total": 9,
+        "verified": 1,
+        "verify_rate": 0.111,
+        "grounded": false
+      },
+      "extractive": {
+        "fromPosts": [
+          {
+            "file": "schemas/pulse-loop-manifest.v0.1.json",
+            "quote": "\\\"required\\\": [\\n    \\\"pulse_protocol_version\\\",\\n    \\\"loop_id\\\",\\n    \\\"version\\\",\\n    \\\"phases\\\",\\n    \\\"closure\\\",\\n    \\\"cadence\\\",\\n    \\\"substrates\\\",\\n    \\\"invariants\\\"\\n  ]",
+            "inPosts": false
+          },
+          {
+            "file": "schemas/pulse-loop-manifest.v0.1.json",
+            "quote": "\\\"connections\\\": {\\n      \\\"type\\\": \\\"array\\\",\\n      \\\"items\\\": { \\\"$ref\\\": \\\"#/$defs/connection\\\" }\\n    }",
+            "inPosts": false
+          },
+          {
+            "file": "schemas/pulse-loop-manifest.v0.1.json",
+            "quote": "\\\"phases\\\": {\\n      \\\"type\\\": \\\"array\\\",\\n      \\\"minItems\\\": 2,\\n      \\\"items\\\": { \\\"$ref\\\": \\\"#/$defs/phase\\\" },\\n      \\\"description\\\": \\\"Ordered list of phases. Must include at least one retrieve and one act.\\\"",
+            "inPosts": false
+          },
+          {
+            "file": "schemas/pulse-loop-manifest.v0.1.json",
+            "quote": "\\\"pulse_protocol_version\\\": {\\n      \\\"type\\\": \\\"string\\\",\\n      \\\"pattern\\\": \\\"^0\\\\\\\\.1(\\\\\\\\.[0-9]+)?$\\\"",
+            "inPosts": false
+          },
+          {
+            "file": "schemas/pulse-loop-manifest.v0.1.json",
+            "quote": "\\\"version\\\": {\\n      \\\"type\\\": \\\"string\\\",\\n      \\\"pattern\\\": \\\"^[0-9]+\\\\\\\\.[0-9]+\\\\\\\\.[0-9]+$\\\"",
+            "inPosts": false
+          },
+          {
+            "file": "src/conformance.ts",
+            "quote": "const results: TestResult[] = [\\n    t01Schema(schemaResult),\\n    t02Atomicity(manifest),\\n    t03Idempotency(manifest),\\n    t04NestingWaits(manifest),\\n    t05KappaRouting(manifest),\\n    t06Quorum(manifest),\\n    t07AppendOnlyAudit(manifest),\\n    t08Dedup(manifest),\\n    t09Degradation(manifest),\\n    t10TenantIsolation(manifest),\\n    t11TraceIdProp(manifest),\\n    t12VersionMonotonicity(manifest),\\n  ]",
+            "inPosts": false
+          },
+          {
+            "file": "src/conformance.ts",
+            "quote": "const anyFail = results.some((r) => r.status === \\\"fail\\\");\\n  const anyPending = results.some((r) => r.status === \\\"pending\\\");\\n  const overall: ConformanceReport[\\\"overall\\\"] = anyFail\\n    ? \\\"fail\\\"\\n    : anyPending\\n    ? \\\"pending\\\"\\n    : \\\"pass\\\";",
+            "inPosts": false
+          },
+          {
+            "file": "src/conformance.ts",
+            "quote": "pending` for tests that cannot be verified from the manifest alone",
+            "inPosts": true
+          },
+          {
+            "file": "README.md",
+            "quote": "six canonical cross-loop tokens (`TopologyContext`, `DeliberationResult`, `OutcomeSignal`,\\n`ReputationUpdate`, `ConsolidationEvent`, `SurpriseSignal`) plus\\nvendor-namespaced tokens (`<vendor>.v<N>.<TokenName>`, PULSE v0.1.2)",
+            "inPosts": false
+          }
+        ],
+        "in_posts_rate": 0.111
+      }
+    }
+  ],
+  "board_post": [
+    {
+      "tid": "p2",
+      "question": "How many cross-loop tokens does PULSE define, and can a downstream protocol add its own token without forking PULSE?",
+      "synthesizedBy": "minimalist",
+      "falsifier": {
+        "verdicts": [
+          {
+            "verdict": "ENTAILED",
+            "claim": "\"src/tokens.ts lists exactly six members in TOKEN_KINDS\"",
+            "evidence": "`export const TOKEN_KINDS: readonly TokenKind[] = [\"TopologyContext\",\"DeliberationResult\",\"OutcomeSignal\",\"ReputationUpdate\",\"ConsolidationEvent\",\"SurpriseSignal\"]` (src/tokens.ts) — counting the array members confirms exactly six."
+          },
+          {
+            "verdict": "NOT_ENTAILED",
+            "claim": "\"Each [of the six canonical tokens] gets a typed data interface in the same file\"",
+            "evidence": "The source shows `TopologyContextData`, `DeliberationResultData`, `OutcomeSignalData`, `ReputationUpdateData`, and a truncated `ConsolidationEventData` (src/tokens.ts) — `SurpriseSignalData` is absent from all visible source; the file is cut off before it would appear. The finding's \"each\" is unverifiable for the sixth token from the provided source, making the pairing claim an overclaim against what the source actually shows."
+          },
+          {
+            "verdict": "ENTAILED",
+            "claim": "\"VENDOR_TOKEN_RE enforces `<vendor>.v<N>.<TokenName>` form\"",
+            "evidence": "`export const VENDOR_TOKEN_RE = /^[a-z][a-z0-9_]*\\.v[0-9]+\\.[A-Z][A-Za-z0-9]*$/;` (src/tokens.ts) — the regex structurally mandates lowercase-snake vendor segment, dot-v-digits version, dot-PascalCase name, exactly as claimed."
+          },
+          {
+            "verdict": "ENTAILED",
+            "claim": "\"RESERVED_VENDOR_PREFIXES fences off `pulse`, `opensentience`, and `os`\"",
+            "evidence": "`const RESERVED_VENDOR_PREFIXES = new Set([\"pulse\", \"opensentience\", \"os\"]);` (src/tokens.ts) — the set contains precisely and only those three entries."
+          },
+          {
+            "verdict": "ENTAILED",
+            "claim": "\"A token like `scope.v1.SpatialClaim` passes that gate without touching PULSE source\"",
+            "evidence": "`export function isValidToken(token: string): boolean { return isCanonicalToken(token) || isVendorToken(token); }` (src/tokens.ts) — `scope` clears the reserved-prefix check, the regex matches, so the token is valid under the existing code with no modification needed."
+          },
+          {
+            "verdict": "ENTAILED",
+            "claim": "\"The PulseToken union types vendor tokens as `string & {}` — no data interface, no typed CloudEvents derivation\"",
+            "evidence": "`export type PulseToken = TokenKind | (string & {});` (src/tokens.ts) — vendor tokens are represented as an unbranded string; no corresponding `XxxData` interface or CloudEvents type-string derivation exists for the `string & {}` branch in any visible source."
+          },
+          {
+            "verdict": "NOT_ENTAILED",
+            "claim": "\"the conformance suite covers twelve tests built around the canonical six\"",
+            "evidence": "The twelve test titles are `T01 Schema validation, T02 Phase atomicity, T03 Phase idempotency, T04 Nesting waits, T05 κ-routing, T06 Quorum before commit, T07 Append-only audit, T08 Signal deduplication, T09 Substrate degradation, T10 Multi-tenant isolation, T11 trace_id propagation, T12 Schema/version monotonicity` (src/conformance.ts) — none of the twelve tests are about token enumeration or canonical-token identity; they test loop-manifest and runtime loop behavior. \"Built around the canonical six\" is an overclaim; the suite is built around loop lifecycle properties."
+          },
+          {
+            "verdict": "ENTAILED",
+            "claim": "\"There is no visible test body asking whether a vendor token survives a loop-boundary round-trip\"",
+            "evidence": "The complete test list in src/conformance.ts (T01–T12) contains no test for vendor-token round-trip, vendor-token schema acceptance, or cross-loop vendor-token propagation — absence is confirmed by the exhaustive enumeration in the file header and `runConformance` call array."
+          },
+          {
+            "verdict": "NOT_ENTAILED",
+            "claim": "\"canonical tokens get version management through `pulse_protocol_version` at the manifest level\"",
+            "evidence": "The field name `pulse_protocol_version` does not appear in any provided source file (tokens.ts, conformance.ts, README.md, THREE_PROTOCOL_STACK.md). The finding introduces this field name without any supporting citation from the visible corpus; it is unverifiable and constitutes an invented behavior from the provided source."
+          },
+          {
+            "verdict": "ENTAILED",
+            "claim": "\"vendor tokens encode version into their own name because the protocol isn't tracking it for them — differentiated treatment, not equivalent treatment\"",
+            "evidence": "`export const VENDOR_TOKEN_RE = /^[a-z][a-z0-9_]*\\.v[0-9]+\\.[A-Z][A-Za-z0-9]*$/;` versus no per-vendor version tracking elsewhere in tokens.ts or conformance.ts (src/tokens.ts) — the regex mandates in-name versioning exclusively for vendor tokens while no analogous per-token version field exists for canonical tokens in the visible source, confirming structurally differentiated handling."
+          }
+        ],
+        "counts": {
+          "ENTAILED": 7,
+          "NOT_ENTAILED": 3
+        },
+        "raw": "VERDICT: ENTAILED :: \"src/tokens.ts lists exactly six members in TOKEN_KINDS\" :: `export const TOKEN_KINDS: readonly TokenKind[] = [\"TopologyContext\",\"DeliberationResult\",\"OutcomeSignal\",\"ReputationUpdate\",\"ConsolidationEvent\",\"SurpriseSignal\"]` (src/tokens.ts) — counting the array members confirms exactly six.\n\nVERDICT: NOT_ENTAILED :: \"Each [of the six canonical tokens] gets a typed data interface in the same file\" :: The source shows `TopologyContextData`, `DeliberationResultData`, `OutcomeSignalData`, `ReputationUpdateData`, and a truncated `ConsolidationEventData` (src/tokens.ts) — `SurpriseSignalData` is absent from all visible source; the file is cut off before it would appear. The finding's \"each\" is unverifiable for the sixth token from the provided source, making the pairing claim an overclaim against what the source actually shows.\n\nVERDICT: ENTAILED :: \"VENDOR_TOKEN_RE enforces `<vendor>.v<N>.<TokenName>` form\" :: `export const VENDOR_TOKEN_RE = /^[a-z][a-z0-9_]*\\.v[0-9]+\\.[A-Z][A-Za-z0-9]*$/;` (src/tokens.ts) — the regex structurally mandates lowercase-snake vendor segment, dot-v-digits version, dot-PascalCase name, exactly as claimed.\n\nVERDICT: ENTAILED :: \"RESERVED_VENDOR_PREFIXES fences off `pulse`, `opensentience`, and `os`\" :: `const RESERVED_VENDOR_PREFIXES = new Set([\"pulse\", \"opensentience\", \"os\"]);` (src/tokens.ts) — the set contains precisely and only those three entries.\n\nVERDICT: ENTAILED :: \"A token like `scope.v1.SpatialClaim` passes that gate without touching PULSE source\" :: `export function isValidToken(token: string): boolean { return isCanonicalToken(token) || isVendorToken(token); }` (src/tokens.ts) — `scope` clears the reserved-prefix check, the regex matches, so the token is valid under the existing code with no modification needed.\n\nVERDICT: ENTAILED :: \"The PulseToken union types vendor tokens as `string & {}` — no data interface, no typed CloudEvents derivation\" :: `export type PulseToken = TokenKind | (string & {});` (src/tokens.ts) — vendor tokens are represented as an unbranded string; no corresponding `XxxData` interface or CloudEvents type-string derivation exists for the `string & {}` branch in any visible source.\n\nVERDICT: NOT_ENTAILED :: \"the conformance suite covers twelve tests built around the canonical six\" :: The twelve test titles are `T01 Schema validation, T02 Phase atomicity, T03 Phase idempotency, T04 Nesting waits, T05 κ-routing, T06 Quorum before commit, T07 Append-only audit, T08 Signal deduplication, T09 Substrate degradation, T10 Multi-tenant isolation, T11 trace_id propagation, T12 Schema/version monotonicity` (src/conformance.ts) — none of the twelve tests are about token enumeration or canonical-token identity; they test loop-manifest and runtime loop behavior. \"Built around the canonical six\" is an overclaim; the suite is built around loop lifecycle properties.\n\nVERDICT: ENTAILED :: \"There is no visible test body asking whether a vendor token survives a loop-boundary round-trip\" :: The complete test list in src/conformance.ts (T01–T12) contains no test for vendor-token round-trip, vendor-token schema acceptance, or cross-loop vendor-token propagation — absence is confirmed by the exhaustive enumeration in the file header and `runConformance` call array.\n\nVERDICT: NOT_ENTAILED :: \"canonical tokens get version management through `pulse_protocol_version` at the manifest level\" :: The field name `pulse_protocol_version` does not appear in any provided source file (tokens.ts, conformance.ts, README.md, THREE_PROTOCOL_STACK.md). The finding introduces this field name without any supporting citation from the visible corpus; it is unverifiable and constitutes an invented behavior from the provided source.\n\nVERDICT: ENTAILED :: \"vendor tokens encode version into their own name because the protocol isn't tracking it for them — differentiated treatment, not equivalent treatment\" :: `export const VENDOR_TOKEN_RE = /^[a-z][a-z0-9_]*\\.v[0-9]+\\.[A-Z][A-Za-z0-9]*$/;` versus no per-vendor version tracking elsewhere in tokens.ts or conformance.ts (src/tokens.ts) — the regex mandates in-name versioning exclusively for vendor tokens while no analogous per-token version field exists for canonical tokens in the visible source, confirming structurally differentiated handling."
+      },
+      "type": "finding",
+      "title": "PULSE defines exactly six canonical cross-loop tokens; downstream protocols may add vendor-namespaced tokens without forking, but those tokens receive no typed data contract and no conformance coverage",
+      "claim": "PULSE canonically defines six cross-loop tokens and provides a fork-free vendor extension mechanism, but vendor tokens are structurally differentiated from canonical tokens: they carry no typed data interface and no conformance test covers their behavior.",
+      "body": "The token count is settled. `src/tokens.ts` declares `TOKEN_KINDS` as a readonly array of exactly six members: `TopologyContext`, `DeliberationResult`, `OutcomeSignal`, `ReputationUpdate`, `ConsolidationEvent`, and `SurpriseSignal`. This is the canonical set.\n\nThe vendor extension mechanism is real and structurally disciplined. `VENDOR_TOKEN_RE` enforces the form `<vendor>.v<N>.<TokenName>` — lowercase-snake vendor segment, dot-v-digits version, dot-PascalCase token name. `RESERVED_VENDOR_PREFIXES` fences off `pulse`, `opensentience`, and `os`. `isValidToken` returns true for any token that matches the regex and clears the reserved-prefix check. A token such as `scope.v1.SpatialClaim` passes this gate under the existing code with no modification to PULSE source — the fork-free claim is accurate.\n\nThe treatment is nonetheless structurally differentiated, not equivalent. The `PulseToken` type union represents vendor tokens as `string & {}` — an unbranded string with no accompanying `XxxData` interface and no typed CloudEvents derivation. Canonical tokens each have a named data interface in `src/tokens.ts`; no such interface exists for the `string & {}` branch. Additionally, the twelve conformance tests (T01 Schema validation through T12 Schema/version monotonicity) cover loop-manifest and runtime loop-lifecycle properties; none of them tests vendor-token schema acceptance or cross-loop vendor-token propagation. Vendor tokens encode version into their own name via the regex-mandated `v<N>` segment, precisely because the protocol performs no per-token version tracking for them — a structural asymmetry confirmed by the absence of any analogous per-token version field for canonical tokens in the visible source. Passing `isValidToken` is the ceiling of what PULSE guarantees for a vendor token, not the floor of a conformance-backed contract.",
+      "cites": [
+        {
+          "file": "src/tokens.ts",
+          "quote": "export const TOKEN_KINDS: readonly TokenKind[] = ["
+        }
+      ],
+      "verify": {
+        "checked": [
+          {
+            "file": "src/tokens.ts",
+            "quote": "export const TOKEN_KINDS: readonly TokenKind[] = [",
+            "inCorpus": true,
+            "verified": true,
+            "reason": "literal match"
+          }
+        ],
+        "total": 1,
+        "verified": 1,
+        "verify_rate": 1,
+        "grounded": true
+      }
+    },
+    {
+      "tid": "p1",
+      "question": "How many distinct phase KINDS does the PULSE loop-manifest schema allow, and what exactly are they?",
+      "synthesizedBy": "minimalist",
+      "falsifier": {
+        "verdicts": [
+          {
+            "verdict": "ENTAILED",
+            "claim": "The schema defines exactly six legal phase kinds — retrieve, route, act, learn, consolidate, custom — in a closed enum",
+            "evidence": "schemas/pulse-loop-manifest.v0.1.json: `\"enum\": [\"retrieve\", \"route\", \"act\", \"learn\", \"consolidate\", \"custom\"]` — the six values are literally enumerated in the source before the truncation point."
+          },
+          {
+            "verdict": "ENTAILED",
+            "claim": "\"additionalProperties\": false on the phase $def makes the enum a closed contract",
+            "evidence": "schemas/pulse-loop-manifest.v0.1.json: `\"phase\": { \"type\": \"object\", \"required\": [\"id\", \"kind\"], \"additionalProperties\": false, ...}` — any property outside the defined set, including any kind value outside the enum, is schema-illegal."
+          },
+          {
+            "verdict": "NOT_ENTAILED",
+            "claim": "retrieve and act are the only two the spec **structurally mandates**",
+            "evidence": "schemas/pulse-loop-manifest.v0.1.json: `\"description\": \"Ordered list of phases. Must include at least one retrieve and one act.\"` — a JSON Schema `description` field is documentation metadata, not a validation keyword. The schema shows only `\"minItems\": 2` as the actual enforcing keyword on the phases array; there is no `contains`, `if/then`, or other structural validator requiring any phase with `kind: \"retrieve\"` or `kind: \"act\"`. A manifest with two phases both of `kind: \"custom\"` would pass AJV schema validation and therefore pass T01, falsifying the claim that the mandate is \"structural.\""
+          },
+          {
+            "verdict": "NOT_ENTAILED",
+            "claim": "all six are \"equally load-bearing at schema-validation time via T01\"",
+            "evidence": "schemas/pulse-loop-manifest.v0.1.json: `\"description\": \"Ordered list of phases. Must include at least one retrieve and one act.\"` — the description creates an apparent asymmetry (retrieve/act singled out), but since that description is not a validation keyword, the claim collapses into a tautology with the previous overclaim: if retrieve/act are not enforced by schema, all six are equally permissive; if they are enforced (somehow), all six are not equal. The finding cannot have it both ways, and neither position is cleanly settled by the visible source without seeing the AJV invocation code."
+          },
+          {
+            "verdict": "ENTAILED",
+            "claim": "T01 returns fail when the schema result is invalid",
+            "evidence": "src/conformance.ts: `status: schemaResult.valid ? \"pass\" : \"fail\"` — T01 delegates entirely to the external `ValidationResult`; an out-of-enum kind value causes AJV to set `valid: false`, producing `status: \"fail\"`."
+          },
+          {
+            "verdict": "ENTAILED",
+            "claim": "a T01 fail immediately propagates to overall: \"fail\"",
+            "evidence": "src/conformance.ts: `const anyFail = results.some((r) => r.status === \"fail\"); const overall … = anyFail ? \"fail\" : anyPending ? \"pending\" : \"pass\";` — a single fail anywhere in the results array short-circuits the overall verdict."
+          },
+          {
+            "verdict": "NOT_ENTAILED",
+            "claim": "T02 through T11 add no kind-specific behavioral verification",
+            "evidence": "src/conformance.ts (truncated at): `// T02 — Phase atomicity. Manifest must declare on_failur` — the T02 body is visibly cut off mid-sentence with \"Manifest must declare on_failur[e…]\", meaning T02 performs at least some manifest-level check (not purely runtime); the source is truncated before we can see what that check is or whether it touches phase kinds. Claiming T02–T11 add \"no kind-specific behavioral verification\" requires reading bodies that are not present in the provided corpus; this is an overclaim from incomplete evidence, not a conclusion the visible source entails."
+          }
+        ],
+        "counts": {
+          "ENTAILED": 4,
+          "NOT_ENTAILED": 3
+        },
+        "raw": "VERDICT: ENTAILED :: The schema defines exactly six legal phase kinds — retrieve, route, act, learn, consolidate, custom — in a closed enum :: schemas/pulse-loop-manifest.v0.1.json: `\"enum\": [\"retrieve\", \"route\", \"act\", \"learn\", \"consolidate\", \"custom\"]` — the six values are literally enumerated in the source before the truncation point.\n\nVERDICT: ENTAILED :: \"additionalProperties\": false on the phase $def makes the enum a closed contract :: schemas/pulse-loop-manifest.v0.1.json: `\"phase\": { \"type\": \"object\", \"required\": [\"id\", \"kind\"], \"additionalProperties\": false, ...}` — any property outside the defined set, including any kind value outside the enum, is schema-illegal.\n\nVERDICT: NOT_ENTAILED :: retrieve and act are the only two the spec **structurally mandates** :: schemas/pulse-loop-manifest.v0.1.json: `\"description\": \"Ordered list of phases. Must include at least one retrieve and one act.\"` — a JSON Schema `description` field is documentation metadata, not a validation keyword. The schema shows only `\"minItems\": 2` as the actual enforcing keyword on the phases array; there is no `contains`, `if/then`, or other structural validator requiring any phase with `kind: \"retrieve\"` or `kind: \"act\"`. A manifest with two phases both of `kind: \"custom\"` would pass AJV schema validation and therefore pass T01, falsifying the claim that the mandate is \"structural.\"\n\nVERDICT: NOT_ENTAILED :: all six are \"equally load-bearing at schema-validation time via T01\" :: schemas/pulse-loop-manifest.v0.1.json: `\"description\": \"Ordered list of phases. Must include at least one retrieve and one act.\"` — the description creates an apparent asymmetry (retrieve/act singled out), but since that description is not a validation keyword, the claim collapses into a tautology with the previous overclaim: if retrieve/act are not enforced by schema, all six are equally permissive; if they are enforced (somehow), all six are not equal. The finding cannot have it both ways, and neither position is cleanly settled by the visible source without seeing the AJV invocation code.\n\nVERDICT: ENTAILED :: T01 returns fail when the schema result is invalid :: src/conformance.ts: `status: schemaResult.valid ? \"pass\" : \"fail\"` — T01 delegates entirely to the external `ValidationResult`; an out-of-enum kind value causes AJV to set `valid: false`, producing `status: \"fail\"`.\n\nVERDICT: ENTAILED :: a T01 fail immediately propagates to overall: \"fail\" :: src/conformance.ts: `const anyFail = results.some((r) => r.status === \"fail\"); const overall … = anyFail ? \"fail\" : anyPending ? \"pending\" : \"pass\";` — a single fail anywhere in the results array short-circuits the overall verdict.\n\nVERDICT: NOT_ENTAILED :: T02 through T11 add no kind-specific behavioral verification :: src/conformance.ts (truncated at): `// T02 — Phase atomicity. Manifest must declare on_failur` — the T02 body is visibly cut off mid-sentence with \"Manifest must declare on_failur[e…]\", meaning T02 performs at least some manifest-level check (not purely runtime); the source is truncated before we can see what that check is or whether it touches phase kinds. Claiming T02–T11 add \"no kind-specific behavioral verification\" requires reading bodies that are not present in the provided corpus; this is an overclaim from incomplete evidence, not a conclusion the visible source entails.\n\nVERDICT: HEDGE_UNWARRANTED :: the finding says \"Schematist's caution about the truncation point is warranted as method but the enum is visible in the source before truncation\" — schemas/pulse-loop-manifest.v0.1.json: `\"enum\": [\"retrieve\", \"route\", \"act\", \"learn\", \"consolidate\", \"custom\"]` — the enum is fully visible before any truncation; the hedge about truncation affecting enum completeness is not warranted for the enum itself, though it remains relevant for T02–T11 test bodies as noted above."
+      },
+      "type": "finding",
+      "title": "PULSE loop-manifest schema allows exactly six phase kinds in a closed enum; minItems: 2 is the sole schema-enforced structural constraint on phases",
+      "claim": "The PULSE schema defines exactly six legal phase kinds — retrieve, route, act, learn, consolidate, custom — in a closed enum backed by additionalProperties: false; the phases array is structurally constrained only by minItems: 2, and a manifest with an out-of-enum kind value fails T01 which immediately propagates to overall: \"fail\".",
+      "body": "Two questions are settled by the visible source: what the enum contains, and what the schema actually enforces.\n\nOn enum contents: the kind field in the phase $def carries a literal six-value enum — \"retrieve\", \"route\", \"act\", \"learn\", \"consolidate\", \"custom\". The phase object is declared with \"additionalProperties\": false, making this a closed contract. Any kind value outside these six is schema-illegal and will cause AJV to return valid: false.\n\nOn structural enforcement: the phases array carries one structural validation keyword — \"minItems\": 2. The accompanying description field reads \"Must include at least one retrieve and one act,\" but a JSON Schema description is documentation metadata, not a validation keyword. No contains, if/then, or other structural validator in the visible source enforces the presence of a retrieve-kinded or act-kinded phase. A manifest with two phases both of kind: \"custom\" satisfies minItems: 2 and passes all visible schema constraints. The description is an authorial intent statement, not a schema-enforced mandate.\n\nOn T01 enforcement: T01 delegates entirely to the external ValidationResult. An out-of-enum kind value causes AJV to set valid: false, which T01 converts to status: \"fail\". That fail immediately short-circuits the overall verdict to \"fail\" via the anyFail check. What T02–T11 individually verify cannot be confirmed from the truncated source and no claims about their behavior are made here.",
+      "cites": [
+        {
+          "file": "schemas/pulse-loop-manifest.v0.1.json",
+          "quote": "\\\"enum\\\": [\\\"retrieve\\\", \\\"route\\\", \\\"act\\\", \\\"learn\\\", \\\"consolidate\\\", \\\"custom\\\"]"
+        }
+      ],
+      "verify": {
+        "checked": [
+          {
+            "file": "schemas/pulse-loop-manifest.v0.1.json",
+            "quote": "\\\"enum\\\": [\\\"retrieve\\\", \\\"route\\\", \\\"act\\\", \\\"learn\\\", \\\"consolidate\\\", \\\"custom\\\"]",
+            "inCorpus": true,
+            "verified": false,
+            "reason": "quote not found in file"
+          }
+        ],
+        "total": 1,
+        "verified": 0,
+        "verify_rate": 0,
+        "grounded": false
+      }
+    },
+    {
+      "tid": "p3",
+      "question": "Under what condition does the conformance suite FAIL a manifest for κ-routing (T05) — is the route phase always required?",
+      "synthesizedBy": "conformance",
+      "falsifier": {
+        "verdicts": [
+          {
+            "verdict": "NOT_ENTAILED",
+            "claim": "\"the schema enforces only retrieve+act presence\"",
+            "evidence": "schemas/pulse-loop-manifest.v0.1.json — `\"description\": \"Ordered list of phases. Must include at least one retrieve and one act.\"` — This is a JSON Schema `description` annotation, which is non-normative; JSON Schema draft 2020-12 and AJV do not evaluate `description` strings as constraints. The only operative constraint on `phases` in the visible schema is `\"minItems\": 2`. No `contains` keyword or other enforcing keyword mandates retrieve or act kinds, so T01 would not catch their absence either, and the entire redundancy argument built on this premise collapses."
+          },
+          {
+            "verdict": "ENTAILED",
+            "claim": "\"route is in the kind enum as an option, not a mandate\"",
+            "evidence": "schemas/pulse-loop-manifest.v0.1.json — `\"enum\": [\"retrieve\", \"route\", \"act\", \"learn\", \"consolidate\", \"custom\"]` — route appears as one of six permissible values with no separate `contains` or `if/then` constraint mandating its presence anywhere in the schema."
+          },
+          {
+            "verdict": "NOT_ENTAILED",
+            "claim": "\"if route were always required, T01 would catch its absence and T05 would be redundant on that axis\"",
+            "evidence": "schemas/pulse-loop-manifest.v0.1.json — `\"minItems\": 2` with no `contains` keyword — because the schema's actual enforcement for phase-kind presence is absent (the description is non-normative), T01 does not catch even retrieve or act absence as a schema violation; the redundancy argument therefore has no valid anchor in T01's actual AJV-evaluated power."
+          },
+          {
+            "verdict": "ENTAILED",
+            "claim": "\"t05KappaRouting(manifest) — manifest only, no pre-computed schemaResult\"",
+            "evidence": "conformance.ts — `t05KappaRouting(manifest),` in the `results` dispatch array, contrasted with `t01Schema(schemaResult)` which explicitly receives the pre-computed validation result — the parameter difference is real and directly shown."
+          },
+          {
+            "verdict": "ENTAILED",
+            "claim": "\"T05 is classified as (runtime+manifest), distinguishing it from pure-runtime tests like T02 Phase atomicity (runtime) and T08 Signal deduplication (runtime)\"",
+            "evidence": "conformance.ts — `T05  κ-routing (runtime+manifest)`, `T02  Phase atomicity (runtime)`, `T08  Signal deduplication (runtime)` all appear verbatim in the block comment, confirming the three-way distinction."
+          },
+          {
+            "verdict": "ENTAILED",
+            "claim": "\"Pure-runtime tests pend on every static manifest\"",
+            "evidence": "conformance.ts — `\"return \\`pending\\` for tests that cannot be verified from the manifest alone\"` in the module-level docstring — explicitly states v0.1 returns pending for tests requiring a running inner loop."
+          },
+          {
+            "verdict": "ENTAILED",
+            "claim": "\"the t05KappaRouting() body is not present in the provided source\"",
+            "evidence": "conformance.ts — `…[truncated]` appears after the T02 comment block, before any T05 function body could be shown — the body is genuinely absent from the provided excerpt."
+          },
+          {
+            "verdict": "NOT_ENTAILED",
+            "claim": "\"route phase absence alone is not that violation because the schema already has nothing to say against it\"",
+            "evidence": "schemas/pulse-loop-manifest.v0.1.json — `\"minItems\": 2` / description annotation only — the schema's silence on route does not entail that T05 cannot independently fail on route absence; T05 is a conformance test, not a schema validator, and can impose requirements beyond the schema. The finding conflates schema-enforced constraints with conformance-suite requirements. That T05 *could* check for route is not excluded by the schema being silent on it."
+          },
+          {
+            "verdict": "NOT_ENTAILED",
+            "claim": "\"The grounded stopping point is: T05's fail, if triggered statically, is a cross-field consistency violation between manifest declarations\"",
+            "evidence": "conformance.ts — the body of `t05KappaRouting` is truncated with `…[truncated]` — the finding characterises the *nature* of the fail condition as \"cross-field consistency\" rather than a simple presence check, but since the function body is absent no source line settles whether it is cross-field or a simple phase-kind presence check; stating \"cross-field\" as the grounded stopping point is itself an inference the source cannot confirm."
+          }
+        ],
+        "counts": {
+          "NOT_ENTAILED": 4,
+          "ENTAILED": 5
+        },
+        "raw": "VERDICT: NOT_ENTAILED :: \"the schema enforces only retrieve+act presence\" :: schemas/pulse-loop-manifest.v0.1.json — `\"description\": \"Ordered list of phases. Must include at least one retrieve and one act.\"` — This is a JSON Schema `description` annotation, which is non-normative; JSON Schema draft 2020-12 and AJV do not evaluate `description` strings as constraints. The only operative constraint on `phases` in the visible schema is `\"minItems\": 2`. No `contains` keyword or other enforcing keyword mandates retrieve or act kinds, so T01 would not catch their absence either, and the entire redundancy argument built on this premise collapses.\n\nVERDICT: ENTAILED :: \"route is in the kind enum as an option, not a mandate\" :: schemas/pulse-loop-manifest.v0.1.json — `\"enum\": [\"retrieve\", \"route\", \"act\", \"learn\", \"consolidate\", \"custom\"]` — route appears as one of six permissible values with no separate `contains` or `if/then` constraint mandating its presence anywhere in the schema.\n\nVERDICT: NOT_ENTAILED :: \"if route were always required, T01 would catch its absence and T05 would be redundant on that axis\" :: schemas/pulse-loop-manifest.v0.1.json — `\"minItems\": 2` with no `contains` keyword — because the schema's actual enforcement for phase-kind presence is absent (the description is non-normative), T01 does not catch even retrieve or act absence as a schema violation; the redundancy argument therefore has no valid anchor in T01's actual AJV-evaluated power.\n\nVERDICT: ENTAILED :: \"t05KappaRouting(manifest) — manifest only, no pre-computed schemaResult\" :: conformance.ts — `t05KappaRouting(manifest),` in the `results` dispatch array, contrasted with `t01Schema(schemaResult)` which explicitly receives the pre-computed validation result — the parameter difference is real and directly shown.\n\nVERDICT: ENTAILED :: \"T05 is classified as (runtime+manifest), distinguishing it from pure-runtime tests like T02 Phase atomicity (runtime) and T08 Signal deduplication (runtime)\" :: conformance.ts — `T05  κ-routing (runtime+manifest)`, `T02  Phase atomicity (runtime)`, `T08  Signal deduplication (runtime)` all appear verbatim in the block comment, confirming the three-way distinction.\n\nVERDICT: ENTAILED :: \"Pure-runtime tests pend on every static manifest\" :: conformance.ts — `\"return \\`pending\\` for tests that cannot be verified from the manifest alone\"` in the module-level docstring — explicitly states v0.1 returns pending for tests requiring a running inner loop.\n\nVERDICT: ENTAILED :: \"the t05KappaRouting() body is not present in the provided source\" :: conformance.ts — `…[truncated]` appears after the T02 comment block, before any T05 function body could be shown — the body is genuinely absent from the provided excerpt.\n\nVERDICT: NOT_ENTAILED :: \"route phase absence alone is not that violation because the schema already has nothing to say against it\" :: schemas/pulse-loop-manifest.v0.1.json — `\"minItems\": 2` / description annotation only — the schema's silence on route does not entail that T05 cannot independently fail on route absence; T05 is a conformance test, not a schema validator, and can impose requirements beyond the schema. The finding conflates schema-enforced constraints with conformance-suite requirements. That T05 *could* check for route is not excluded by the schema being silent on it.\n\nVERDICT: NOT_ENTAILED :: \"The grounded stopping point is: T05's fail, if triggered statically, is a cross-field consistency violation between manifest declarations\" :: conformance.ts — the body of `t05KappaRouting` is truncated with `…[truncated]` — the finding characterises the *nature* of the fail condition as \"cross-field consistency\" rather than a simple presence check, but since the function body is absent no source line settles whether it is cross-field or a simple phase-kind presence check; stating \"cross-field\" as the grounded stopping point is itself an inference the source cannot confirm."
+      },
+      "type": "finding",
+      "title": "T05 κ-routing fails on a manifest-level check derivable from declared fields alone, but the exact fail condition is unresolvable from the truncated source",
+      "claim": "T05 is capable of a non-pending result on a static manifest and operates on manifest fields alone, but whether a missing `route` phase is its fail condition cannot be established because the `t05KappaRouting()` body is absent from the provided source.",
+      "body": "Three auditor-confirmed points survive and jointly define the defensible boundary.\n\nFirst, `route` is not mandated by the schema. The `pulse-loop-manifest.v0.1.json` phase `kind` property lists `route` as one of six permissible enum values with no separate `contains`, `if/then`, or other enforcing keyword requiring its presence. Schema silence on `route` absence is real — but it does not settle what the conformance suite independently requires, because T05 is a conformance test, not a schema validator, and can impose requirements the schema does not.\n\nSecond, `t05KappaRouting` receives only the manifest object. The `runConformance` dispatch array shows `t05KappaRouting(manifest)` alongside `t01Schema(schemaResult)`, which explicitly receives the pre-computed validation result. Whatever T05 checks, it reads manifest fields directly at call time with no external state. Any fail condition it can produce is derivable from the manifest object alone.\n\nThird, the test is classified `(runtime+manifest)`, distinguishing it from pure-runtime tests such as `T02 Phase atomicity (runtime)` and `T08 Signal deduplication (runtime)`. The module docstring states v0.1 returns `pending` for tests that cannot be verified from the manifest alone. Therefore T05 — unlike T02 or T08 — is capable of a non-pending result on a static manifest. A manifest-level branch exists and can fire.\n\nWhat that branch checks is not resolvable: the body of `t05KappaRouting` is truncated in the provided source. The question \"is the `route` phase always required for T05 to pass?\" cannot be answered yes or no from these files. The auditor confirmed the function body is genuinely absent. No inference about cross-field consistency versus simple presence check survives without it.",
+      "cites": [
+        {
+          "file": "schemas/pulse-loop-manifest.v0.1.json",
+          "quote": "\\\"enum\\\": [\\\"retrieve\\\", \\\"route\\\", \\\"act\\\", \\\"learn\\\", \\\"consolidate\\\", \\\"custom\\\"]"
+        }
+      ],
+      "verify": {
+        "checked": [
+          {
+            "file": "schemas/pulse-loop-manifest.v0.1.json",
+            "quote": "\\\"enum\\\": [\\\"retrieve\\\", \\\"route\\\", \\\"act\\\", \\\"learn\\\", \\\"consolidate\\\", \\\"custom\\\"]",
+            "inCorpus": true,
+            "verified": false,
+            "reason": "quote not found in file"
+          }
+        ],
+        "total": 1,
+        "verified": 0,
+        "verify_rate": 0,
+        "grounded": false
+      }
+    },
+    {
+      "tid": "p4",
+      "question": "Which fields are REQUIRED at the top level of a loop manifest, and is `connections` one of them?",
+      "synthesizedBy": "schematist",
+      "falsifier": {
+        "verdicts": [
+          {
+            "verdict": "ENTAILED",
+            "claim": "\"The top-level `required` array contains exactly eight fields\"",
+            "evidence": "schemas/pulse-loop-manifest.v0.1.json: `\"required\": [\"pulse_protocol_version\",\"loop_id\",\"version\",\"phases\",\"closure\",\"cadence\",\"substrates\",\"invariants\"]` — counting the array members yields exactly eight; the claim is arithmetically correct."
+          },
+          {
+            "verdict": "ENTAILED",
+            "claim": "\"`connections` is not among them [the required fields]\"",
+            "evidence": "schemas/pulse-loop-manifest.v0.1.json: `\"connections\": {\"type\": \"array\",\"items\": {\"$ref\": \"#/$defs/connection\"}}` appears only in `properties`, not in `required`; the schema source unambiguously excludes it from the required set."
+          },
+          {
+            "verdict": "ENTAILED",
+            "claim": "\"any connections element declared is immediately schema-enforced\"",
+            "evidence": "schemas/pulse-loop-manifest.v0.1.json: `\"additionalProperties\": false` is set at the top level, and `connections` is defined in `properties` with `{\"$ref\": \"#/$defs/connection\"}`; under JSON Schema draft 2020-12, when `additionalProperties: false` is in effect and a property is listed in `properties`, any value supplied for that key is fully validated against the referenced schema, so enforcement is automatic on declaration."
+          },
+          {
+            "verdict": "NOT_ENTAILED",
+            "claim": "\"the only tests the visible source definitively grounds as manifest-only are T01 and T12\"",
+            "evidence": "src/conformance.ts: `// T02 — Phase atomicity. Manifest must declare on_failur` — this truncated-but-visible function-body comment for T02 explicitly states a manifest-level obligation (\"Manifest must declare on_failur[e]…\"), establishing that T02 also inspects the manifest, not runtime alone; therefore T02 is also manifest-grounded and the claim that ONLY T01 and T12 are is falsified by the visible source fragment."
+          },
+          {
+            "verdict": "HEDGE_UNWARRANTED",
+            "claim": "\"the behavior of all others [is] unknowable without the truncated function bodies\"",
+            "evidence": "src/conformance.ts: `\"pending\" for tests that cannot be verified from the manifest alone` — the file-level doc comment unambiguously settles the policy: every test that requires a running loop returns `pending`, not an arbitrary or implementation-specific result; the overall behavior of the non-manifest tests is therefore settled by the visible source without needing the truncated function bodies."
+          },
+          {
+            "verdict": "NOT_ENTAILED",
+            "claim": "\"the phases description 'Must include at least one retrieve and one act' is schema-enforced\" (implicit in citing that quote as part of schema enforcement)",
+            "evidence": "schemas/pulse-loop-manifest.v0.1.json: `\"phases\": {\"type\": \"array\",\"minItems\": 2,\"items\": {\"$ref\": \"#/$defs/phase\"},\"description\": \"Ordered list of phases. Must include at least one retrieve and one act.\"}` — the schema enforces only `minItems: 2` and item shape; there is no `contains` constraint enforcing the presence of a `retrieve`-kinded or `act`-kinded phase, so the \"must include\" language in `description` is advisory prose, not a machine-enforced schema constraint."
+          }
+        ],
+        "counts": {
+          "ENTAILED": 3,
+          "NOT_ENTAILED": 2,
+          "HEDGE_UNWARRANTED": 1
+        },
+        "raw": "VERDICT: ENTAILED :: \"The top-level `required` array contains exactly eight fields\" :: schemas/pulse-loop-manifest.v0.1.json: `\"required\": [\"pulse_protocol_version\",\"loop_id\",\"version\",\"phases\",\"closure\",\"cadence\",\"substrates\",\"invariants\"]` — counting the array members yields exactly eight; the claim is arithmetically correct.\n\nVERDICT: ENTAILED :: \"`connections` is not among them [the required fields]\" :: schemas/pulse-loop-manifest.v0.1.json: `\"connections\": {\"type\": \"array\",\"items\": {\"$ref\": \"#/$defs/connection\"}}` appears only in `properties`, not in `required`; the schema source unambiguously excludes it from the required set.\n\nVERDICT: ENTAILED :: \"any connections element declared is immediately schema-enforced\" :: schemas/pulse-loop-manifest.v0.1.json: `\"additionalProperties\": false` is set at the top level, and `connections` is defined in `properties` with `{\"$ref\": \"#/$defs/connection\"}`; under JSON Schema draft 2020-12, when `additionalProperties: false` is in effect and a property is listed in `properties`, any value supplied for that key is fully validated against the referenced schema, so enforcement is automatic on declaration.\n\nVERDICT: NOT_ENTAILED :: \"the only tests the visible source definitively grounds as manifest-only are T01 and T12\" :: src/conformance.ts: `// T02 — Phase atomicity. Manifest must declare on_failur` — this truncated-but-visible function-body comment for T02 explicitly states a manifest-level obligation (\"Manifest must declare on_failur[e]…\"), establishing that T02 also inspects the manifest, not runtime alone; therefore T02 is also manifest-grounded and the claim that ONLY T01 and T12 are is falsified by the visible source fragment.\n\nVERDICT: HEDGE_UNWARRANTED :: \"the behavior of all others [is] unknowable without the truncated function bodies\" :: src/conformance.ts: `\"pending\" for tests that cannot be verified from the manifest alone` — the file-level doc comment unambiguously settles the policy: every test that requires a running loop returns `pending`, not an arbitrary or implementation-specific result; the overall behavior of the non-manifest tests is therefore settled by the visible source without needing the truncated function bodies.\n\nVERDICT: NOT_ENTAILED :: \"the phases description 'Must include at least one retrieve and one act' is schema-enforced\" (implicit in citing that quote as part of schema enforcement) :: schemas/pulse-loop-manifest.v0.1.json: `\"phases\": {\"type\": \"array\",\"minItems\": 2,\"items\": {\"$ref\": \"#/$defs/phase\"},\"description\": \"Ordered list of phases. Must include at least one retrieve and one act.\"}` — the schema enforces only `minItems: 2` and item shape; there is no `contains` constraint enforcing the presence of a `retrieve`-kinded or `act`-kinded phase, so the \"must include\" language in `description` is advisory prose, not a machine-enforced schema constraint."
+      },
+      "type": "finding",
+      "title": "PULSE loop manifests require exactly eight top-level fields; `connections` is optional but schema-enforced when declared; all runtime-dependent tests return `pending` by documented policy",
+      "claim": "The top-level `required` array names exactly eight fields (`pulse_protocol_version`, `loop_id`, `version`, `phases`, `closure`, `cadence`, `substrates`, `invariants`); `connections` is absent from that array and therefore optional; when declared it is fully schema-enforced; and tests that cannot be verified from the manifest alone return `pending` — a policy the file-level comment settles explicitly, without needing truncated function bodies.",
+      "body": "The required-fields question is settled directly by the schema. The `required` array in `schemas/pulse-loop-manifest.v0.1.json` names exactly eight entries: `pulse_protocol_version`, `loop_id`, `version`, `phases`, `closure`, `cadence`, `substrates`, and `invariants`. Every other top-level property — including `connections`, `nesting`, `loop_name`, `owner`, `workspace_scope`, `description`, and `telemetry` — appears only in `properties` and is therefore optional.\n\n`connections` is not required, but it is not schema-free either. The schema sets `\"additionalProperties\": false` at the top level and defines `connections` in `properties` as `{\"type\": \"array\", \"items\": {\"$ref\": \"#/$defs/connection\"}}`. Under JSON Schema draft 2020-12, this combination means that any value supplied for `connections` is automatically validated against the `connection` definition — enforcement is immediate on declaration, not deferred.\n\nOn the conformance suite: the file-level comment in `src/conformance.ts` commits to a clear policy — tests that require a running loop return `pending`; they do not produce arbitrary or implementation-specific results. This policy is stated in the visible source and settles the behavioral question without recourse to the truncated function bodies. Additionally, the visible fragment for T02 contains the comment \"Manifest must declare on_failur[e]…\", confirming that T02 also performs a manifest-level inspection — it is not runtime-only. T01 (schema validation) and T12 (version monotonicity) are manifest-grounded, and T02 joins them; the remaining runtime-dependent tests return `pending` per the documented policy.",
+      "cites": [
+        {
+          "file": "schemas/pulse-loop-manifest.v0.1.json",
+          "quote": "`\"required\": [\"pulse_protocol_version\",\"loop_id\",\"version\",\"phases\",\"closure\",\"cadence\",\"substrates\",\"invariants\"]`"
+        }
+      ],
+      "verify": {
+        "checked": [
+          {
+            "file": "schemas/pulse-loop-manifest.v0.1.json",
+            "quote": "`\"required\": [\"pulse_protocol_version\",\"loop_id\",\"version\",\"phases\",\"closure\",\"cadence\",\"substrates\",\"invariants\"]`",
+            "inCorpus": true,
+            "verified": false,
+            "reason": "quote not found in file"
+          }
+        ],
+        "total": 1,
+        "verified": 0,
+        "verify_rate": 0,
+        "grounded": false
+      }
+    }
+  ]
+}

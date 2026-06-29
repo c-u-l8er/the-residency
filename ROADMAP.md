@@ -123,6 +123,14 @@ gate0:
   #   over-deny (falsifier denied the real temporal/supervise rung) -> 0.5. See EVIDENCE/gate0_2.md.
   #   CAVEAT: n=4 not 6 (b3+l2 harness-timeout, resumable); still 1 corpus. Promote H3 only after
   #   b3+l2 close AND a 3rd corpus reproduces board_lift>0. Single critic stays the deployed default.
+  # RUN 1.3 (Gate 0.3, 3rd corpus = PULSE @94eb994, MESSIER: TS+JSON-schema+docs; full pipeline, n=4):
+  #   board_lift(H3 vs single) = 0.875 - 0.875 = 0.0 → TIE, the Gate 0.2 flip does NOT generalize.
+  #   What DID replicate: H3 repair (board H1+H2 0.75 -> board+H3 0.875 = +0.125, same as 0.2) AND the
+  #   H1+H2 board LOSS (-0.125, like Gate 0/0.1). Net: board+H3 ~= single, not > single. See gate0_3.md.
+  #   p3 methodology finding: SRC_CAP=2600 truncated the t05KappaRouting body (char 4922) out of the
+  #   window → single FABRICATED confidently, board+H3 retreated honestly ("insufficient evidence").
+  #   VERDICT after 2 corpora: keep the SINGLE CRITIC as deployed default; H3 is a board-repair, not a
+  #   board-advantage. Before a 4th corpus: FIX SRC_CAP truncation + use a more discriminating thread set.
 gate1:
   finding_precision:  ">= 0.75   # findings that survive human verification"
   citation_accuracy:  ">= 0.95   # references that check out as stated"
