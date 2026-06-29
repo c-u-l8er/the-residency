@@ -108,6 +108,14 @@ gate0:
   # RUN 1 (box-and-box @353d1679, n=6): board_lift = -0.33 → FAIL. board 0.42 vs single 0.75.
   # Board lost to confident-wrong fabrication (herding); single critic committed & fabricated less.
   # Redesign deliberation before hardening. See EVIDENCE/gate0.md. n small (1 corpus); calibrate over 3-4.
+  # RUN 1.1 (Gate 0.1, +compose.mjs, H1 grounding gate + H2 extractive synth + A' k=3 sampling):
+  #   board_lift (precision) = -0.25 → still FAIL (improved from -0.33, NOT flipped).
+  #   The falsifiable bet ("H1+H2 alone flip board_lift>=0") is FALSIFIED. See EVIDENCE/gate0_1.md.
+  #   HEADLINE: two metrics DIVERGE. citation_verify_rate (mechanical) board 0.904 (BEST, +0.20) but
+  #   finding_precision (correctness) board 0.583 (WORST, -0.25): H1 verifies a quote EXISTS, not that
+  #   it ENTAILS the claim. k-sampling (A') added nothing (single==sampled, both 0.833).
+  #   Next lever is H3 (stance-free falsifier/entailment seat) + H6 (penalize hedging), NOT more H1.
+  #   Standing recommendation: default to the single critic until an H3 re-run flips board_lift>0.
 gate1:
   finding_precision:  ">= 0.75   # findings that survive human verification"
   citation_accuracy:  ">= 0.95   # references that check out as stated"
