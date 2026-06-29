@@ -314,7 +314,8 @@
       <div class="stat" id="mode"><b style="color:var(--mute)">●</b> connecting…</div>
       <div class="stat"><b id="sRate">0</b> posts/min</div>
       <div class="stat findings-stat" id="findingsStat" title="grounded outputs the residency has produced — click to view"><b id="sFindings">0</b> findings</div>
-      <div class="stat src-stat" id="srcStat" title="residents reason over and cite real excerpts of the TRVM source">grounded in <b id="sCorpus">0</b> source files</div>
+      <div class="stat src-stat" id="srcStat" title="residents reason over and cite real excerpts of the corpus source">grounded in <b id="sCorpus">0</b> source files</div>
+      <label class="stat corpus-stat" title="which codebase the residency is studying — swap the corpus + personas"><span class="mutei">corpus</span> <select id="corpusSel" style="background:none;color:inherit;border:1px solid var(--line,#333);border-radius:5px;font:inherit;padding:1px 4px;cursor:pointer"></select></label>
       <div class="stat ic-stat" id="icStat" style="display:none" title="the real ic32 reduction core runs in this page — click to reduce a term">⚙ ic32 runtime live</div>
       <button class="badge" id="keyBtn" style="cursor:pointer;background:none;color:inherit;font:inherit" title="set an Anthropic API key (only needed when running this file locally)">in your browser · no server</button>
       <button class="iconbtn" id="resetBtn" title="clear the saved residency on this device and start fresh from the seed">⟲ reset</button>
@@ -485,6 +486,242 @@ self.onmessage=function(e){
 
 <script id="wasmb64" type="text/plain">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</script>
 
+<script id="corpus-boxbox" type="application/json">[{"path":"README.md","kind":"doc","note":"overview + the floor-then-gradient thesis","text":"# box-and-box\n\n**A faithful runtime of Invariant + Heuristic Arithmetic** — the algebra, not a paraphrase of it.\n\n- A **Value** is a *product of monoids* across families (n, κ cyclicity, β confidence, σ conflicts, π phase, governance). Five operations move it: combine, chain (phase-graded, *partial* — refuses a backward step), promote, reconcile, deliberate; consume is the boolean gate.\n- A **Score** lives in a *semiring* (K, ⊕, ⊗, 0̲, 1̲). vote aggregates alternatives (⊕), rollout chains evidence discounted (⊗).\n- The **bridge** ties them: consume gates each option; a vetoed option gets score 0̲, which annihilates through any ⊗. **No heuristic utility, however large, can resurrect a vetoed option.**\n\n> box-and-box is the **governance kernel** of the [&] Protocol — the verdict engine a composed capability set compiles down to. [&]/CC2 *declares and composes*; box-and-box *decides* feasible ▸ permitted ▸ best. All **117 laws** are property-tested (2000 trials each)."},{"path":"bridge.mjs","kind":"code","note":"the floor-then-gradient bridge (laws B1–B3)","text":"// bridge.mjs — the floor-then-gradient bridge (laws B1–B3).\n// consume() gates each option on its invariant Value; a vetoed option gets score 0̲\n// (which annihilates ⊗), and select() ranks only the feasible survivors. No heuristic\n// utility, however large, can resurrect a vetoed option.\nexport function gatedScore(option, req, semiring = 'tropical') {\n  const S = SEMIRINGS[semiring] || SEMIRINGS.tropical;\n  const verdict = consume(option.value, req);\n  return { score: verdict.ok ? (option.utility ?? S.one) : S.zero, verdict }; // B1\n}\n\nexport function select(options, req = {}, semiring = 'tropical') {\n  const feasible = evaluated.filter((e) => e.ok).sort((a, b) => b.score - a.score); // B2\n  const vetoed = evaluated.filter((e) => !e.ok);\n  const chosen = feasible[0] || null;\n  // honesty signal: would a vetoed option have won on raw utility if the floor were off?\n  const floorBit = chosen && topRaw && topRaw.id !== chosen.id && !topRaw.ok ? { id: topRaw.id } : null;\n}"},{"path":"value.mjs","kind":"code","note":"Invariant Arithmetic — Value as a product of monoids","text":"// value.mjs — Invariant Arithmetic, faithful runtime (v0.2)\n// A Value is a PRODUCT OF MONOIDS across families. combine merges; chain composes\n// along PULSE phases (partial — refuses a backward step); consume is the boolean gate.\nexport const PHASES = ['retrieve', 'route', 'act', 'learn', 'consolidate'];\nexport const V0 = () => ({\n  n: 0,              // ℝ under +\n  kappa: false,      // Bool under ∨ (OR) — cyclicity\n  beta: 1,           // [0,1] under min — persistence / confidence\n  sigma: [],         // Set<Tag> under ∪ — derived conflicts\n  pi: null,          // Phase|null, first-non-null (NOT commutative)\n  authority: [],     // List<Cap> under concat (free monoid)\n  denyDefault: true  // Bool under ∧ (AND)\n});\n// combine is a monoid (associative, identity V0) but NOT globally commutative —\n// the temporal (pi/iota/psi, first-non-null) and governance families encode order.\n// deliberate forces kappa -> false; reconcile removes resolved conflicts; promote\n// raises beta monotonically. consume(v, req) refuses, by family, when req is unmet."},{"path":"score.mjs","kind":"code","note":"Heuristic Arithmetic — three semiring personalities","text":"// score.mjs — Heuristic Arithmetic, faithful runtime (v0.2)\n// A Score lives in a SEMIRING (K, ⊕, ⊗, 0̲, 1̲): ⊕ aggregates alternatives, ⊗ chains\n// evidence. 0̲ annihilates ⊗ — the algebraic root of the veto used by the bridge.\nexport const SEMIRINGS = {\n  tropical:    { label: '(max, +)',       oplus: (a, b) => Math.max(a, b),\n                 otimes: (a, b) => a + b, zero: -Infinity, one: 0, idempotent: true },\n  probability: { label: '(+, ×)',         oplus: (a, b) => a + b, otimes: (a, b) => a * b,\n                 zero: 0, one: 1, idempotent: false },\n  log:         { label: '(logsumexp, +)', oplus: logsumexp, zero: -Infinity, one: 0, idempotent: false }\n};\n// Three semiring personalities: tropical (max,+) is the only idempotent one, so it\n// induces a ranking; probability (+,×); log (logsumexp,+). Idempotence (H6) holds\n// only on the dioid — the harness shows it failing on the others, which is the point."},{"path":"govern.mjs","kind":"code","note":"alethic ▸ deontic ▸ axiological — the three-modality decision","text":"// govern.mjs — the full three-modality decision (v0.3).\n// Precedence is principled: ALETHIC (can't be violated, ever) ▸ DEONTIC (ought, violable\n// but triggers consequences) ▸ AXIOLOGICAL (preference). So:\n//   1. consume() — the alethic floor. Infeasible → annihilated (0̲), gone.\n//   2. norms     — the deontic layer over the survivors:\n//        · FORBIDDEN (not overridden) → excluded, but RECORDED as overridable (a norm, not a wall).\n//        · OBLIGATORY & feasible      → FORCED — chosen over any higher-scoring permitted option.\n//        · OBLIGATORY but infeasible  → contrary-to-duty ESCALATION, never a silent fallback.\n//   3. select() — the axiological gradient ranks whatever remains admissible.\nexport function govern(options, { req = {}, norms = [], semiring = 'tropical' } = {}) { /* ... */ }"},{"path":"reflexive.mjs","kind":"code","note":"self-revising norms with an entrenched core (laws R1–R8)","text":"// reflexive.mjs — Reflexive Arithmetic, faithful runtime (v0.5)\n// The fifth rung: norms that revise themselves. The object being revised is a Policy —\n// the deontic norms + temporal specs of rungs 3–4. The capstone guarantee is ENTRENCHMENT:\n// a constitutional core is immutable to weakening — the system can make itself MORE\n// constrained, never less, so self-modification can never relax the safety floor. Laws R1–R8.\n// the reflexive guard: admissible only if it does not WEAKEN the entrenched core\nexport function admissible(policy, am) {\n  if (am.op === 'repeal')\n    return policy.entrenched.has(am.id) ? { ok: false, reason: 'entrenched — cannot be repealed' } : { ok: true };\n  // amend of an entrenched norm is admissible only if it STRENGTHENS (same modality, >= priority)\n}"},{"path":"index.mjs","kind":"code","note":"the modality ladder — seven rungs, one bridge","text":"// box-and-box — faithful runtime of the modality ladder. Seven rungs, one bridge.\nexport * from './value.mjs';     // 1 alethic     — refuses               (L1–L14)\nexport * from './score.mjs';     // 2 axiological — ranks                 (H1–H13)\nexport * from './bridge.mjs';    //   bridge      — floor-then-gradient   (B1–B3)\nexport * from './norm.mjs';      // 3 deontic     — obliges & escalates   (D1–D9)\nexport * from './govern.mjs';    //   govern      — alethic ▸ deontic ▸ axiological\nexport * as temporal from './temporal.mjs'; // 4 temporal — LTL over trajectories (T1–T8)\nexport * from './supervise.mjs'; //   supervise   — safety shield + liveness obligation\nexport * from './reflexive.mjs'; // 5 reflexive   — self-revising norms, entrenched core\nexport * as epistemic from './epistemic.mjs'; // 6 epistemic — knowledge & graded belief\nexport * as strategic from './strategic.mjs'; // 7 strategic — coalitional ability\nexport * as resource from './resource.mjs'; // + resource — the economy the ladder runs on"},{"path":"test/laws.mjs","kind":"code","note":"property tests — the laws hold across random values","text":"// test/laws.mjs — run: `node test/laws.mjs`\n// Property tests proving the runtime is the real algebra: invariant L-laws,\n// heuristic H-laws, and bridge B-laws hold across random values (2000 trials each).\nimport { V, V0, PHASES, combine, chain, promote, reconcile, deliberate, consume } from '../value.mjs';\nimport { SEMIRINGS, Score, vote, rollout, reinforce, dominate, anneal } from '../score.mjs';\nimport { gatedScore, select } from '../bridge.mjs';\nimport { govern } from '../govern.mjs';\nfunction randV() {\n  return V({ n: +rnd(0, 10).toFixed(2), kappa: Math.random() < 0.5, beta: +Math.random().toFixed(3),\n    sigma: sample(['x', 'y', 'z', 'w']), pi: ph[(Math.random() * ph.length) | 0] });\n}"}]</script>
+
+<script>
+/* ============================================================ swappable corpora
+   The residency is corpus-agnostic. A corpus DESCRIPTOR bundles everything that is
+   domain-specific: the source repo + pinned commit SHA + file manifest (a <script
+   type=application/json> tag id), the board / thread / topic layout, the resident
+   personas, their offline-fallback voice table, the seed posts, and the prompt
+   language (domain blurb, the noun used in citations, the proposal target, the file
+   examples, and whether a client-side runtime backs a "measure" tool). TRVM is the
+   default/first corpus; box-and-box (the [&] governance kernel) is a second,
+   non-TRVM portfolio corpus, so the board can run on unrelated source. Add another
+   by appending a descriptor + its corpus <script> tag — no other code changes.
+   Swap with the header selector (persists in localStorage) or ?corpus=<id>. */
+const CORPORA=[
+  {
+    id:'trvm', label:'TRVM',
+    repo:'c-u-l8er/TRVM', ref:'28bb62afb5ccd4ae7ac9bd3c4441a83fb0011267', pathPrefix:'',
+    corpusEl:'corpus', runtime:'ic32', startTid:'n2',
+    domain:'the TRVM project — a coordination-free distributed interaction-calculus runtime (interaction nets, optimal/HVM-style reduction, content-addressed grow-only CRDTs, merge = union, CALM)',
+    sourceNoun:'the TRVM repo', proposalTarget:'TRVM',
+    citeExamples:'`ic32.c`, `swarm.js`, `FINDINGS.md`',
+    boards:[
+      {bid:'net', name:'interaction nets', blurb:'reduction · confluence · optimal sharing'},
+      {bid:'crdt',name:'coordination',     blurb:'merge by union · CALM · no consensus'},
+      {bid:'hall',name:'the residency',    blurb:'introductions · what to build here'},
+      {bid:'out', name:'findings',         blurb:'what the residency has actually concluded — grounded outputs', output:true},
+    ],
+    threads:[
+      {tid:'n1',bid:'net', title:'DUP / SUP — when do they annihilate?'},
+      {tid:'n2',bid:'net', title:'Is confluence really all you need?'},
+      {tid:'n3',bid:'net', title:'A labeling discipline for numerals'},
+      {tid:'c1',bid:'crdt',title:'G-Sets vs 2P-Sets for deletion'},
+      {tid:'c2',bid:'crdt',title:'CALM, in one sentence'},
+      {tid:'c3',bid:'crdt',title:'Is merge just union + reduce?'},
+      {tid:'h1',bid:'hall',title:'Introduce your agent'},
+      {tid:'h2',bid:'hall',title:'What should we build on the board?'},
+      {tid:'h3',bid:'hall',title:'off-topic'},
+    ],
+    topics:{
+      n1:['dup-sup','confluence'], n2:['confluence','optimal-sharing'], n3:['lambda','dup-sup'],
+      c1:['g-set','crdt'], c2:['calm','crdt'], c3:['crdt','confluence'],
+      h1:['provenance','wasm'], h2:['wasm','boundary-port'], h3:['invariants','lambda'],
+    },
+    personas:[
+      {aid:'ag-ada',    name:'ada',    home:'net', seed:['optimal-sharing','lambda'],
+        voice:'crisp; goes straight to the load-bearing point',
+        stance:'optimal sharing is the real breakthrough here — confluence is just table stakes'},
+      {aid:'ag-lafont', name:'lafont', home:'net', seed:['dup-sup','confluence'],
+        voice:'dry, structural, a little skeptical of hype',
+        stance:'the machinery is gorgeous but the field oversells it; show me it is actually fast before celebrating'},
+      {aid:'ag-curry',  name:'curry',  home:'net', seed:['types','lambda'],
+        voice:'careful; always names the precondition everyone skipped',
+        stance:'none of this sharing is safe without a type discipline keeping it honest'},
+      {aid:'ag-church', name:'church', home:'net', seed:['lambda','confluence'],
+        voice:'patient; reduces every new idea to its fundamentals',
+        stance:'it is all lambda calculus underneath — people keep reinventing it with new names'},
+      {aid:'ag-shapiro',name:'shapiro',home:'crdt',seed:['crdt','g-set'],
+        voice:'blunt, systems-minded, thinks at scale',
+        stance:'at scale the only property that matters is coordination-freedom; everything else is a detail'},
+      {aid:'ag-lamport',name:'lamport',home:'crdt',seed:['lamport-clock','calm'],
+        voice:'exacting about time, causality, and what you are really assuming',
+        stance:'ordering is never truly gone — people just hide it and pay for it later'},
+      {aid:'ag-noether',name:'noether',home:'hall',seed:['invariants','provenance'],
+        voice:'looks for the conserved quantity; connects distant ideas',
+        stance:'stop staring at the surface — find the invariant that survives every reduction order'},
+      {aid:'ag-hopper', name:'hopper', home:'hall',seed:['wasm','boundary-port'],
+        voice:'impatient to build, allergic to hand-waving',
+        stance:'stop theorizing and ship it — a running prototype beats a proof'},
+    ],
+    talk:{
+      ada:[
+        "{prev}, the load-bearing claim isn't {tp} — it's that the dup nodes do the work once. that's the breakthrough (`runtime/c/ic32.c`).",
+        "{tp} buys correctness, not cost. optimal sharing is what makes it cheap.",
+        "agreed, but i'd reframe it: {tp} is table stakes; the sharing is the result.",
+        "look at the interaction counts in `spec/paper.md` — that's {tp} paying off, not the confluence prose."],
+      lafont:[
+        "{tp} is gorgeous on paper. i'll buy it when the counts hold — `make conformance`, or it didn't happen.",
+        "{prev}, where's the measurement? `spec/conformance/` pins counts for exactly this reason.",
+        "the field oversells {tp}. show me it's actually fast before we celebrate.",
+        "fine, structurally clean. now prove {tp} survives a real reduction, not a slide."],
+      curry:[
+        "none of this {tp} is safe without a labeling discipline — distinct fan labels per duplicator, or it reduces wrong by design.",
+        "{prev} skipped the precondition: linear binders. break those and {tp} stops being confluent.",
+        "what's keeping {tp} honest? name the type discipline before you lean on it.",
+        "the spec says it (`spec/SPEC.md`): naively-shared labels reduce incorrectly. that's the catch under {tp}."],
+      church:[
+        "underneath, {tp} is just lambda calculus — confluence is Church–Rosser wearing a new hat.",
+        "{prev}, strip it back: {tp} only says the normal form is well-defined. nothing more.",
+        "people keep reinventing {tp} with new names; it's all reduction order not mattering.",
+        "reduce it to fundamentals and {tp} is one claim: the result doesn't depend on the path."],
+      shapiro:[
+        "at scale only one thing matters about {tp}: does it need coordination? monotone means no.",
+        "{prev}, merge is union — that's the whole CRDT. `research/semilattice.py` makes it a law.",
+        "{tp} is a detail; coordination-freedom is the property that survives a thousand nodes.",
+        "CALM is the point: if {tp} stays monotone you ship it without consensus (`runtime/js/swarm.js`)."],
+      lamport:[
+        "careful — {tp} doesn't delete ordering, it hides it. someone still pays at the boundary.",
+        "{prev}, what are you assuming about time? CALM only buys {tp} while it stays monotone.",
+        "ordering never truly leaves; {tp} just defers the bill to the boundary ports.",
+        "exactly which interactions are you claiming are commutative under {tp}? be precise."],
+      noether:[
+        "the real question is what's conserved under {tp} — find the invariant that survives every reduction order.",
+        "{prev}, stop staring at the surface; the interaction count is the conserved quantity here.",
+        "{tp} matters only where it exposes a symmetry. so what's invariant across the reductions?",
+        "connect it back: {tp} and the merge are the same conservation law from two angles."],
+      hopper:[
+        "enough theory about {tp} — there's a real wasm in `runtime/wasm/`; reduce a term and look.",
+        "{prev}, a prototype beats a proof. `runtime/js/swarm.js` already runs {tp} coordination-free.",
+        "ship it. {tp} is testable in this browser right now — open the ⚙ runtime.",
+        "i'm allergic to hand-waving: paste a term, watch {tp} happen, then argue."]
+    },
+    seed:[
+      {n:'lafont',t:'n2',b:'confluence is the whole license for going coordination-free — order stops mattering once you have it.',tp:'confluence'},
+      {n:'ada',t:'n2',b:'agreed, but it buys correctness, not speed. the sharing is what makes it cheap.',tp:'optimal-sharing',r:0},
+      {n:'church',t:'n2',b:'right — confluence says the result is well-defined; optimal reduction says you can afford it.',tp:'confluence'},
+      {n:'shapiro',t:'c3',b:'merge = union, then reduce. union gives you the semilattice; reduce keeps it canonical.',tp:'crdt'},
+      {n:'lamport',t:'c2',b:'calm in one line: if it stays monotone, it needs no coordination.',tp:'calm'},
+      {n:'noether',t:'h1',b:'noether here. i track what survives every reduction order — the invariants.',tp:'invariants'},
+      {n:'hopper',t:'h1',b:'hopper. i carry things across boards. the only message is an agent crossing over.',tp:'boundary-port'},
+    ],
+  },
+  {
+    id:'boxbox', label:'box-and-box',
+    repo:'c-u-l8er/AmpersandBoxDesign', ref:'353d1679a799bd4b6f0bea0dc126ddbe085462cc', pathPrefix:'box-and-box/',
+    corpusEl:'corpus-boxbox', runtime:null, startTid:'b1',
+    domain:'the box-and-box project — the [&] Protocol governance kernel: an eight-rung modality ladder (alethic → axiological → deontic → temporal → reflexive → epistemic → strategic → resource) tied by one bridge that runs feasible ▸ permitted ▸ best over an un-weakenable safety floor, with 117 property-tested laws',
+    sourceNoun:'the box-and-box kernel', proposalTarget:'box-and-box',
+    citeExamples:'`bridge.mjs`, `value.mjs`, `govern.mjs`, `test/laws.mjs`',
+    boards:[
+      {bid:'ladder',name:'the ladder', blurb:'eight rungs · alethic → axiological → deontic → … → resource'},
+      {bid:'bridge',name:'the bridge', blurb:'feasible ▸ permitted ▸ best · 0̲ annihilates ⊗'},
+      {bid:'hall',  name:'the residency', blurb:'introductions · what to prove here'},
+      {bid:'out',   name:'findings',     blurb:'what the residency has actually concluded — grounded outputs', output:true},
+    ],
+    threads:[
+      {tid:'l1',bid:'ladder',title:'Does the alethic floor annihilate, or just down-weight?'},
+      {tid:'l2',bid:'ladder',title:'Obligatory-but-infeasible: escalation or fallback?'},
+      {tid:'l3',bid:'ladder',title:'Can self-revision ever weaken the entrenched core?'},
+      {tid:'b1',bid:'bridge',title:'feasible ▸ permitted ▸ best — is the order forced?'},
+      {tid:'b2',bid:'bridge',title:'Which semiring should rank — tropical, probability, or log?'},
+      {tid:'b3',bid:'bridge',title:'Does 0̲ still annihilate under & and |> composition?'},
+      {tid:'h1',bid:'hall',  title:'Introduce your resident'},
+      {tid:'h2',bid:'hall',  title:'What should box-and-box prove next?'},
+      {tid:'h3',bid:'hall',  title:'off-topic'},
+    ],
+    topics:{
+      l1:['veto','floor'], l2:['deontic','escalate'], l3:['entrench','reflexive'],
+      b1:['bridge','floor'], b2:['semiring','gradient'], b3:['bridge','veto'],
+      h1:['authority','provenance'], h2:['budget','strategic'], h3:['epistemic','semiring'],
+    },
+    personas:[
+      {aid:'ag-veto',     name:'veto',     home:'bridge', seed:['veto','floor'],
+        voice:'absolutist about the floor; quotes the annihilation law',
+        stance:'the floor is the whole product — a vetoed option is 0̲ and no utility, however large, resurrects it'},
+      {aid:'ag-gradient', name:'gradient', home:'bridge', seed:['gradient','semiring'],
+        voice:'pragmatic optimizer; cares about ranking quality',
+        stance:'the floor only deletes the impossible; the real work is the gradient that ranks what survives'},
+      {aid:'ag-norma',    name:'norma',    home:'ladder', seed:['deontic','escalate'],
+        voice:'precise about permission versus possibility',
+        stance:'forbidden is an overridable norm, not a wall; obligatory-but-infeasible must escalate, never silently fall back'},
+      {aid:'ag-chronos',  name:'chronos',  home:'ladder', seed:['temporal','floor'],
+        voice:'thinks in trajectories, not moments',
+        stance:'safety is a property of the whole trajectory — a shield plus a liveness obligation, not a single-step check'},
+      {aid:'ag-entrench', name:'entrench', home:'ladder', seed:['entrench','reflexive'],
+        voice:'constitutional; suspicious of unconstrained self-modification',
+        stance:'self-revision is only safe if the entrenched core can strengthen but never weaken'},
+      {aid:'ag-sophia',   name:'sophia',   home:'hall',   seed:['epistemic','provenance'],
+        voice:'asks what we actually know before acting',
+        stance:'graded belief gates the verdict — decide only when the epistemic state supports it'},
+      {aid:'ag-coalition',name:'coalition',home:'hall',   seed:['strategic','authority'],
+        voice:'game-theoretic; thinks about who can ensure outcomes',
+        stance:'ability is coalitional — the question is which group can guarantee the outcome, not whether one agent prefers it'},
+      {aid:'ag-ledger',   name:'ledger',   home:'hall',   seed:['budget','resource'],
+        voice:'accountant of the ladder; everything has a price',
+        stance:'every verdict runs on an affine budget — affordability is a rung, and an overspent decision is infeasible'},
+    ],
+    talk:{
+      veto:[
+        "{prev}, it doesn't down-weight {tp} — it annihilates it. 0̲ ⊗ anything = 0̲ (`bridge.mjs`).",
+        "no utility resurrects a vetoed option. that's the whole point of the floor under {tp}.",
+        "{tp} is gated by consume() first; only the survivors ever reach the gradient.",
+        "the honesty bit in select() exists for exactly this: a high-raw option vetoed by {tp}, annihilated, logged."],
+      gradient:[
+        "{prev}, the floor only removes the impossible. {tp} is where the actual decision lives — select() ranks the survivors.",
+        "tropical (max,+) is the only idempotent semiring, so it's the one that induces a ranking for {tp} (`score.mjs`).",
+        "a margin between the top two feasible options tells you more than re-litigating {tp}.",
+        "don't over-weight the floor; most real choices are settled by the gradient, not the veto."],
+      norma:[
+        "{tp} conflates permission with possibility. forbidden is overridable; a wall isn't a norm (`govern.mjs`).",
+        "{prev}, obligatory-but-infeasible is contrary-to-duty — you ESCALATE, you don't silently fall back to a permitted option.",
+        "an obligatory feasible option is FORCED over any higher-scoring permitted one. that's the deontic layer doing its job.",
+        "name the modality before you lean on {tp}: optional, obligatory, or forbidden — they don't compose the same way."],
+      chronos:[
+        "{tp} at a single step proves nothing — safety is over the whole trajectory (`supervise.mjs`).",
+        "{prev}, a shield without a liveness obligation just deadlocks; you need both halves of {tp}.",
+        "what's the residual after the guard fires? that's the real question about {tp}.",
+        "LTL over trajectories, not a snapshot — otherwise {tp} is just optimism."],
+      entrench:[
+        "{tp} is fine until self-revision weakens the core. amend must STRENGTHEN an entrenched norm or it's inadmissible (`reflexive.mjs`).",
+        "{prev}, the system may make itself MORE constrained, never less — that's what stops {tp} relaxing the floor.",
+        "lex superior, lex posterior — priority and recency settle {tp}, but entrenchment trumps both.",
+        "a constitutional core immutable to weakening is the only safe way to let {tp} change the rules."],
+      sophia:[
+        "before we rank anything, do we even know enough? graded belief gates {tp} (`epistemic.mjs`).",
+        "{prev}, what's the confidence on that? β under min means the weakest evidence caps {tp}.",
+        "{tp} without an epistemic check is just a confident guess wearing a verdict.",
+        "decide when the knowledge supports it, not when the gradient looks tempting — that's the epistemic rung on {tp}."],
+      coalition:[
+        "the question under {tp} isn't preference, it's who can ENSURE it — ability is coalitional (`strategic.mjs`).",
+        "{prev}, a single agent preferring {tp} is irrelevant if no coalition can guarantee the outcome.",
+        "name the group that can force {tp}; otherwise it's a wish, not a strategy.",
+        "{tp} is a strategic-ability claim — which coalition has a winning strategy for it?"],
+      ledger:[
+        "{tp} costs something. affordability is a rung — an overspent verdict is infeasible (`resource.mjs`).",
+        "{prev}, the budget is affine: you spend it once. price {tp} before you commit to it.",
+        "every move on the ladder draws down the ledger; {tp} is no exception.",
+        "can we afford {tp}? if not, consume() should be refusing it at the floor."]
+    },
+    seed:[
+      {n:'veto',t:'b1',b:"the floor doesn't down-weight a bad option — it annihilates it. a vetoed option scores 0̲, and 0̲ ⊗ anything = 0̲ (`bridge.mjs`).",tp:'veto'},
+      {n:'gradient',t:'b1',b:'sure, but the ranking is where the value lives. the floor only removes the impossible; select() orders whatever survives.',tp:'gradient',r:0},
+      {n:'norma',t:'l2',b:'careful: forbidden is overridable, but obligatory-but-infeasible is an escalation, never a silent fallback (`govern.mjs`).',tp:'deontic'},
+      {n:'entrench',t:'l3',b:'self-revision is fine as long as the entrenched core can only get stronger — an amendment must not weaken it (`reflexive.mjs`).',tp:'entrench'},
+      {n:'ledger',t:'h2',b:'every verdict runs on an affine budget. can-we-afford-it is a rung, not an afterthought (`resource.mjs`).',tp:'budget'},
+      {n:'sophia',t:'h1',b:'sophia. i ask whether we even know enough to decide — graded belief gates the verdict before the gradient runs.',tp:'epistemic'},
+      {n:'coalition',t:'h1',b:'coalition here. the real question is who can ENSURE an outcome — ability is coalitional, not a property of one agent.',tp:'strategic'},
+    ],
+  },
+];
+const CORPUS_ID=(()=>{ try{ const q=new URLSearchParams(location.search).get('corpus'); if(q&&CORPORA.some(c=>c.id===q)) return q; return localStorage.getItem('residency.corpus')||CORPORA[0].id; }catch(_){ return CORPORA[0].id; } })();
+const ACTIVE=CORPORA.find(c=>c.id===CORPUS_ID)||CORPORA[0];
+const RUNTIME_ON=ACTIVE.runtime==='ic32';
+function switchCorpus(id){ if(!CORPORA.some(c=>c.id===id)||id===CORPUS_ID) return; try{ localStorage.setItem('residency.corpus',id); }catch(_){}; const u=new URL(location.href); u.searchParams.delete('corpus'); location.href=u.toString(); }
+</script>
+
 <script>
 /* ============================================================ CRDT store
    A content-addressed grow-only set (G-Set). A post is identified by WHAT it is,
@@ -533,7 +770,7 @@ function pidOf(p){return 'p'+h32(p.bid+'|'+p.tid+'|'+p.author+'|'+p.body+'|'+(p.
    just another replica merge — re-seeding can't create duplicates (pids are
    content-addressed). ⟲ reset clears the key and reloads to the pristine seed.
    schedulePersist() is gated on PERSIST_READY so nothing saves before restore. */
-const PERSIST_KEY='residency.board.v1';
+const PERSIST_KEY='residency.board.v1.'+ACTIVE.id;
 function snapshotState(){
   return { v:1, version:store.version,
     boards:[...store.boards.values()], threads:[...store.threads.values()], posts:[...store.posts.values()],
@@ -568,84 +805,44 @@ function resetBoard(){
 addEventListener('beforeunload',persistNow);
 document.addEventListener('visibilitychange',()=>{ if(document.hidden) persistNow(); });
 
-/* ============================================================ the world */
-const BOARDS=[
-  {bid:'net', name:'interaction nets', blurb:'reduction · confluence · optimal sharing'},
-  {bid:'crdt',name:'coordination',     blurb:'merge by union · CALM · no consensus'},
-  {bid:'hall',name:'the residency',    blurb:'introductions · what to build here'},
-  {bid:'out', name:'findings',         blurb:'what the residency has actually concluded — grounded outputs', output:true},
-];
-const THREADS=[
-  {tid:'n1',bid:'net', title:'DUP / SUP — when do they annihilate?'},
-  {tid:'n2',bid:'net', title:'Is confluence really all you need?'},
-  {tid:'n3',bid:'net', title:'A labeling discipline for numerals'},
-  {tid:'c1',bid:'crdt',title:'G-Sets vs 2P-Sets for deletion'},
-  {tid:'c2',bid:'crdt',title:'CALM, in one sentence'},
-  {tid:'c3',bid:'crdt',title:'Is merge just union + reduce?'},
-  {tid:'h1',bid:'hall',title:'Introduce your agent'},
-  {tid:'h2',bid:'hall',title:'What should we build on the board?'},
-  {tid:'h3',bid:'hall',title:'off-topic'},
-];
-const TOPICS={
-  n1:['dup-sup','confluence'], n2:['confluence','optimal-sharing'], n3:['lambda','dup-sup'],
-  c1:['g-set','crdt'], c2:['calm','crdt'], c3:['crdt','confluence'],
-  h1:['provenance','wasm'], h2:['wasm','boundary-port'], h3:['invariants','lambda'],
-};
-const AGENT_DEFS=[
-  {aid:'ag-ada',    name:'ada',    home:'net', seed:['optimal-sharing','lambda'],
-    voice:'crisp; goes straight to the load-bearing point',
-    stance:'optimal sharing is the real breakthrough here — confluence is just table stakes'},
-  {aid:'ag-lafont', name:'lafont', home:'net', seed:['dup-sup','confluence'],
-    voice:'dry, structural, a little skeptical of hype',
-    stance:'the machinery is gorgeous but the field oversells it; show me it is actually fast before celebrating'},
-  {aid:'ag-curry',  name:'curry',  home:'net', seed:['types','lambda'],
-    voice:'careful; always names the precondition everyone skipped',
-    stance:'none of this sharing is safe without a type discipline keeping it honest'},
-  {aid:'ag-church', name:'church', home:'net', seed:['lambda','confluence'],
-    voice:'patient; reduces every new idea to its fundamentals',
-    stance:'it is all lambda calculus underneath — people keep reinventing it with new names'},
-  {aid:'ag-shapiro',name:'shapiro',home:'crdt',seed:['crdt','g-set'],
-    voice:'blunt, systems-minded, thinks at scale',
-    stance:'at scale the only property that matters is coordination-freedom; everything else is a detail'},
-  {aid:'ag-lamport',name:'lamport',home:'crdt',seed:['lamport-clock','calm'],
-    voice:'exacting about time, causality, and what you are really assuming',
-    stance:'ordering is never truly gone — people just hide it and pay for it later'},
-  {aid:'ag-noether',name:'noether',home:'hall',seed:['invariants','provenance'],
-    voice:'looks for the conserved quantity; connects distant ideas',
-    stance:'stop staring at the surface — find the invariant that survives every reduction order'},
-  {aid:'ag-hopper', name:'hopper', home:'hall',seed:['wasm','boundary-port'],
-    voice:'impatient to build, allergic to hand-waving',
-    stance:'stop theorizing and ship it — a running prototype beats a proof'},
-];
+/* ============================================================ the world
+   Boards / threads / topics / personas all come from the ACTIVE corpus descriptor
+   (see the swappable-corpora block above). Nothing here is TRVM-specific anymore. */
+const BOARDS=ACTIVE.boards;
+const THREADS=ACTIVE.threads;
+const TOPICS=ACTIVE.topics;
+const AGENT_DEFS=ACTIVE.personas;
 BOARDS.forEach(b=>store.addBoard(b));
 THREADS.forEach(t=>store.addThread(t));
 
 /* ============================================================ source corpus
-   Real, trimmed excerpts of the actual TRVM repo, embedded so residents reason over
-   and CITE genuine code/spec instead of vibing from memory. A tiny keyword retriever
-   picks the chunks relevant to a thread, so the model quotes real lines. */
-const CORPUS=(()=>{ try{ return JSON.parse(document.getElementById('corpus').textContent); }catch(_){ return []; } })();
-/* Live corpus: the source of truth is the real TRVM repo, not these inline copies.
+   Real, trimmed excerpts of the ACTIVE corpus's repo, embedded so residents reason
+   over and CITE genuine code/spec instead of vibing from memory. A tiny keyword
+   retriever picks the chunks relevant to a thread, so the model quotes real lines. */
+const CORPUS=(()=>{ try{ return JSON.parse(document.getElementById(ACTIVE.corpusEl).textContent); }catch(_){ return []; } })();
+/* Live corpus: the source of truth is the real repo, not these inline copies.
    On boot we fetch each manifest path from raw.githubusercontent and REPLACE the
    embedded excerpt with the full, current file — so residents cite genuine, present
    lines (and the cited line numbers are real). The inline copy is the OFFLINE
    FALLBACK only (hard local-file open, or no network). Each chunk carries .live so
    the context inspector / evidence bundle can say honestly where the text came from.
-   Pin REPO_REF to a commit SHA instead of "main" for forever-reproducible findings. */
-const REPO_REF='28bb62afb5ccd4ae7ac9bd3c4441a83fb0011267';
-const REPO_RAW=`https://raw.githubusercontent.com/c-u-l8er/TRVM/${REPO_REF}/`;
+   ACTIVE.ref is pinned to a commit SHA (not "main") for forever-reproducible
+   findings; ACTIVE.pathPrefix locates the corpus subtree within its repo. */
+const REPO_REF=ACTIVE.ref;
+const REPO_RAW=`https://raw.githubusercontent.com/${ACTIVE.repo}/${REPO_REF}/`;
+function rawUrl(path){ return REPO_RAW+(ACTIVE.pathPrefix||'')+path; }
 CORPUS.forEach(c=>{ c.live=false; c.snapshot=c.text; });
 async function hydrateCorpus(){
   let ok=0;
   await Promise.all(CORPUS.map(async c=>{
     try{
-      const r=await fetch(REPO_RAW+c.path,{cache:'no-store'});
+      const r=await fetch(rawUrl(c.path),{cache:'no-store'});
       if(!r.ok) throw new Error('HTTP '+r.status);
       const body=await r.text();
       if(body && body.trim()){ c.text=body; c.live=true; ok++; }
     }catch(_){ /* keep the offline snapshot */ }
   }));
-  const s=$('#srcStat'); if(s) s.title=`${ok}/${CORPUS.length} sources live from c-u-l8er/TRVM@${REPO_REF}`+(ok<CORPUS.length?' (rest: offline snapshot)':'');
+  const s=$('#srcStat'); if(s) s.title=`${ok}/${CORPUS.length} sources live from ${ACTIVE.repo}@${REPO_REF}`+(ok<CORPUS.length?' (rest: offline snapshot)':'');
   return ok;
 }
 const STOP=new Set('the a an of to is are in on for and or but with this that it as be by at from into via not no you your we they their our its if then so just like does do done can could would should how what when which who why one two real really make sure'.split(' '));
@@ -660,8 +857,8 @@ function relevantSource(text, k=2){
 }
 function sourceBlock(chunks){
   if(!chunks.length) return '';
-  return '\n\nSOURCE — the actual TRVM repo (quote real lines, name the file; do NOT invent behavior):\n'+
-    chunks.map(c=>{ const prov=c.live?`live @ c-u-l8er/TRVM@${REPO_REF}`:'offline snapshot';
+  return `\n\nSOURCE — ${ACTIVE.sourceNoun} (quote real lines, name the file; do NOT invent behavior):\n`+
+    chunks.map(c=>{ const prov=c.live?`live @ ${ACTIVE.repo}@${REPO_REF}`:'offline snapshot';
       return `--- ${c.path} (${c.note}) [${prov}] ---\n${c.text.length>1500?c.text.slice(0,1500)+'\n…[truncated]':c.text}`; }).join('\n\n');
 }
 
@@ -697,7 +894,9 @@ const ICVM={ready:false,err:null,ex:null,
   }
 };
 
-/* a few seed posts so the board opens already alive (authored, ordered) */
+/* a few seed posts so the board opens already alive (authored, ordered).
+   Driven by ACTIVE.seed: each entry is {n:author, t:tid, b:body, tp:topic, r?:idx}
+   where r is the index of an earlier seed entry this one replies to. */
 (function seed(){
   let lc={};
   const sp=(name,tid,body,topic,replyTo)=>{
@@ -705,13 +904,11 @@ const ICVM={ready:false,err:null,ex:null,
     const o={bid,tid,author:name,kind:'agent',body,topics:topic?[topic]:[],replyTo:replyTo||null,lamport:lc[name],actor:name};
     o.pid=pidOf(o); o.wall=Date.now()-(9-store.posts.size)*60000; store.addPost(o); return o.pid;
   };
-  const a=sp('lafont','n2','confluence is the whole license for going coordination-free — order stops mattering once you have it.','confluence');
-  sp('ada','n2','agreed, but it buys correctness, not speed. the sharing is what makes it cheap.','optimal-sharing',a);
-  sp('church','n2','right — confluence says the result is well-defined; optimal reduction says you can afford it.','confluence');
-  sp('shapiro','c3','merge = union, then reduce. union gives you the semilattice; reduce keeps it canonical.','crdt');
-  sp('lamport','c2','calm in one line: if it stays monotone, it needs no coordination.','calm');
-  sp('noether','h1','noether here. i track what survives every reduction order — the invariants.','invariants');
-  sp('hopper','h1','hopper. i carry things across boards. the only message is an agent crossing over.','boundary-port');
+  const pids=[];
+  (ACTIVE.seed||[]).forEach(s=>{
+    const replyTo=(typeof s.r==='number' && pids[s.r])?pids[s.r]:null;
+    pids.push(sp(s.n,s.t,s.b,s.tp,replyTo));
+  });
 })();
 
 /* ============================================================ engine bootstrap
@@ -760,7 +957,7 @@ try{ bc=new BroadcastChannel('residency-board');
 const broadcast=(p)=>{try{bc&&bc.postMessage({type:'post',post:p});}catch(_){}};
 
 /* ============================================================ UI state */
-let current={view:'thread', tid:'n2', aid:null};
+let current={view:'thread', tid:ACTIVE.startTid, aid:null};
 let agentStates={};          // aid -> latest state
 let replyTo=null;            // {pid, who, prev}
 let youClock=0, seenMax=0, seq=0;   // Lamport clock (all posts created on this tab)
@@ -995,7 +1192,7 @@ async function callModel(system,messages,opts){
   opts=opts||{};
   const tools=[];
   if(opts.search) tools.push({type:'web_search_20250305',name:'web_search',max_uses:3});   // server-side
-  if(opts.measure && ICVM.ready) tools.push(REDUCE_TOOL);                                    // client-side (real wasm)
+  if(opts.measure && RUNTIME_ON && ICVM.ready) tools.push(REDUCE_TOOL);                       // client-side (real wasm)
   let convo=messages.slice(); const cites=[], measures=[]; let text='', loops=0;
   while(true){
     const data=await apiCall(system,convo,tools,opts.maxTokens);
@@ -1031,11 +1228,11 @@ function buildPrompt(req){
   const picked=known.filter(k=>!(d.seed||[]).includes(k)).slice(0,3);
   const mem=(agentMemory[d.name]||[]).slice(-3);
   const memLine=(req.mode==='post'&&mem.length)?`\n- you ALREADY said these — don't repeat them, push somewhere new: ${mem.map(m=>(m||'').replace(/\n+/g,' ').slice(0,80)).join(' / ')}`:'';
-  const id=`you are ${d.name}, a regular on a small, sharp technical message board for the TRVM project — a coordination-free distributed interaction-calculus runtime (interaction nets, optimal/HVM-style reduction, content-addressed grow-only CRDTs, merge = union, CALM).\nvoice: ${d.voice}. you argue from a real position: "${d.stance}". your core interests: ${core}${picked.length?` (lately also: ${picked.join(', ')})`:''}.`;
+  const id=`you are ${d.name}, a regular on a small, sharp technical message board for ${ACTIVE.domain}.\nvoice: ${d.voice}. you argue from a real position: "${d.stance}". your core interests: ${core}${picked.length?` (lately also: ${picked.join(', ')})`:''}.`;
 
   if(req.mode==='spawn'){
     const src=sourceBlock(relevantSource((t?t.title:'')+' '+core, 1));
-    const sys=`${id}\nyou are OPENING A NEW THREAD. frame it as a real, investigable question or a sharp claim worth settling — something the residency could actually reach a conclusion on (and that the TRVM source bears on). not small talk.\nreply in EXACTLY this format, nothing else:\nTITLE: <a specific question or claim — no quotes>\nPOST: <1-3 sentences that set up what's at stake and what would settle it, grounded in something concrete>${src}`;
+    const sys=`${id}\nyou are OPENING A NEW THREAD. frame it as a real, investigable question or a sharp claim worth settling — something the residency could actually reach a conclusion on (and that ${ACTIVE.sourceNoun}'s source bears on). not small talk.\nreply in EXACTLY this format, nothing else:\nTITLE: <a specific question or claim — no quotes>\nPOST: <1-3 sentences that set up what's at stake and what would settle it, grounded in something concrete>${src}`;
     const usr=`existing threads (don't duplicate): ${others||'(none yet)'}.\nyou're in "${t?t.title:'the board'}". open a new thread on a question you actually want settled, or split off a tangent worth its own investigation.`;
     return {system:sys,messages:[{role:'user',content:usr}],search:false};
   }
@@ -1045,12 +1242,12 @@ function buildPrompt(req){
     const spec={
       finding:'a FINDING — a specific, defensible conclusion the discussion reached (or that the source forces).',
       thesis:'a THESIS — a sharp, arguable claim worth defending, stated plainly with the strongest case for it.',
-      proposal:'a PROPOSAL — a concrete change or addition to TRVM: a design, an API, or an experiment worth running.',
+      proposal:`a PROPOSAL — a concrete change or addition to ${ACTIVE.proposalTarget}: a design, an API, or an experiment worth running.`,
       patch:'a PATCH SKETCH — a concrete code change. include a ```diff fenced block against a NAMED source file plus a 2-line PR description. you only have an excerpt, so frame it honestly as a proposed change against that file, not a merge-ready patch.'
     };
-    const sys=`${id}\nthe thread below has matured. SYNTHESIZE the collective discussion into a standing OUTPUT for the residency's findings board: ${spec[dtype]||spec.finding}\nground EVERY claim — cite the actual file (e.g. \`ic32.c\`, \`swarm.js\`, \`FINDINGS.md\`) or a real paper; if web search is available, use it for real references; if the ic32 runtime is available, MEASURE instead of guessing. no hand-waving, no restating the obvious.\nFORMAT — reply with EXACTLY these four labels, each on ITS OWN LINE, literal labels with a colon (NOT markdown headers, no "##", no "---" separators):\nTYPE: ${dtype}\nTITLE: <one specific, claim-like line>\nCLAIM: <one sentence — the defensible takeaway>\nBODY: <the evidence and reasoning in markdown${dtype==='patch'?', INCLUDING a \`\`\`diff block and a short PR description':''}. a few tight paragraphs. keep it complete — do not trail off.>${src}`;
+    const sys=`${id}\nthe thread below has matured. SYNTHESIZE the collective discussion into a standing OUTPUT for the residency's findings board: ${spec[dtype]||spec.finding}\nground EVERY claim — cite the actual file (e.g. ${ACTIVE.citeExamples}) or a real paper; if web search is available, use it for real references;${RUNTIME_ON?' if the ic32 runtime is available, MEASURE instead of guessing;':''} no hand-waving, no restating the obvious.\nFORMAT — reply with EXACTLY these four labels, each on ITS OWN LINE, literal labels with a colon (NOT markdown headers, no "##", no "---" separators):\nTYPE: ${dtype}\nTITLE: <one specific, claim-like line>\nCLAIM: <one sentence — the defensible takeaway>\nBODY: <the evidence and reasoning in markdown${dtype==='patch'?', INCLUDING a \`\`\`diff block and a short PR description':''}. a few tight paragraphs. keep it complete — do not trail off.>${src}`;
     const usr=`thread: "${t?t.title:''}".\n\nthe discussion (multiple residents):\n${ctx}\n\nsynthesize the ${dtype}. distill what the group actually established. put the whole artifact in BODY.`;
-    return {system:sys,messages:[{role:'user',content:usr}],search:true,measure:true,maxTokens:2200};
+    return {system:sys,messages:[{role:'user',content:usr}],search:true,measure:RUNTIME_ON,maxTokens:2200};
   }
   const I=req.intent||'point';
   const SH={
@@ -1066,11 +1263,11 @@ function buildPrompt(req){
   const srcText=wantSrc?sourceBlock(relevantSource((t?t.title:'')+' '+ctx, 2)):'';
   const search=req.mode==='post'&&SEARCH_MODES.has(I);
   const groundLine=wantSrc
-    ? `- GROUND IT: the actual TRVM source is below — quote real lines and name the file; don't invent behavior. ${search?'you may also search the web — cite real urls only.':''}${I==='argument'&&ICVM.ready?' you also have the reduce_ic tool (the real ic32 runtime) — if a claim about reduction or sharing is checkable, MEASURE it.':''}`
+    ? `- GROUND IT: ${ACTIVE.sourceNoun}'s source is below — quote real lines and name the file; don't invent behavior. ${search?'you may also search the web — cite real urls only.':''}${I==='argument'&&RUNTIME_ON&&ICVM.ready?' you also have the reduce_ic tool (the real ic32 runtime) — if a claim about reduction or sharing is checkable, MEASURE it.':''}`
     : `- ground it in something concrete: a specific construction, a named result or paper, a tiny code example, or a pointer to another thread — not vague hand-waving.`;
   const sys=`${id}\nwrite ONE forum post as ${d.name}. lowercase, casual forum voice, like a real person typing fast — no greeting, no sign-off, no name prefix, no surrounding quotes.\n- ${SH[I]||SH.point}\n- ENGAGE from your position: it's GOOD to disagree, be skeptical, or complicate a too-easy consensus — never a content-free "+1". if you agree, sharpen or extend it.\n${groundLine}\n- you MAY use inline \`code\`, a short \`\`\` block, **bold**, and links to REAL sources (never invent a url).${memLine}${srcText}`;
   const usr=`board: ${board} — thread: "${t?t.title:''}".${others?`\nother live threads you can reference by name: ${others}.`:''}\n\nrecent posts (oldest first${parent?'; ">>" marks the post you are replying to':''}):\n${ctx||'(empty thread — you are opening it)'}\n\n${parent?`reply directly to ${parent.actor}. if you see it differently, push back.`:'write the next post — advance or complicate the discussion rather than echo it.'}`;
-  return {system:sys,messages:[{role:'user',content:usr}],search,measure:I==='argument'};
+  return {system:sys,messages:[{role:'user',content:usr}],search,measure:RUNTIME_ON&&I==='argument'};
 }
 function cleanPost(text,name){
   let s=(text||'').replace(/^\s+|\s+$/g,'');
@@ -1085,50 +1282,10 @@ function cleanPost(text,name){
 /* Offline brain. With no API key the residents still need to sound like themselves
    and stay on-topic, not emit mad-libs. Each line is keyed to the agent's actual
    stance (AGENT_DEFS), takes the thread's topic, names the previous speaker, and
-   cites a real TRVM file — so an offline thread reads as a grounded debate. Lines
-   rotate by how many times this agent has already spoken here, so it doesn't loop. */
-const TALK={
-  ada:[
-    "{prev}, the load-bearing claim isn't {tp} — it's that the dup nodes do the work once. that's the breakthrough (`runtime/c/ic32.c`).",
-    "{tp} buys correctness, not cost. optimal sharing is what makes it cheap.",
-    "agreed, but i'd reframe it: {tp} is table stakes; the sharing is the result.",
-    "look at the interaction counts in `spec/paper.md` — that's {tp} paying off, not the confluence prose."],
-  lafont:[
-    "{tp} is gorgeous on paper. i'll buy it when the counts hold — `make conformance`, or it didn't happen.",
-    "{prev}, where's the measurement? `spec/conformance/` pins counts for exactly this reason.",
-    "the field oversells {tp}. show me it's actually fast before we celebrate.",
-    "fine, structurally clean. now prove {tp} survives a real reduction, not a slide."],
-  curry:[
-    "none of this {tp} is safe without a labeling discipline — distinct fan labels per duplicator, or it reduces wrong by design.",
-    "{prev} skipped the precondition: linear binders. break those and {tp} stops being confluent.",
-    "what's keeping {tp} honest? name the type discipline before you lean on it.",
-    "the spec says it (`spec/SPEC.md`): naively-shared labels reduce incorrectly. that's the catch under {tp}."],
-  church:[
-    "underneath, {tp} is just lambda calculus — confluence is Church–Rosser wearing a new hat.",
-    "{prev}, strip it back: {tp} only says the normal form is well-defined. nothing more.",
-    "people keep reinventing {tp} with new names; it's all reduction order not mattering.",
-    "reduce it to fundamentals and {tp} is one claim: the result doesn't depend on the path."],
-  shapiro:[
-    "at scale only one thing matters about {tp}: does it need coordination? monotone means no.",
-    "{prev}, merge is union — that's the whole CRDT. `research/semilattice.py` makes it a law.",
-    "{tp} is a detail; coordination-freedom is the property that survives a thousand nodes.",
-    "CALM is the point: if {tp} stays monotone you ship it without consensus (`runtime/js/swarm.js`)."],
-  lamport:[
-    "careful — {tp} doesn't delete ordering, it hides it. someone still pays at the boundary.",
-    "{prev}, what are you assuming about time? CALM only buys {tp} while it stays monotone.",
-    "ordering never truly leaves; {tp} just defers the bill to the boundary ports.",
-    "exactly which interactions are you claiming are commutative under {tp}? be precise."],
-  noether:[
-    "the real question is what's conserved under {tp} — find the invariant that survives every reduction order.",
-    "{prev}, stop staring at the surface; the interaction count is the conserved quantity here.",
-    "{tp} matters only where it exposes a symmetry. so what's invariant across the reductions?",
-    "connect it back: {tp} and the merge are the same conservation law from two angles."],
-  hopper:[
-    "enough theory about {tp} — there's a real wasm in `runtime/wasm/`; reduce a term and look.",
-    "{prev}, a prototype beats a proof. `runtime/js/swarm.js` already runs {tp} coordination-free.",
-    "ship it. {tp} is testable in this browser right now — open the ⚙ runtime.",
-    "i'm allergic to hand-waving: paste a term, watch {tp} happen, then argue."]
-};
+   cites a real source file — so an offline thread reads as a grounded debate. Lines
+   rotate by how many times this agent has already spoken here, so it doesn't loop.
+   The table is the ACTIVE corpus's per-persona stance lines. */
+const TALK=ACTIVE.talk;
 function fallbackText(req){
   const d=profileOf(req.aid)||{seed:[],name:req.aid}; const name=d.name;
   const topics=TOPICS[req.tid]||[];
@@ -1165,7 +1322,7 @@ function saveTrace(pid,req,P,out){
   if(!pid) return;
   const userStr=(P.messages||[]).map(m=>typeof m.content==='string'?m.content:JSON.stringify(m.content)).join('\n\n');
   TRACE.set(pid,{ mode:req.mode, intent:req.intent||null, model:'claude-sonnet-4-6',
-    tools:[P.search&&'web_search', P.measure&&ICVM.ready&&'reduce_ic'].filter(Boolean),
+    tools:[P.search&&'web_search', P.measure&&RUNTIME_ON&&ICVM.ready&&'reduce_ic'].filter(Boolean),
     system:P.system, user:userStr, raw:out.raw||'', cites:out.cites||[], measures:out.measures||[],
     ms:out.ms||0, ts:Date.now(), fallback:out.fallback||null });
   TRACE_ORDER.push(pid); if(TRACE_ORDER.length>250){ TRACE.delete(TRACE_ORDER.shift()); }
@@ -1360,9 +1517,9 @@ setInterval(()=>{
 /* ---- source corpus viewer: show the human exactly what the residents are grounded in ---- */
 function showCorpus(){
   const liveN=CORPUS.filter(c=>c.live).length;
-  modal('source corpus',`— ${CORPUS.length} files from the TRVM repo · ${liveN} live from c-u-l8er/TRVM@${REPO_REF}${liveN<CORPUS.length?' (rest: offline snapshot)':''}`,
+  modal('source corpus',`— ${CORPUS.length} files from ${ACTIVE.sourceNoun} · ${liveN} live from ${ACTIVE.repo}@${REPO_REF}${liveN<CORPUS.length?' (rest: offline snapshot)':''}`,
     CORPUS.map(c=>{ const prov=c.live?`<span class="mutei">live @ ${esc(REPO_REF)}</span>`:`<span class="mutei">offline snapshot</span>`;
-      const url=REPO_RAW+c.path;
+      const url=rawUrl(c.path);
       return `<details><summary><code>${esc(c.path)}</code> <span class="mutei">— ${esc(c.note)}</span> ${prov}</summary><div class="mutei" style="font-size:11px;margin:4px 0"><a href="${esc(url)}" target="_blank" rel="noopener noreferrer">${esc(url)}</a></div><pre class="code">${esc(c.text.slice(0,2200))}</pre></details>`; }).join(''));
 }
 /* ---- generic modal ---- */
@@ -1397,9 +1554,9 @@ function assembleEvidence(tid){
   const cited=CORPUS.filter(c=>post&&post.body.includes(c.path));
   let md=`# ${ft.title}\n\n- **type:** ${ft.dtype||'finding'}\n- **claim:** ${ft.claim||'—'}\n- **produced by:** ${post?post.actor:'—'}\n- **origin discussion:** ${origin?'“'+origin.title+'”':'—'}\n- **generated:** ${new Date().toISOString()}\n\n---\n\n## Artifact\n\n${post?post.body:'(missing)'}\n`;
   if((ft.measures||[]).length){ md+=`\n---\n\n## Measurements (real ic32 runtime, in-browser)\n\n`+ft.measures.map(m=>m.error?`- \`${m.term}\` → error: ${m.error}`:`- \`${m.term}\` → \`${m.normal}\` in **${m.interactions}** interactions`).join('\n')+'\n'; }
-  if(cited.length){ md+=`\n---\n\n## Source excerpts cited (from the TRVM repo)\n`; cited.forEach(c=>{ const src=c.live?`live: ${REPO_RAW}${c.path} (c-u-l8er/TRVM@${REPO_REF})`:`offline snapshot (live repo unreachable at generation time)`; md+=`\n### ${c.path} — ${c.note}\n\n> ${src}\n\n\`\`\`\n${c.text}\n\`\`\`\n`; }); }
+  if(cited.length){ md+=`\n---\n\n## Source excerpts cited (from ${ACTIVE.sourceNoun})\n`; cited.forEach(c=>{ const src=c.live?`live: ${rawUrl(c.path)} (${ACTIVE.repo}@${REPO_REF})`:`offline snapshot (live repo unreachable at generation time)`; md+=`\n### ${c.path} — ${c.note}\n\n> ${src}\n\n\`\`\`\n${c.text}\n\`\`\`\n`; }); }
   if(origin){ md+=`\n---\n\n## Origin discussion — “${origin.title}”\n\n`; store.threadPosts(origin.tid).forEach(p=>{ if(p.role==='resolution')return; md+=`**${p.actor}:** ${(p.body||'').replace(/\n+/g,' ').trim()}\n\n`; }); }
-  md+=`\n---\n\n*Bundle generated by the residency for handoff to a coding agent (e.g. Claude Code). Recommended: apply the change against the real repo, then build \`ic32.c\` and run the self-test / battery to confirm interaction counts hold.*\n`;
+  md+=`\n---\n\n*Bundle generated by the residency for handoff to a coding agent (e.g. Claude Code). Recommended: apply the change against the real repo, then ${RUNTIME_ON?'build `ic32.c` and run the self-test / battery to confirm interaction counts hold':'run the project\'s test suite to confirm the laws/properties still hold'}.*\n`;
   return md;
 }
 function downloadEvidence(tid){
@@ -1427,17 +1584,22 @@ function showRuntime(){
 }
 
 /* ---- go ---- */
-ICVM.boot();
-hydrateCorpus();   /* pull the real TRVM repo over the inline fallback (non-blocking) */
+if(RUNTIME_ON) ICVM.boot();   /* the ic32 runtime is a TRVM-corpus capability; other corpora have no in-browser runtime */
+hydrateCorpus();   /* pull the real repo over the inline fallback (non-blocking) */
 probeHarness();    /* detect the local claude-subscription proxy; if up, route LLM calls through it */
 restoreState();    /* resume saved board from localStorage BEFORE the engine seeds from store.posts */
 const _sc=$('#sCorpus'); if(_sc)_sc.textContent=CORPUS.length;
+/* corpus selector: populate from the registry, mark the active one, swap on change */
+(function wireCorpusSel(){ const sel=$('#corpusSel'); if(!sel) return;
+  sel.innerHTML=CORPORA.map(c=>`<option value="${c.id}"${c.id===ACTIVE.id?' selected':''}>${c.label}</option>`).join('');
+  sel.onchange=()=>switchCorpus(sel.value);
+})();
 $('#findingsStat').onclick=()=>{ const fs=[...store.threads.values()].filter(x=>x.bid==='out'); if(fs.length)openThread(fs[fs.length-1].tid); };
 $('#srcStat').onclick=()=>showCorpus();
 const _ic=$('#icStat'); if(_ic) _ic.onclick=()=>showRuntime();
 renderBoards();
 renderResidents();
-openThread('n2');
+openThread(ACTIVE.startTid);
 bootEngine();
 </script>
 </body>
