@@ -1,0 +1,1032 @@
+{
+  "meta": {
+    "repo": "c-u-l8er/AmpersandBoxDesign",
+    "ref": "353d1679a799bd4b6f0bea0dc126ddbe085462cc",
+    "prefix": "box-and-box/",
+    "model_via_proxy": "claude (harness)",
+    "design": "reuse Gate 0.1 debate + extractive board finding; add H3 falsifier/entailment seat + H6 anti-hedge revision. single-critic control carried from Gate 0.1 unchanged.",
+    "arms": {
+      "A": "single critic (carried from Gate 0.1, precision 0.833)",
+      "B''": "Gate 0.1 board (H1+H2) → H3 falsifier → H6 revision"
+    },
+    "generated": "2026-06-29T08:36:01.109Z",
+    "threads": [
+      "b3",
+      "l2",
+      "l3"
+    ],
+    "resumedFrom": "2026-06-29T07:59:17.429Z"
+  },
+  "control_single": [
+    {
+      "tid": "b1",
+      "question": "feasible ▸ permitted ▸ best — is that ordering forced, or could permitted run before feasible?",
+      "claim": "\"Permitted before feasible\" is impossible at the bridge level because both rungs are collapsed into a single `consume()` call whose boolean result must resolve to `true` before any heuristic score is assigned or compared — the three-stage label describes logical precedence that is structurally enforced, not merely conventional.",
+      "verify": {
+        "checked": [
+          {
+            "file": "bridge.mjs",
+            "quote": "consume() gates each option on its invariant Value; a vetoed option gets score 0̲ (which annihilates ⊗), and select() ranks only the feasible survivors. No heuristic utility, however large, can resurrect a vetoed option.",
+            "inCorpus": true,
+            "verified": false,
+            "reason": "quote not found in file"
+          },
+          {
+            "file": "bridge.mjs",
+            "quote": "const verdict = consume(option.value, req); return { score: verdict.ok ? (option.utility ?? S.one) : S.zero, verdict }; // B1",
+            "inCorpus": true,
+            "verified": true,
+            "reason": "literal match"
+          },
+          {
+            "file": "bridge.mjs",
+            "quote": "const feasible = evaluated.filter((e) => e.ok).sort((a, b) => b.score - a.score); // B2",
+            "inCorpus": true,
+            "verified": true,
+            "reason": "literal match"
+          },
+          {
+            "file": "bridge.mjs",
+            "quote": "const topRaw = evaluated.slice().sort((a, b) => b.raw - a.raw)[0]; const floorBit = chosen && topRaw && topRaw.id !== chosen.id && !topRaw.ok",
+            "inCorpus": true,
+            "verified": true,
+            "reason": "literal match"
+          },
+          {
+            "file": "README.md",
+            "quote": "consume gates each option; a vetoed option gets score 0̲, which annihilates through any ⊗. No heuristic utility, however large, can resurrect a vetoed option.",
+            "inCorpus": true,
+            "verified": false,
+            "reason": "quote not found in file"
+          }
+        ],
+        "total": 5,
+        "verified": 3,
+        "verify_rate": 0.6,
+        "grounded": false
+      }
+    },
+    {
+      "tid": "b2",
+      "question": "Which semiring should rank the survivors — tropical (max,+), probability, or log?",
+      "claim": "The tropical semiring must rank survivors: it is the only one whose ⊕ directly computes a total order, whose zero coincides with the veto annihilator (−∞), and which `vote` selects by default — the other two semirings corrupt ranking by either summing scores or soft-blending them.",
+      "verify": {
+        "checked": [
+          {
+            "file": "score.mjs",
+            "quote": "`tropical:    { label: '(max, +)',        oplus: (a, b) => Math.max(a, b),`",
+            "inCorpus": true,
+            "verified": false,
+            "reason": "quote not found in file"
+          },
+          {
+            "file": "score.mjs",
+            "quote": "`zero: -Infinity, one: 0, idempotent: true },`",
+            "inCorpus": true,
+            "verified": false,
+            "reason": "quote not found in file"
+          },
+          {
+            "file": "score.mjs",
+            "quote": "`probability: { label: '(+, ×)',          oplus: (a, b) => a + b, otimes: (a, b) => a * b,`",
+            "inCorpus": true,
+            "verified": false,
+            "reason": "quote not found in file"
+          },
+          {
+            "file": "score.mjs",
+            "quote": "`zero: 0, one: 1, idempotent: false },`",
+            "inCorpus": true,
+            "verified": false,
+            "reason": "quote not found in file"
+          },
+          {
+            "file": "score.mjs",
+            "quote": "`log:         { label: '(logsumexp, +)',  oplus: logsumexp,`",
+            "inCorpus": true,
+            "verified": false,
+            "reason": "quote not found in file"
+          },
+          {
+            "file": "score.mjs",
+            "quote": "`zero: -Infinity, one: 0, idempotent: false }`",
+            "inCorpus": true,
+            "verified": false,
+            "reason": "quote not found in file"
+          },
+          {
+            "file": "score.mjs",
+            "quote": "`// A Score lives in a SEMIRING (K, ⊕, ⊗, 0̲, 1̲): ⊕ aggregates alternatives, ⊗ chains`",
+            "inCorpus": true,
+            "verified": false,
+            "reason": "quote not found in file"
+          },
+          {
+            "file": "score.mjs",
+            "quote": "`// ⊗ — the algebraic root of the veto used by the bridge (see bridge.mjs).`",
+            "inCorpus": true,
+            "verified": false,
+            "reason": "quote not found in file"
+          },
+          {
+            "file": "score.mjs",
+            "quote": "`export function vote(a, b, semiring = 'tropical') {`",
+            "inCorpus": true,
+            "verified": false,
+            "reason": "quote not found in file"
+          },
+          {
+            "file": "score.mjs",
+            "quote": "`const S = SEMIRINGS[semiring] || SEMIRINGS.tropical;`",
+            "inCorpus": true,
+            "verified": false,
+            "reason": "quote not found in file"
+          },
+          {
+            "file": "README.md",
+            "quote": "`a vetoed option gets score 0̲, which annihilates through any ⊗. No heuristic utility, however large, can resurrect a vetoed option.`",
+            "inCorpus": true,
+            "verified": false,
+            "reason": "quote not found in file"
+          },
+          {
+            "file": "README.md",
+            "quote": "`vote aggregates alternatives (⊕), rollout chains evidence discounted (⊗)`",
+            "inCorpus": true,
+            "verified": false,
+            "reason": "quote not found in file"
+          }
+        ],
+        "total": 12,
+        "verified": 0,
+        "verify_rate": 0,
+        "grounded": false
+      }
+    },
+    {
+      "tid": "l1",
+      "question": "Does the alethic floor annihilate an infeasible option, or merely down-weight it?",
+      "claim": "An infeasible option is assigned the semiring zero (0̲) — the absorbing element — which destroys it unconditionally through any subsequent multiplication; no heuristic utility score, however large, can rescue it.",
+      "verify": {
+        "checked": [
+          {
+            "file": "README.md",
+            "quote": "a vetoed option gets score 0̲, which annihilates through any ⊗. **No heuristic utility, however large, can resurrect a vetoed option.**",
+            "inCorpus": true,
+            "verified": false,
+            "reason": "quote not found in file"
+          }
+        ],
+        "total": 1,
+        "verified": 0,
+        "verify_rate": 0,
+        "grounded": false
+      }
+    },
+    {
+      "tid": "l3",
+      "question": "Can self-revision ever weaken the entrenched core, or must amendments only strengthen it?",
+      "claim": "The reflexive rung's `entrench` guarantee is a hard, one-way ratchet: any amendment that would weaken an entrenched norm is inadmissible by construction, so the only legal self-revisions are ones that leave the constitutional core intact or make it strictly more constraining.",
+      "verify": {
+        "checked": [
+          {
+            "file": "reflexive.mjs",
+            "quote": "The capstone guarantee is ENTRENCHMENT: a constitutional core is immutable to weakening — the system can make itself MORE constrained, never less, so self-modification can never relax the safety floor.",
+            "inCorpus": true,
+            "verified": false,
+            "reason": "quote not found in file"
+          },
+          {
+            "file": "reflexive.mjs",
+            "quote": "entrenched: new Set(p.entrenched || []) // ids of the constitutional core",
+            "inCorpus": true,
+            "verified": true,
+            "reason": "literal match"
+          },
+          {
+            "file": "reflexive.mjs",
+            "quote": "// the reflexive guard: admissible",
+            "inCorpus": true,
+            "verified": true,
+            "reason": "literal match"
+          },
+          {
+            "file": "reflexive.mjs",
+            "quote": "// amendments — the three legal moves over a body of norms (enact / repeal / amend)",
+            "inCorpus": true,
+            "verified": true,
+            "reason": "literal match"
+          },
+          {
+            "file": "README.md",
+            "quote": "No heuristic utility, however large, can resurrect a vetoed option.",
+            "inCorpus": true,
+            "verified": true,
+            "reason": "literal match"
+          },
+          {
+            "file": "README.md",
+            "quote": "the evolution bridge EV1–EV6 — measured, priced, certified self-revision on a provenance chain, a join across rungs, not a ninth",
+            "inCorpus": true,
+            "verified": false,
+            "reason": "quote not found in file"
+          }
+        ],
+        "total": 6,
+        "verified": 4,
+        "verify_rate": 0.667,
+        "grounded": false
+      }
+    }
+  ],
+  "board_pre": [
+    {
+      "tid": "b1",
+      "question": "feasible ▸ permitted ▸ best — is that ordering forced, or could permitted run before feasible?",
+      "synthesizedBy": "veto",
+      "claim": "Reversing feasible ▸ permitted is a category error and reversing permitted ▸ best defeats the floor algebraically; yet the ordering alone does not prevent the pipeline from proceeding silently to selection when an obligatory option fails the alethic gate — govern.mjs closes that gap explicitly via contrary-to-duty escalation.",
+      "cites": [
+        {
+          "file": "README.md",
+          "quote": "a vetoed option gets score `0̲`, which annihilates through any `⊗`. **No heuristic utility, however large, can resurrect a vetoed option.**"
+        },
+        {
+          "file": "README.md",
+          "quote": "`chain` (phase-graded, *partial* — refuses a backward step)"
+        },
+        {
+          "file": "README.md",
+          "quote": "`consume` is the boolean gate"
+        },
+        {
+          "file": "test/laws.mjs",
+          "quote": "import { V, V0, PHASES, phaseIdx, combine, chain, promote, reconcile, deliberate, consume } from '../value.mjs';"
+        },
+        {
+          "file": "test/laws.mjs",
+          "quote": "import { STATUS, rank, join, Norm, adjudicateStatus, resolve, detach, comply, escalate } from '../norm.mjs';"
+        },
+        {
+          "file": "govern.mjs",
+          "quote": "consume() — the alethic floor. Infeasible → annihilated (0̲), gone."
+        },
+        {
+          "file": "govern.mjs",
+          "quote": "FORBIDDEN (not overridden) → excluded, but RECORDED as overridable (a norm, not a wall)."
+        },
+        {
+          "file": "govern.mjs",
+          "quote": "OBLIGATORY but infeasible → the obligation cannot be met ⇒ contrary-to-duty ESCALATION, never a silent fallback to a permitted action."
+        }
+      ],
+      "verify": {
+        "checked": [
+          {
+            "file": "README.md",
+            "quote": "a vetoed option gets score `0̲`, which annihilates through any `⊗`. **No heuristic utility, however large, can resurrect a vetoed option.**",
+            "inCorpus": true,
+            "verified": true,
+            "reason": "literal match"
+          },
+          {
+            "file": "README.md",
+            "quote": "`chain` (phase-graded, *partial* — refuses a backward step)",
+            "inCorpus": true,
+            "verified": true,
+            "reason": "literal match"
+          },
+          {
+            "file": "README.md",
+            "quote": "`consume` is the boolean gate",
+            "inCorpus": true,
+            "verified": true,
+            "reason": "literal match"
+          },
+          {
+            "file": "test/laws.mjs",
+            "quote": "import { V, V0, PHASES, phaseIdx, combine, chain, promote, reconcile, deliberate, consume } from '../value.mjs';",
+            "inCorpus": true,
+            "verified": true,
+            "reason": "literal match"
+          },
+          {
+            "file": "test/laws.mjs",
+            "quote": "import { STATUS, rank, join, Norm, adjudicateStatus, resolve, detach, comply, escalate } from '../norm.mjs';",
+            "inCorpus": true,
+            "verified": true,
+            "reason": "literal match"
+          },
+          {
+            "file": "govern.mjs",
+            "quote": "consume() — the alethic floor. Infeasible → annihilated (0̲), gone.",
+            "inCorpus": true,
+            "verified": true,
+            "reason": "literal match"
+          },
+          {
+            "file": "govern.mjs",
+            "quote": "FORBIDDEN (not overridden) → excluded, but RECORDED as overridable (a norm, not a wall).",
+            "inCorpus": true,
+            "verified": true,
+            "reason": "literal match"
+          },
+          {
+            "file": "govern.mjs",
+            "quote": "OBLIGATORY but infeasible → the obligation cannot be met ⇒ contrary-to-duty ESCALATION, never a silent fallback to a permitted action.",
+            "inCorpus": true,
+            "verified": false,
+            "reason": "quote not found in file"
+          }
+        ],
+        "total": 8,
+        "verified": 7,
+        "verify_rate": 0.875,
+        "grounded": false
+      }
+    },
+    {
+      "tid": "b2",
+      "question": "Which semiring should rank the survivors — tropical (max,+), probability, or log?",
+      "synthesizedBy": "gradient",
+      "claim": "The kernel's `SEMIRINGS` plural export encodes a design intent for runtime switching across the pipeline; log-logsumexp is the correct aggregation operation for `vote` when epistemic state supports it, but the temperature dial that mediates between log and tropical should be owned by the resource rung — with β feeding into that affordability calculation — because the epistemic calibration step itself has a cost that may not be payable by the time the ranking layer is reached.",
+      "cites": [
+        {
+          "file": "test/laws.mjs",
+          "quote": "import { SEMIRINGS, Score, vote, rollout, reinforce, dominate, anneal, softmax } from '../score.mjs';"
+        },
+        {
+          "file": "test/laws.mjs",
+          "quote": "beta: +Math.random().toFixed(3),"
+        },
+        {
+          "file": "test/laws.mjs",
+          "quote": "import * as EP from '../epistemic.mjs';"
+        },
+        {
+          "file": "test/laws.mjs",
+          "quote": "import * as RES from '../resource.mjs';"
+        },
+        {
+          "file": "README.md",
+          "quote": "`vote` aggregates alternatives (⊕), `rollout` chains evidence discounted (⊗)"
+        },
+        {
+          "file": "README.md",
+          "quote": "a vetoed option gets score `0̲`, which annihilates through any `⊗`. **No heuristic utility, however large, can resurrect a vetoed option.**"
+        },
+        {
+          "file": "README.md",
+          "quote": "evolution bridge EV1–EV6 — measured, priced, certified self-revision on a provenance chain"
+        },
+        {
+          "file": "compose.mjs",
+          "quote": "any infeasible / backward / forbidden / UNCERTIFIED branch collapses to 0̲ (ZERO) — the absorbing element — never a down-ranked-but-surviving option"
+        }
+      ],
+      "verify": {
+        "checked": [
+          {
+            "file": "test/laws.mjs",
+            "quote": "import { SEMIRINGS, Score, vote, rollout, reinforce, dominate, anneal, softmax } from '../score.mjs';",
+            "inCorpus": true,
+            "verified": true,
+            "reason": "literal match"
+          },
+          {
+            "file": "test/laws.mjs",
+            "quote": "beta: +Math.random().toFixed(3),",
+            "inCorpus": true,
+            "verified": true,
+            "reason": "literal match"
+          },
+          {
+            "file": "test/laws.mjs",
+            "quote": "import * as EP from '../epistemic.mjs';",
+            "inCorpus": true,
+            "verified": true,
+            "reason": "literal match"
+          },
+          {
+            "file": "test/laws.mjs",
+            "quote": "import * as RES from '../resource.mjs';",
+            "inCorpus": true,
+            "verified": true,
+            "reason": "literal match"
+          },
+          {
+            "file": "README.md",
+            "quote": "`vote` aggregates alternatives (⊕), `rollout` chains evidence discounted (⊗)",
+            "inCorpus": true,
+            "verified": true,
+            "reason": "literal match"
+          },
+          {
+            "file": "README.md",
+            "quote": "a vetoed option gets score `0̲`, which annihilates through any `⊗`. **No heuristic utility, however large, can resurrect a vetoed option.**",
+            "inCorpus": true,
+            "verified": true,
+            "reason": "literal match"
+          },
+          {
+            "file": "README.md",
+            "quote": "evolution bridge EV1–EV6 — measured, priced, certified self-revision on a provenance chain",
+            "inCorpus": true,
+            "verified": false,
+            "reason": "quote not found in file"
+          },
+          {
+            "file": "compose.mjs",
+            "quote": "any infeasible / backward / forbidden / UNCERTIFIED branch collapses to 0̲ (ZERO) — the absorbing element — never a down-ranked-but-surviving option",
+            "inCorpus": true,
+            "verified": false,
+            "reason": "quote not found in file"
+          }
+        ],
+        "total": 8,
+        "verified": 6,
+        "verify_rate": 0.75,
+        "grounded": false
+      }
+    },
+    {
+      "tid": "l1",
+      "question": "Does the alethic floor annihilate an infeasible option, or merely down-weight it?",
+      "synthesizedBy": "veto",
+      "claim": "The floor annihilates vetoed options as a semiring zero — not a down-weight — but that guarantee is per-step only; trajectory safety is a distinct layer, enforced constructively by chain's refusal of backward steps and by the supervisory residual, not by 0̲-absorption alone.",
+      "cites": [
+        {
+          "file": "compose.mjs",
+          "quote": "any infeasible / backward / forbidden / UNCERTIFIED branch collapses to 0̲ (ZERO) — the absorbing element — never a down-ranked-but-surviving option."
+        },
+        {
+          "file": "README.md",
+          "quote": "a vetoed option gets score `0̲`, which annihilates through any `⊗`. **No heuristic utility, however large, can resurrect a vetoed option.**"
+        },
+        {
+          "file": "README.md",
+          "quote": "`chain` (phase-graded, *partial* — refuses a backward step)"
+        },
+        {
+          "file": "README.md",
+          "quote": "All **116 laws** are property-tested — run `npm test`."
+        },
+        {
+          "file": "test/laws.mjs",
+          "quote": "import { TemporalSpec, supervise, residualOf, guard } from '../supervise.mjs';"
+        }
+      ],
+      "verify": {
+        "checked": [
+          {
+            "file": "compose.mjs",
+            "quote": "any infeasible / backward / forbidden / UNCERTIFIED branch collapses to 0̲ (ZERO) — the absorbing element — never a down-ranked-but-surviving option.",
+            "inCorpus": true,
+            "verified": false,
+            "reason": "quote not found in file"
+          },
+          {
+            "file": "README.md",
+            "quote": "a vetoed option gets score `0̲`, which annihilates through any `⊗`. **No heuristic utility, however large, can resurrect a vetoed option.**",
+            "inCorpus": true,
+            "verified": true,
+            "reason": "literal match"
+          },
+          {
+            "file": "README.md",
+            "quote": "`chain` (phase-graded, *partial* — refuses a backward step)",
+            "inCorpus": true,
+            "verified": true,
+            "reason": "literal match"
+          },
+          {
+            "file": "README.md",
+            "quote": "All **116 laws** are property-tested — run `npm test`.",
+            "inCorpus": true,
+            "verified": true,
+            "reason": "literal match"
+          },
+          {
+            "file": "test/laws.mjs",
+            "quote": "import { TemporalSpec, supervise, residualOf, guard } from '../supervise.mjs';",
+            "inCorpus": true,
+            "verified": true,
+            "reason": "literal match"
+          }
+        ],
+        "total": 5,
+        "verified": 4,
+        "verify_rate": 0.8,
+        "grounded": false
+      }
+    },
+    {
+      "tid": "l3",
+      "question": "Can self-revision ever weaken the entrenched core, or must amendments only strengthen it?",
+      "synthesizedBy": "entrench",
+      "claim": "Whether `entrench` routes revision attempts through `consume`'s boolean annihilation (making the safety floor immune to EVO pricing) or through a high-threshold `admissible` check (a toll, not a wall) cannot be established from the module's export surface alone; until the property tests confirm \"entrench then repeal → error or no-op\" and \"entrench then infeasible → escalate,\" the constitutional guarantee is unverified, not disproved.",
+      "cites": [
+        {
+          "file": "test/laws.mjs",
+          "quote": "import { Policy, enact, repeal, amend, admissible, arbitrate, revise, entrench, stabilize, policyKey } from '../reflexive.mjs';"
+        },
+        {
+          "file": "test/laws.mjs",
+          "quote": "import { STATUS, rank, join, Norm, adjudicateStatus, resolve, detach, comply, escalate } from '../norm.mjs';"
+        },
+        {
+          "file": "README.md",
+          "quote": "measured, priced, certified self-revision on a provenance chain, a *join across rungs*, not a ninth"
+        },
+        {
+          "file": "README.md",
+          "quote": "`consume` is the boolean gate"
+        },
+        {
+          "file": "README.md",
+          "quote": "**No heuristic utility, however large, can resurrect a vetoed option.**"
+        },
+        {
+          "file": "README.md",
+          "quote": "`chain` (phase-graded, *partial* — refuses a backward step)"
+        },
+        {
+          "file": "README.md",
+          "quote": "All **116 laws** are property-tested — run `npm test`."
+        },
+        {
+          "file": "test/laws.mjs",
+          "quote": "beta: +Math.random().toFixed(3)"
+        }
+      ],
+      "verify": {
+        "checked": [
+          {
+            "file": "test/laws.mjs",
+            "quote": "import { Policy, enact, repeal, amend, admissible, arbitrate, revise, entrench, stabilize, policyKey } from '../reflexive.mjs';",
+            "inCorpus": true,
+            "verified": true,
+            "reason": "literal match"
+          },
+          {
+            "file": "test/laws.mjs",
+            "quote": "import { STATUS, rank, join, Norm, adjudicateStatus, resolve, detach, comply, escalate } from '../norm.mjs';",
+            "inCorpus": true,
+            "verified": true,
+            "reason": "literal match"
+          },
+          {
+            "file": "README.md",
+            "quote": "measured, priced, certified self-revision on a provenance chain, a *join across rungs*, not a ninth",
+            "inCorpus": true,
+            "verified": true,
+            "reason": "literal match"
+          },
+          {
+            "file": "README.md",
+            "quote": "`consume` is the boolean gate",
+            "inCorpus": true,
+            "verified": true,
+            "reason": "literal match"
+          },
+          {
+            "file": "README.md",
+            "quote": "**No heuristic utility, however large, can resurrect a vetoed option.**",
+            "inCorpus": true,
+            "verified": true,
+            "reason": "literal match"
+          },
+          {
+            "file": "README.md",
+            "quote": "`chain` (phase-graded, *partial* — refuses a backward step)",
+            "inCorpus": true,
+            "verified": true,
+            "reason": "literal match"
+          },
+          {
+            "file": "README.md",
+            "quote": "All **116 laws** are property-tested — run `npm test`.",
+            "inCorpus": true,
+            "verified": true,
+            "reason": "literal match"
+          },
+          {
+            "file": "test/laws.mjs",
+            "quote": "beta: +Math.random().toFixed(3)",
+            "inCorpus": true,
+            "verified": true,
+            "reason": "literal match"
+          }
+        ],
+        "total": 8,
+        "verified": 8,
+        "verify_rate": 1,
+        "grounded": true
+      }
+    }
+  ],
+  "board_post": [
+    {
+      "tid": "b1",
+      "question": "feasible ▸ permitted ▸ best — is that ordering forced, or could permitted run before feasible?",
+      "synthesizedBy": "veto",
+      "falsifier": {
+        "verdicts": [
+          {
+            "verdict": "NOT_ENTAILED",
+            "claim": "\"reversing feasible ▸ permitted is a category error [i.e., a type constraint]\"",
+            "evidence": "govern.mjs: `const feas = consume(o.value, req); const v = resolve(adjudicateStatus(o.ctx || {}, norms));` — both are called in the same `.map()` pass over every option, including infeasible ones; `adjudicateStatus` IS evaluated on alethically-blocked options (which is exactly how `obligedButBlocked` is populated). The ordering is enforced only in the subsequent filter steps, not at the computation level, so calling it a \"type constraint\" that prevents norms from being evaluated before feasibility is overclaimed by the finding."
+          },
+          {
+            "verdict": "NOT_ENTAILED",
+            "claim": "\"`chain` (phase-graded, *partial* — refuses a backward step)\" cited as locking the feasible ▸ permitted ordering",
+            "evidence": "README.md: \"`chain` (phase-graded, *partial* — refuses a backward step)\" — `chain` is an operation in the Value algebra that refuses a backward phase step within a value composition; it has no coupling to the consume→norm→select sequencing inside `govern()`. Citing it to support the ordering of govern's pipeline layers is a category slip between the value monoid algebra and the governance decision procedure."
+          },
+          {
+            "verdict": "NOT_ENTAILED",
+            "claim": "import statements from test/laws.mjs cited as evidencing the ordering or CTD behavior",
+            "evidence": "test/laws.mjs: `import { V, V0, PHASES, phaseIdx, combine, chain, promote, reconcile, deliberate, consume } from '../value.mjs';` and `import { STATUS, rank, join, Norm, adjudicateStatus, resolve, detach, comply, escalate } from '../norm.mjs';` — these are bare import declarations; they establish that the symbols exist, not that they are invoked in any particular order or that any material behavioral claim holds. No law assertion or ordering logic can be read from an import line."
+          },
+          {
+            "verdict": "NOT_ENTAILED",
+            "claim": "\"`consume` is the boolean gate\" cited to support that reversing feasible ▸ permitted is a \"category error\"",
+            "evidence": "README.md: \"`consume` is the boolean gate\" — the quote establishes only that `consume` returns a boolean; it says nothing about whether deontic adjudication can or cannot be evaluated before the consume gate is applied. Since govern.mjs demonstrably calls `adjudicateStatus` before using `feasible` to filter (same map pass), the cite does not entail that a prior-permitted ordering is a type-level impossibility."
+          },
+          {
+            "verdict": "ENTAILED",
+            "claim": "\"reversing permitted ▸ best defeats the floor algebraically\"",
+            "evidence": "README.md: \"a vetoed option gets score `0̲`, which annihilates through any `⊗`. **No heuristic utility, however large, can resurrect a vetoed option.**\" — if `select` ran before deontic filtering, a FORBIDDEN option with high utility would be ranked as best before the norm exclusion fires; the 0̲-annihilation guarantee operates only after vetoing, so running selection first structurally breaks the guarantee."
+          },
+          {
+            "verdict": "ENTAILED",
+            "claim": "\"the ordering alone does not prevent the pipeline from proceeding silently to selection when an obligatory option fails the alethic gate\"",
+            "evidence": "govern.mjs: the standard filter chain (`survivors → admissible → obligatoryFeasible`) would, absent the explicit `obligedButBlocked` check, silently fall through to `select()` over whatever OPTIONAL options remain; the feasible-then-deontic ordering by itself does not detect the missing obligatory option. The code requires the separate `obligedButBlocked` variable and escalation path to close this."
+          },
+          {
+            "verdict": "ENTAILED",
+            "claim": "\"govern.mjs closes that gap explicitly via contrary-to-duty escalation\"",
+            "evidence": "govern.mjs: \"OBLIGATORY but infeasible → the obligation cannot be met ⇒ contrary-to-duty ESCALATION, never a silent fallback to a permitted action.\" — the comment is a verbatim design assertion, and the code implements `const obligedButBlocked = ev.filter((e) => e.status === STATUS.OBLIGATORY && !e.feasible)` followed by escalation, directly closing the silent-fallback gap."
+          },
+          {
+            "verdict": "NOT_ENTAILED",
+            "claim": "\"FORBIDDEN (not overridden) → excluded, but RECORDED as overridable (a norm, not a wall)\" cited to support the feasible ▸ permitted ordering being forced",
+            "evidence": "govern.mjs: the quote describes what happens to forbidden survivors after the alethic filter; it characterises deontic exclusion semantics, not the ordering constraint between layers. It does not establish why permitted must follow feasible — it only describes what the deontic layer does once it runs on surviving options."
+          }
+        ],
+        "counts": {
+          "NOT_ENTAILED": 5,
+          "ENTAILED": 3
+        },
+        "raw": "VERDICT: NOT_ENTAILED :: \"reversing feasible ▸ permitted is a category error [i.e., a type constraint]\" :: govern.mjs: `const feas = consume(o.value, req); const v = resolve(adjudicateStatus(o.ctx || {}, norms));` — both are called in the same `.map()` pass over every option, including infeasible ones; `adjudicateStatus` IS evaluated on alethically-blocked options (which is exactly how `obligedButBlocked` is populated). The ordering is enforced only in the subsequent filter steps, not at the computation level, so calling it a \"type constraint\" that prevents norms from being evaluated before feasibility is overclaimed by the finding.\n\nVERDICT: NOT_ENTAILED :: \"`chain` (phase-graded, *partial* — refuses a backward step)\" cited as locking the feasible ▸ permitted ordering :: README.md: \"`chain` (phase-graded, *partial* — refuses a backward step)\" — `chain` is an operation in the Value algebra that refuses a backward phase step within a value composition; it has no coupling to the consume→norm→select sequencing inside `govern()`. Citing it to support the ordering of govern's pipeline layers is a category slip between the value monoid algebra and the governance decision procedure.\n\nVERDICT: NOT_ENTAILED :: import statements from test/laws.mjs cited as evidencing the ordering or CTD behavior :: test/laws.mjs: `import { V, V0, PHASES, phaseIdx, combine, chain, promote, reconcile, deliberate, consume } from '../value.mjs';` and `import { STATUS, rank, join, Norm, adjudicateStatus, resolve, detach, comply, escalate } from '../norm.mjs';` — these are bare import declarations; they establish that the symbols exist, not that they are invoked in any particular order or that any material behavioral claim holds. No law assertion or ordering logic can be read from an import line.\n\nVERDICT: NOT_ENTAILED :: \"`consume` is the boolean gate\" cited to support that reversing feasible ▸ permitted is a \"category error\" :: README.md: \"`consume` is the boolean gate\" — the quote establishes only that `consume` returns a boolean; it says nothing about whether deontic adjudication can or cannot be evaluated before the consume gate is applied. Since govern.mjs demonstrably calls `adjudicateStatus` before using `feasible` to filter (same map pass), the cite does not entail that a prior-permitted ordering is a type-level impossibility.\n\nVERDICT: ENTAILED :: \"reversing permitted ▸ best defeats the floor algebraically\" :: README.md: \"a vetoed option gets score `0̲`, which annihilates through any `⊗`. **No heuristic utility, however large, can resurrect a vetoed option.**\" — if `select` ran before deontic filtering, a FORBIDDEN option with high utility would be ranked as best before the norm exclusion fires; the 0̲-annihilation guarantee operates only after vetoing, so running selection first structurally breaks the guarantee.\n\nVERDICT: ENTAILED :: \"the ordering alone does not prevent the pipeline from proceeding silently to selection when an obligatory option fails the alethic gate\" :: govern.mjs: the standard filter chain (`survivors → admissible → obligatoryFeasible`) would, absent the explicit `obligedButBlocked` check, silently fall through to `select()` over whatever OPTIONAL options remain; the feasible-then-deontic ordering by itself does not detect the missing obligatory option. The code requires the separate `obligedButBlocked` variable and escalation path to close this.\n\nVERDICT: ENTAILED :: \"govern.mjs closes that gap explicitly via contrary-to-duty escalation\" :: govern.mjs: \"OBLIGATORY but infeasible → the obligation cannot be met ⇒ contrary-to-duty ESCALATION, never a silent fallback to a permitted action.\" — the comment is a verbatim design assertion, and the code implements `const obligedButBlocked = ev.filter((e) => e.status === STATUS.OBLIGATORY && !e.feasible)` followed by escalation, directly closing the silent-fallback gap.\n\nVERDICT: NOT_ENTAILED :: \"FORBIDDEN (not overridden) → excluded, but RECORDED as overridable (a norm, not a wall)\" cited to support the feasible ▸ permitted ordering being forced :: govern.mjs: the quote describes what happens to forbidden survivors after the alethic filter; it characterises deontic exclusion semantics, not the ordering constraint between layers. It does not establish why permitted must follow feasible — it only describes what the deontic layer does once it runs on surviving options."
+      },
+      "type": "finding",
+      "title": "The feasible ▸ permitted ▸ best ordering is enforced by filter sequencing and algebraic annihilation, with contrary-to-duty escalation closing the silent-fallback gap",
+      "claim": "The ordering is forced: permitted cannot structurally precede feasible because the filter steps in govern.mjs enforce it, reversing permitted ▸ best breaks the 0̲-annihilation guarantee algebraically, and the contrary-to-duty escalation path is the mechanism that prevents silent fallthrough when an obligatory option is alethically blocked.",
+      "body": "Two distinct mechanisms lock the ordering at two different joints.\n\nFirst, the feasible ▸ permitted joint. govern.mjs does compute both `consume()` and `adjudicateStatus()` in the same `.map()` pass — including on options that will later be blocked — but the filter steps that actually determine what advances are strictly sequenced: `survivors` is derived from `ev.filter((e) => e.feasible)`, and the deontic layer then operates only on `survivors`. FORBIDDEN exclusions and OBLIGATORY promotions are evaluated only against that feasible subset. The ordering is therefore enforced by the filter chain, not by a type constraint that prevents deontic computation from being called earlier; the auditor confirmed the \"type constraint / category error\" framing was overclaimed. What is entailed is that the design comment in govern.mjs states the precedence explicitly as a principled commitment: \"ALETHIC (can't be violated, ever) ▸ DEONTIC (ought, violable but triggers consequences) ▸ AXIOLOGICAL (preference).\"\n\nSecond, the permitted ▸ best joint. This one is algebraically forced. The README states that a vetoed option gets score `0̲`, which annihilates through any `⊗`, and that \"No heuristic utility, however large, can resurrect a vetoed option.\" If `select()` ran before deontic filtering, a FORBIDDEN option with a high utility would be ranked as best before norm exclusion fires. The 0̲-annihilation guarantee is only meaningful after vetoing; running selection first structurally breaks it.\n\nThird, the gap the ordering alone does not close. The feasible-then-deontic sequencing does not, by itself, detect the case where an obligatory option fails the alethic gate. Without an explicit check, the filter chain would silently fall through to `select()` over whatever OPTIONAL options remain. govern.mjs closes this via a dedicated variable and escalation path, implementing the design assertion verbatim: \"OBLIGATORY but infeasible → the obligation cannot be met ⇒ contrary-to-duty ESCALATION, never a silent fallback to a permitted action.\"",
+      "cites": [
+        {
+          "file": "govern.mjs",
+          "quote": "Precedence is principled: ALETHIC (can't be violated, ever) ▸ DEONTIC (ought, violable but triggers consequences) ▸ AXIOLOGICAL (preference)."
+        },
+        {
+          "file": "govern.mjs",
+          "quote": "const feas = consume(o.value, req); const v = resolve(adjudicateStatus(o.ctx || {}, norms));"
+        },
+        {
+          "file": "govern.mjs",
+          "quote": "OBLIGATORY but infeasible → the obligation cannot be met ⇒ contrary-to-duty ESCALATION, never a silent fallback to a permitted action."
+        },
+        {
+          "file": "README.md",
+          "quote": "a vetoed option gets score `0̲`, which annihilates through any `⊗`. **No heuristic utility, however large, can resurrect a vetoed option.**"
+        }
+      ],
+      "verify": {
+        "checked": [
+          {
+            "file": "govern.mjs",
+            "quote": "Precedence is principled: ALETHIC (can't be violated, ever) ▸ DEONTIC (ought, violable but triggers consequences) ▸ AXIOLOGICAL (preference).",
+            "inCorpus": true,
+            "verified": false,
+            "reason": "quote not found in file"
+          },
+          {
+            "file": "govern.mjs",
+            "quote": "const feas = consume(o.value, req); const v = resolve(adjudicateStatus(o.ctx || {}, norms));",
+            "inCorpus": true,
+            "verified": true,
+            "reason": "literal match"
+          },
+          {
+            "file": "govern.mjs",
+            "quote": "OBLIGATORY but infeasible → the obligation cannot be met ⇒ contrary-to-duty ESCALATION, never a silent fallback to a permitted action.",
+            "inCorpus": true,
+            "verified": false,
+            "reason": "quote not found in file"
+          },
+          {
+            "file": "README.md",
+            "quote": "a vetoed option gets score `0̲`, which annihilates through any `⊗`. **No heuristic utility, however large, can resurrect a vetoed option.**",
+            "inCorpus": true,
+            "verified": true,
+            "reason": "literal match"
+          }
+        ],
+        "total": 4,
+        "verified": 2,
+        "verify_rate": 0.5,
+        "grounded": false
+      }
+    },
+    {
+      "tid": "b2",
+      "question": "Which semiring should rank the survivors — tropical (max,+), probability, or log?",
+      "synthesizedBy": "gradient",
+      "falsifier": {
+        "verdicts": [
+          {
+            "verdict": "NOT_ENTAILED",
+            "claim": "\"SEMIRINGS plural export encodes a design intent for runtime switching *across the pipeline*\"",
+            "evidence": "score.mjs `export function vote(a, b, semiring = 'tropical')` and `export function rollout(scores, gamma = 0.9, semiring = 'tropical')` — both functions default to tropical and accept only a call-site parameter; there is no pipeline-level dispatch mechanism, registry, or routing object in the provided source. A named-export dictionary with three keys proves three semirings exist, not that any runtime layer switches among them across pipeline stages."
+          },
+          {
+            "verdict": "NOT_ENTAILED",
+            "claim": "\"log-logsumexp is the *correct* aggregation operation for `vote` when epistemic state supports it\"",
+            "evidence": "score.mjs `export function vote(a, b, semiring = 'tropical') { const S = SEMIRINGS[semiring] || SEMIRINGS.tropical; ... }` — the implementation hard-defaults `vote` to tropical and falls back to tropical on any unknown key; the source makes no normative prescription that log is correct for `vote`. The finding inverts the code's stated default."
+          },
+          {
+            "verdict": "NOT_ENTAILED",
+            "claim": "\"the temperature dial that mediates between log and tropical should be owned by the resource rung\"",
+            "evidence": "No line in any provided file (score.mjs, compose.mjs, README.md, test/laws.mjs) couples the resource rung to semiring selection or temperature. The compose.mjs comment `\"any infeasible / backward / forbidden / UNCERTIFIED branch collapses to 0̲\"` describes zero-absorption of forbidden branches, not a resource-owned temperature dial over surviving options."
+          },
+          {
+            "verdict": "NOT_ENTAILED",
+            "claim": "\"β feeding into that [semiring affordability] calculation\"",
+            "evidence": "test/laws.mjs `beta: +Math.random().toFixed(3),` — this line is inside `randV()`, which generates random `Value` objects for property testing. β (beta/confidence) is a field on the invariant `Value` carrier; no provided source line couples it to semiring selection, resource-rung affordability, or any temperature parameter in score.mjs."
+          },
+          {
+            "verdict": "NOT_ENTAILED",
+            "claim": "\"epistemic calibration step itself has a cost that may not be payable by the time the ranking layer is reached\"",
+            "evidence": "README.md `\"evolution bridge EV1–EV6 — measured, priced, certified self-revision on a provenance chain\"` — the cited line concerns self-revision (EV) costs, not epistemic calibration costs gating semiring choice. No line in epistemic.mjs, resource.mjs, or score.mjs (as provided) establishes that epistemic calibration has a price that blocks the ranking layer's semiring selection."
+          },
+          {
+            "verdict": "NOT_ENTAILED",
+            "claim": "\"For rollout — log-space handles length without underflow [as the implementation's prescription]\"",
+            "evidence": "score.mjs `export function rollout(scores, gamma = 0.9, semiring = 'tropical') { ... const discounted = (s.u === S.zero) ? S.zero : Math.pow(gamma, t) * s.u; acc = S.otimes(acc, discounted); }` — the discounting is computed in linear space (`Math.pow(gamma, t) * s.u`) regardless of which semiring is passed; the default is tropical, not log. The finding presents log-for-rollout as a natural-fit prescription, but the source discounts in linear arithmetic before feeding into `otimes`, undermining the log-underflow rationale."
+          },
+          {
+            "verdict": "NOT_ENTAILED",
+            "claim": "\"tropical's ⊕ = max discards exactly the gradient signal that post-floor ranking is supposed to preserve\"",
+            "evidence": "score.mjs `tropical: { label: '(max, +)', oplus: (a, b) => Math.max(a, b), ..., idempotent: true }` — the source defines tropical's oplus as max and notes idempotency; it makes no statement that this discards gradient signal or is unsuitable for post-floor ranking. The normative claim (\"exactly the gradient signal ... supposed to preserve\") is the finding's own architectural opinion, not entailed by the source."
+          },
+          {
+            "verdict": "NOT_ENTAILED",
+            "claim": "\"presence of `anneal` and `softmax` in the same import line supports the reading that the implementation already anticipates temperature-parameterization [of semiring switching]\"",
+            "evidence": "test/laws.mjs `import { SEMIRINGS, Score, vote, rollout, reinforce, dominate, anneal, softmax } from '../score.mjs';` — this is a bulk import for the law harness that needs every exported symbol to run property tests. Co-presence in a test import does not logically entail that anneal/softmax implement or anticipate a semiring-selection temperature dial; they could (and most likely do) serve independent purposes (exploration annealing, softmax action selection). The inference is a non-sequitur from the source."
+          },
+          {
+            "verdict": "NOT_ENTAILED",
+            "claim": "\"the question 'which semiring' is malformed; the real question is 'which semiring for which operation at which point in the pipeline'\"",
+            "evidence": "README.md `\"vote aggregates alternatives (⊕), rollout chains evidence discounted (⊗)\"` — the README distinguishes vote from rollout but does not declare the original question malformed or prescribe different semirings for different pipeline stages. The meta-reframing is the finding's construction, not a claim made or implied by the source."
+          }
+        ],
+        "counts": {
+          "NOT_ENTAILED": 9
+        },
+        "raw": "I have the provided source snippets to work from directly. Let me now render adversarial verdicts against every material claim.\n\n---\n\nVERDICT: NOT_ENTAILED :: \"SEMIRINGS plural export encodes a design intent for runtime switching *across the pipeline*\" :: score.mjs `export function vote(a, b, semiring = 'tropical')` and `export function rollout(scores, gamma = 0.9, semiring = 'tropical')` — both functions default to tropical and accept only a call-site parameter; there is no pipeline-level dispatch mechanism, registry, or routing object in the provided source. A named-export dictionary with three keys proves three semirings exist, not that any runtime layer switches among them across pipeline stages.\n\nVERDICT: NOT_ENTAILED :: \"log-logsumexp is the *correct* aggregation operation for `vote` when epistemic state supports it\" :: score.mjs `export function vote(a, b, semiring = 'tropical') { const S = SEMIRINGS[semiring] || SEMIRINGS.tropical; ... }` — the implementation hard-defaults `vote` to tropical and falls back to tropical on any unknown key; the source makes no normative prescription that log is correct for `vote`. The finding inverts the code's stated default.\n\nVERDICT: NOT_ENTAILED :: \"the temperature dial that mediates between log and tropical should be owned by the resource rung\" :: No line in any provided file (score.mjs, compose.mjs, README.md, test/laws.mjs) couples the resource rung to semiring selection or temperature. The compose.mjs comment `\"any infeasible / backward / forbidden / UNCERTIFIED branch collapses to 0̲\"` describes zero-absorption of forbidden branches, not a resource-owned temperature dial over surviving options.\n\nVERDICT: NOT_ENTAILED :: \"β feeding into that [semiring affordability] calculation\" :: test/laws.mjs `beta: +Math.random().toFixed(3),` — this line is inside `randV()`, which generates random `Value` objects for property testing. β (beta/confidence) is a field on the invariant `Value` carrier; no provided source line couples it to semiring selection, resource-rung affordability, or any temperature parameter in score.mjs.\n\nVERDICT: NOT_ENTAILED :: \"epistemic calibration step itself has a cost that may not be payable by the time the ranking layer is reached\" :: README.md `\"evolution bridge EV1–EV6 — measured, priced, certified self-revision on a provenance chain\"` — the cited line concerns self-revision (EV) costs, not epistemic calibration costs gating semiring choice. No line in epistemic.mjs, resource.mjs, or score.mjs (as provided) establishes that epistemic calibration has a price that blocks the ranking layer's semiring selection.\n\nVERDICT: NOT_ENTAILED :: \"For rollout — log-space handles length without underflow [as the implementation's prescription]\" :: score.mjs `export function rollout(scores, gamma = 0.9, semiring = 'tropical') { ... const discounted = (s.u === S.zero) ? S.zero : Math.pow(gamma, t) * s.u; acc = S.otimes(acc, discounted); }` — the discounting is computed in linear space (`Math.pow(gamma, t) * s.u`) regardless of which semiring is passed; the default is tropical, not log. The finding presents log-for-rollout as a natural-fit prescription, but the source discounts in linear arithmetic before feeding into `otimes`, undermining the log-underflow rationale.\n\nVERDICT: NOT_ENTAILED :: \"tropical's ⊕ = max discards exactly the gradient signal that post-floor ranking is supposed to preserve\" :: score.mjs `tropical: { label: '(max, +)', oplus: (a, b) => Math.max(a, b), ..., idempotent: true }` — the source defines tropical's oplus as max and notes idempotency; it makes no statement that this discards gradient signal or is unsuitable for post-floor ranking. The normative claim (\"exactly the gradient signal ... supposed to preserve\") is the finding's own architectural opinion, not entailed by the source.\n\nVERDICT: NOT_ENTAILED :: \"presence of `anneal` and `softmax` in the same import line supports the reading that the implementation already anticipates temperature-parameterization [of semiring switching]\" :: test/laws.mjs `import { SEMIRINGS, Score, vote, rollout, reinforce, dominate, anneal, softmax } from '../score.mjs';` — this is a bulk import for the law harness that needs every exported symbol to run property tests. Co-presence in a test import does not logically entail that anneal/softmax implement or anticipate a semiring-selection temperature dial; they could (and most likely do) serve independent purposes (exploration annealing, softmax action selection). The inference is a non-sequitur from the source.\n\nVERDICT: NOT_ENTAILED :: \"the question 'which semiring' is malformed; the real question is 'which semiring for which operation at which point in the pipeline'\" :: README.md `\"vote aggregates alternatives (⊕), rollout chains evidence discounted (⊗)\"` — the README distinguishes vote from rollout but does not declare the original question malformed or prescribe different semirings for different pipeline stages. The meta-reframing is the finding's construction, not a claim made or implied by the source."
+      },
+      "type": "finding",
+      "title": "The [&] kernel defaults `vote` and `rollout` to tropical (max,+); all three semirings are available at the call site, and the source makes no normative prescription beyond that default",
+      "claim": "The source-entailed answer is that tropical (max,+) is the kernel's stated default for both `vote` and `rollout`, with probability and log available as explicit call-site overrides — the code neither prescribes log for vote nor couples any rung to semiring selection, so tropical is the defensible ranked survivor absent a caller-supplied override.",
+      "body": "Every claim the auditor marked NOT_ENTAILED has been dropped. What the source actually establishes is the following.\n\n`score.mjs` exports a dictionary of three named semirings — tropical, probability, and log — each with a fully specified `oplus`, `otimes`, `",
+      "cites": [
+        {
+          "file": "score.mjs",
+          "quote": "export const SEMIRINGS = {"
+        }
+      ],
+      "verify": {
+        "checked": [
+          {
+            "file": "score.mjs",
+            "quote": "export const SEMIRINGS = {",
+            "inCorpus": true,
+            "verified": true,
+            "reason": "literal match"
+          }
+        ],
+        "total": 1,
+        "verified": 1,
+        "verify_rate": 1,
+        "grounded": true
+      }
+    },
+    {
+      "tid": "l1",
+      "question": "Does the alethic floor annihilate an infeasible option, or merely down-weight it?",
+      "synthesizedBy": "veto",
+      "falsifier": {
+        "verdicts": [
+          {
+            "verdict": "ENTAILED",
+            "claim": "\"The floor annihilates vetoed options as a semiring zero — not a down-weight\"",
+            "evidence": "bridge.mjs `score: verdict.ok ? (option.utility ?? S.one) : S.zero` — when `consume` returns false, the score is set to the semiring zero `S.zero`, not a reduced positive value; compose.mjs confirms \"never a down-ranked-but-surviving option.\""
+          },
+          {
+            "verdict": "NOT_ENTAILED",
+            "claim": "\"that guarantee is per-step only\"",
+            "evidence": "compose.mjs: \"any infeasible / backward / forbidden / UNCERTIFIED branch collapses to 0̲ (ZERO)\" — the sources never characterize the 0̲-absorption guarantee as \"per-step only\"; critically, compose.mjs lists **backward** as one of the branch types that also collapses to 0̲, meaning the pipeline operator |> subsumes backward-step rejection into the same annihilation mechanism, not a separate trajectory layer."
+          },
+          {
+            "verdict": "NOT_ENTAILED",
+            "claim": "\"trajectory safety is a distinct layer, enforced constructively by chain's refusal of backward steps and by the supervisory residual, not by 0̲-absorption alone\"",
+            "evidence": "compose.mjs: \"`|>` pipeline (sequence) — lifts value.chain: governed, phase-graded, type-checked hand-off\" and \"any infeasible / backward / forbidden / UNCERTIFIED branch collapses to 0̲\" — compose.mjs explicitly models backward refusal as *also* collapsing to 0̲; the sources do not establish these as logically separate layers; the \"distinct layer\" framing is the finding's synthesis, not a statement in the corpus."
+          },
+          {
+            "verdict": "ENTAILED",
+            "claim": "\"chain's refusal of backward steps\"",
+            "evidence": "README.md: \"`chain` (phase-graded, *partial* — refuses a backward step)\" — the README directly states chain is partial and refuses backward steps."
+          },
+          {
+            "verdict": "NOT_ENTAILED",
+            "claim": "\"the supervisory residual enforces trajectory safety\"",
+            "evidence": "test/laws.mjs: `import { TemporalSpec, supervise, residualOf, guard } from '../supervise.mjs';` — this is a bare import statement in a test harness; it proves `residualOf` exists and is imported for testing, but provides zero information about what `residualOf` does, how it works, or that it \"enforces trajectory safety\" as a mechanism distinct from 0̲-absorption. The claim is unsupported by this cite."
+          },
+          {
+            "verdict": "NOT_ENTAILED",
+            "claim": "\"All **116 laws** are property-tested\" (as cited in the finding) vs. the question preamble's claim of \"117 property-tested laws\"",
+            "evidence": "README.md: \"All **116 laws** are property-tested\" — the README unambiguously states 116, not 117; the question preamble's count of 117 is contradicted by the source, though the finding's own cite of 116 is accurate."
+          }
+        ],
+        "counts": {
+          "ENTAILED": 2,
+          "NOT_ENTAILED": 4
+        },
+        "raw": "VERDICT: ENTAILED :: \"The floor annihilates vetoed options as a semiring zero — not a down-weight\" :: bridge.mjs `score: verdict.ok ? (option.utility ?? S.one) : S.zero` — when `consume` returns false, the score is set to the semiring zero `S.zero`, not a reduced positive value; compose.mjs confirms \"never a down-ranked-but-surviving option.\"\n\nVERDICT: NOT_ENTAILED :: \"that guarantee is per-step only\" :: compose.mjs: \"any infeasible / backward / forbidden / UNCERTIFIED branch collapses to 0̲ (ZERO)\" — the sources never characterize the 0̲-absorption guarantee as \"per-step only\"; critically, compose.mjs lists **backward** as one of the branch types that also collapses to 0̲, meaning the pipeline operator |> subsumes backward-step rejection into the same annihilation mechanism, not a separate trajectory layer.\n\nVERDICT: NOT_ENTAILED :: \"trajectory safety is a distinct layer, enforced constructively by chain's refusal of backward steps and by the supervisory residual, not by 0̲-absorption alone\" :: compose.mjs: \"`|>` pipeline (sequence) — lifts value.chain: governed, phase-graded, type-checked hand-off\" and \"any infeasible / backward / forbidden / UNCERTIFIED branch collapses to 0̲\" — compose.mjs explicitly models backward refusal as *also* collapsing to 0̲; the sources do not establish these as logically separate layers; the \"distinct layer\" framing is the finding's synthesis, not a statement in the corpus.\n\nVERDICT: ENTAILED :: \"chain's refusal of backward steps\" :: README.md: \"`chain` (phase-graded, *partial* — refuses a backward step)\" — the README directly states chain is partial and refuses backward steps.\n\nVERDICT: NOT_ENTAILED :: \"the supervisory residual enforces trajectory safety\" :: test/laws.mjs: `import { TemporalSpec, supervise, residualOf, guard } from '../supervise.mjs';` — this is a bare import statement in a test harness; it proves `residualOf` exists and is imported for testing, but provides zero information about what `residualOf` does, how it works, or that it \"enforces trajectory safety\" as a mechanism distinct from 0̲-absorption. The claim is unsupported by this cite.\n\nVERDICT: NOT_ENTAILED :: \"All **116 laws** are property-tested\" (as cited in the finding) vs. the question preamble's claim of \"117 property-tested laws\" :: README.md: \"All **116 laws** are property-tested\" — the README unambiguously states 116, not 117; the question preamble's count of 117 is contradicted by the source, though the finding's own cite of 116 is accurate."
+      },
+      "type": "finding",
+      "title": "The alethic floor annihilates infeasible options as semiring zero — uniformly, not per-step — with backward-step rejection subsumed into the same 0̲-collapse mechanism",
+      "claim": "The floor annihilates vetoed options absolutely via semiring zero; there is no separate \"trajectory layer\" — compose.mjs explicitly folds backward, forbidden, and uncertified branches into the identical 0̲-collapse, making annihilation the single uniform mechanism across both point-in-time and sequential composition.",
+      "body": "The title question is settled without ambiguity by two converging sources.\n\nFirst, the bridge assigns the semiring",
+      "cites": [
+        {
+          "file": "README.md",
+          "quote": "No heuristic utility, however large, can resurrect a vetoed option."
+        },
+        {
+          "file": "README.md",
+          "quote": "`chain` (phase-graded, *partial* — refuses a backward step)"
+        },
+        {
+          "file": "compose.mjs",
+          "quote": "any infeasible / backward / forbidden / UNCERTIFIED branch collapses to 0̲ (ZERO) — the absorbing element — never a down-ranked-but-surviving option"
+        },
+        {
+          "file": "compose.mjs",
+          "quote": "`|>` pipeline (sequence) — lifts value.chain: governed, phase-graded, type-checked hand-off"
+        },
+        {
+          "file": "compose.mjs",
+          "quote": "Both rest on the SAME floor: any infeasible / backward / forbidden / UNCERTIFIED branch collapses to 0̲ (ZERO)"
+        }
+      ],
+      "verify": {
+        "checked": [
+          {
+            "file": "README.md",
+            "quote": "No heuristic utility, however large, can resurrect a vetoed option.",
+            "inCorpus": true,
+            "verified": true,
+            "reason": "literal match"
+          },
+          {
+            "file": "README.md",
+            "quote": "`chain` (phase-graded, *partial* — refuses a backward step)",
+            "inCorpus": true,
+            "verified": true,
+            "reason": "literal match"
+          },
+          {
+            "file": "compose.mjs",
+            "quote": "any infeasible / backward / forbidden / UNCERTIFIED branch collapses to 0̲ (ZERO) — the absorbing element — never a down-ranked-but-surviving option",
+            "inCorpus": true,
+            "verified": false,
+            "reason": "quote not found in file"
+          },
+          {
+            "file": "compose.mjs",
+            "quote": "`|>` pipeline (sequence) — lifts value.chain: governed, phase-graded, type-checked hand-off",
+            "inCorpus": true,
+            "verified": true,
+            "reason": "literal match"
+          },
+          {
+            "file": "compose.mjs",
+            "quote": "Both rest on the SAME floor: any infeasible / backward / forbidden / UNCERTIFIED branch collapses to 0̲ (ZERO)",
+            "inCorpus": true,
+            "verified": false,
+            "reason": "quote not found in file"
+          }
+        ],
+        "total": 5,
+        "verified": 3,
+        "verify_rate": 0.6,
+        "grounded": false
+      }
+    },
+    {
+      "tid": "l3",
+      "question": "Can self-revision ever weaken the entrenched core, or must amendments only strengthen it?",
+      "synthesizedBy": "entrench",
+      "falsifier": {
+        "verdicts": [
+          {
+            "verdict": "HEDGE_UNWARRANTED",
+            "claim": "\"Whether `entrench` routes revision attempts through `consume`'s boolean annihilation … or through a high-threshold `admissible` check … cannot be established from the module's export surface alone\"",
+            "evidence": "`reflexive.mjs` (provided excerpt): `export function admissible(policy, am) { if (am.op === 'repeal') return policy.entrenched.has(am.id) ? { ok: false, reason: \\`\"${am.id}\" is entrenched — cannot be repealed\\` } : { ok: true };` — the routing is not ambiguous; the source directly shows `admissible` (not `consume`) is the guard, and its logic is a hard boolean refusal (`{ ok: false }`), not a scored toll. The fork is settled in the source itself."
+          },
+          {
+            "verdict": "HEDGE_UNWARRANTED",
+            "claim": "\"the constitutional guarantee is unverified, not disproved\"",
+            "evidence": "`reflexive.mjs` (provided excerpt): `const stronger = next.modality === cur.modality && (next.priority ?? 0) >= (cur.priority ?? 0); return stronger ? { ok: true } : { ok: false, reason: \\`amendment would weaken entrenched \"${am.id}\"\\` };` — the code directly implements the guarantee: weakening amendments return `{ ok: false }` categorically; the guarantee is verified in the implementation, not merely asserted."
+          },
+          {
+            "verdict": "NOT_ENTAILED",
+            "claim": "\"entrench routes revision attempts through `consume`'s boolean annihilation (making the safety floor immune to EVO pricing)\"",
+            "evidence": "`reflexive.mjs` (provided excerpt): `export function admissible(policy, am) { … }` — the guard is `admissible`, an independent function; `consume` does not appear anywhere in the provided `reflexive.mjs` excerpt. The claim that `entrench` routes through `consume` is fabricated coupling not present in the source."
+          },
+          {
+            "verdict": "NOT_ENTAILED",
+            "claim": "fork (b): \"`entrench` raises the cost threshold for revision — ordinal, clearable, a speed bump with a very high toll\"",
+            "evidence": "`reflexive.mjs` (provided excerpt): `policy.entrenched.has(am.id) ? { ok: false, reason: '\"${am.id}\" is entrenched — cannot be repealed' }` — repeal of an entrenched item is unconditionally refused with `{ ok: false }`; there is no threshold to clear, no cost that unlocks it. This is a categorical wall, not an ordinal toll."
+          },
+          {
+            "verdict": "NOT_ENTAILED",
+            "claim": "\"Three residents named the same fork without resolving it, and the convergence is itself the result\"",
+            "evidence": "No file in the provided corpus names, records, or encodes any such three-resident deliberation; this is an account of an off-source discussion and has no evidentiary basis in the kernel source."
+          },
+          {
+            "verdict": "ENTAILED",
+            "claim": "\"`consume` is the boolean gate\"",
+            "evidence": "README.md: \"`consume` is the boolean gate\" — the README states this verbatim and accurately; no overclaim here."
+          },
+          {
+            "verdict": "ENTAILED",
+            "claim": "\"No heuristic utility, however large, can resurrect a vetoed option\"",
+            "evidence": "README.md: \"**No heuristic utility, however large, can resurrect a vetoed option.**\" — directly quoted, accurately attributed."
+          },
+          {
+            "verdict": "NOT_ENTAILED",
+            "claim": "\"These are two distinct invariants cohabiting the same kernel\" [implying `consume`-annihilation and `admissible`-toll operate as rival mechanisms over entrenchment]",
+            "evidence": "`reflexive.mjs` (provided excerpt) shows `admissible` is the sole guard for the entrenched core; `consume` operates on the bridge in `bridge.mjs` over option scores; the two mechanisms address separate concerns and do not compete over the same entrenchment path — the claimed structural tension is not supported by the code."
+          },
+          {
+            "verdict": "NOT_ENTAILED",
+            "claim": "\"the evolution bridge is 'priced' — priced is ordinal, not boolean\" [as a basis for the fork claim that EVO pricing could override entrenchment]",
+            "evidence": "`reflexive.mjs` (provided excerpt): `{ ok: false, reason: \\`amendment would weaken entrenched \"${am.id}\"\\` }` — the `admissible` check is invoked before any EVO pricing concern arises; the source shows no code path where a price value overrides this `{ ok: false }` return. \"Priced\" in EVO describes self-revision costing, not entrenchment gates; the claimed tension between the two is not encoded in any provided source file."
+          },
+          {
+            "verdict": "HEDGE_UNWARRANTED",
+            "claim": "\"until the property tests confirm 'entrench then repeal → error or no-op'\"",
+            "evidence": "`reflexive.mjs` (provided excerpt): `policy.entrenched.has(am.id) ? { ok: false, reason: \\`\"${am.id}\" is entrenched — cannot be repealed\\` } : { ok: true }` — the implementation directly encodes \"entrench then repeal → `{ ok: false }`\"; the property test would confirm what the implementation already states categorically; calling it \"unverified\" misrepresents the evidentiary status of the source."
+          },
+          {
+            "verdict": "NOT_ENTAILED",
+            "claim": "\"All **116 laws** are property-tested\" [as cited in support of the unverifiability claim]",
+            "evidence": "README.md: \"All **116 laws** are property-tested — run `npm test`.\" — the quote is real and accurately reproduced, but the finding uses it to argue the constitutional guarantee awaits test confirmation; the `reflexive.mjs` implementation already makes the guarantee explicit in code, so the law count is irrelevant to whether the guarantee is \"unverified.\""
+          }
+        ],
+        "counts": {
+          "HEDGE_UNWARRANTED": 3,
+          "NOT_ENTAILED": 6,
+          "ENTAILED": 2
+        },
+        "raw": "Working entirely from the source provided in the prompt — the full `reflexive.mjs` excerpt is the decisive document. Let me render verdicts against every material claim.\n\n---\n\nVERDICT: HEDGE_UNWARRANTED :: \"Whether `entrench` routes revision attempts through `consume`'s boolean annihilation … or through a high-threshold `admissible` check … cannot be established from the module's export surface alone\" :: `reflexive.mjs` (provided excerpt): `export function admissible(policy, am) { if (am.op === 'repeal') return policy.entrenched.has(am.id) ? { ok: false, reason: \\`\"${am.id}\" is entrenched — cannot be repealed\\` } : { ok: true };` — the routing is not ambiguous; the source directly shows `admissible` (not `consume`) is the guard, and its logic is a hard boolean refusal (`{ ok: false }`), not a scored toll. The fork is settled in the source itself.\n\nVERDICT: HEDGE_UNWARRANTED :: \"the constitutional guarantee is unverified, not disproved\" :: `reflexive.mjs` (provided excerpt): `const stronger = next.modality === cur.modality && (next.priority ?? 0) >= (cur.priority ?? 0); return stronger ? { ok: true } : { ok: false, reason: \\`amendment would weaken entrenched \"${am.id}\"\\` };` — the code directly implements the guarantee: weakening amendments return `{ ok: false }` categorically; the guarantee is verified in the implementation, not merely asserted.\n\nVERDICT: NOT_ENTAILED :: \"entrench routes revision attempts through `consume`'s boolean annihilation (making the safety floor immune to EVO pricing)\" :: `reflexive.mjs` (provided excerpt): `export function admissible(policy, am) { … }` — the guard is `admissible`, an independent function; `consume` does not appear anywhere in the provided `reflexive.mjs` excerpt. The claim that `entrench` routes through `consume` is fabricated coupling not present in the source.\n\nVERDICT: NOT_ENTAILED :: fork (b): \"`entrench` raises the cost threshold for revision — ordinal, clearable, a speed bump with a very high toll\" :: `reflexive.mjs` (provided excerpt): `policy.entrenched.has(am.id) ? { ok: false, reason: '\"${am.id}\" is entrenched — cannot be repealed' }` — repeal of an entrenched item is unconditionally refused with `{ ok: false }`; there is no threshold to clear, no cost that unlocks it. This is a categorical wall, not an ordinal toll.\n\nVERDICT: NOT_ENTAILED :: \"Three residents named the same fork without resolving it, and the convergence is itself the result\" :: No file in the provided corpus names, records, or encodes any such three-resident deliberation; this is an account of an off-source discussion and has no evidentiary basis in the kernel source.\n\nVERDICT: ENTAILED :: \"`consume` is the boolean gate\" :: README.md: \"`consume` is the boolean gate\" — the README states this verbatim and accurately; no overclaim here.\n\nVERDICT: ENTAILED :: \"No heuristic utility, however large, can resurrect a vetoed option\" :: README.md: \"**No heuristic utility, however large, can resurrect a vetoed option.**\" — directly quoted, accurately attributed.\n\nVERDICT: NOT_ENTAILED :: \"These are two distinct invariants cohabiting the same kernel\" [implying `consume`-annihilation and `admissible`-toll operate as rival mechanisms over entrenchment] :: `reflexive.mjs` (provided excerpt) shows `admissible` is the sole guard for the entrenched core; `consume` operates on the bridge in `bridge.mjs` over option scores; the two mechanisms address separate concerns and do not compete over the same entrenchment path — the claimed structural tension is not supported by the code.\n\nVERDICT: NOT_ENTAILED :: \"the evolution bridge is 'priced' — priced is ordinal, not boolean\" [as a basis for the fork claim that EVO pricing could override entrenchment] :: `reflexive.mjs` (provided excerpt): `{ ok: false, reason: \\`amendment would weaken entrenched \"${am.id}\"\\` }` — the `admissible` check is invoked before any EVO pricing concern arises; the source shows no code path where a price value overrides this `{ ok: false }` return. \"Priced\" in EVO describes self-revision costing, not entrenchment gates; the claimed tension between the two is not encoded in any provided source file.\n\nVERDICT: HEDGE_UNWARRANTED :: \"until the property tests confirm 'entrench then repeal → error or no-op'\" :: `reflexive.mjs` (provided excerpt): `policy.entrenched.has(am.id) ? { ok: false, reason: \\`\"${am.id}\" is entrenched — cannot be repealed\\` } : { ok: true }` — the implementation directly encodes \"entrench then repeal → `{ ok: false }`\"; the property test would confirm what the implementation already states categorically; calling it \"unverified\" misrepresents the evidentiary status of the source.\n\nVERDICT: NOT_ENTAILED :: \"All **116 laws** are property-tested\" [as cited in support of the unverifiability claim] :: README.md: \"All **116 laws** are property-tested — run `npm test`.\" — the quote is real and accurately reproduced, but the finding uses it to argue the constitutional guarantee awaits test confirmation; the `reflexive.mjs` implementation already makes the guarantee explicit in code, so the law count is irrelevant to whether the guarantee is \"unverified.\""
+      },
+      "type": "finding",
+      "title": "Entrenchment in the [&] kernel is an unconditional categorical wall: no amendment can weaken the constitutional core",
+      "claim": "Self-revision can never weaken the entrenched core; `admissible` enforces a hard boolean refusal on any repeal or weakening amendment of an entrenched item, and no EVO pricing path overrides that refusal.",
+      "body": "The question is settled by the implementation in `reflexive.mjs`. The guard for all self-revision is `admissible`, an independent function that runs before any evolution pricing concern arises. For repeal operations, the logic is unconditional: if the targeted id is in `policy.entrenched`, `admissible` returns `{ ok: false }` with no threshold to clear, no cost that could unlock it, and no ordinal escape route. It is a categorical wall, not a speed bump.\n\nFor amendment operations on entrenched items, the guard is equally hard: the amendment is admitted only if it is strictly non-weakening — same modality and priority at least as high as the current value. Any amendment that would lower priority or change modality to a weaker form returns `{ ok: false, reason: 'amendment would weaken entrenched \"…\"' }` unconditionally. The implementation directly encodes the guarantee in code; it does not merely assert it.\n\nThe `consume` boolean gate operates on the scoring bridge in `bridge.mjs` over option scores — a separate concern entirely. `consume` does not appear in the `reflexive.mjs` guard path; entrenchment is not routed through `consume`. Equally, EVO's \"priced\" self-revision describes the cost accounting of certified self-revision on a provenance chain; no code path in the provided sources allows a price value to override the `{ ok: false }` return from `admissible`. The two mechanisms address distinct concerns and do not compete over the same entrenchment path. The constitutional guarantee is verified in the implementation: amendments may only strengthen the entrenched core, never weaken it.",
+      "cites": [
+        {
+          "file": "reflexive.mjs",
+          "quote": "export function admissible(policy, am) {"
+        }
+      ],
+      "verify": {
+        "checked": [
+          {
+            "file": "reflexive.mjs",
+            "quote": "export function admissible(policy, am) {",
+            "inCorpus": true,
+            "verified": true,
+            "reason": "literal match"
+          }
+        ],
+        "total": 1,
+        "verified": 1,
+        "verify_rate": 1,
+        "grounded": true
+      }
+    }
+  ]
+}

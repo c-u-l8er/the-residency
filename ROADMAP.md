@@ -116,6 +116,13 @@ gate0:
   #   it ENTAILS the claim. k-sampling (A') added nothing (single==sampled, both 0.833).
   #   Next lever is H3 (stance-free falsifier/entailment seat) + H6 (penalize hedging), NOT more H1.
   #   Standing recommendation: default to the single critic until an H3 re-run flips board_lift>0.
+  # RUN 1.2 (Gate 0.2, reuse 1.1 debate+board, add ONLY H3 falsifier + H6 commit-revision):
+  #   board_lift (precision) = +0.125 → FIRST FLIP > 0 (board 0.875 vs single 0.75, n=4).
+  #   H3 raised the SAME findings 0.50 -> 0.875; both designed fixes landed (b2 fabrication
+  #   dropped 9/9 NOT_ENTAILED; l3 hedge reversed via 3 HEDGE_UNWARRANTED). New failure: l1
+  #   over-deny (falsifier denied the real temporal/supervise rung) -> 0.5. See EVIDENCE/gate0_2.md.
+  #   CAVEAT: n=4 not 6 (b3+l2 harness-timeout, resumable); still 1 corpus. Promote H3 only after
+  #   b3+l2 close AND a 3rd corpus reproduces board_lift>0. Single critic stays the deployed default.
 gate1:
   finding_precision:  ">= 0.75   # findings that survive human verification"
   citation_accuracy:  ">= 0.95   # references that check out as stated"
