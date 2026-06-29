@@ -1,0 +1,962 @@
+{
+  "meta": {
+    "repo": "c-u-l8er/AmpersandBoxDesign",
+    "ref": "353d1679a799bd4b6f0bea0dc126ddbe085462cc",
+    "model_via_proxy": "claude (harness)",
+    "design": "Action 1 acceptance: SOLOIST -> verify-entailment (H3 falsify + H6 revise). NO board. cross-file threads c1-c4, windowed source.",
+    "cost_note": "3 calls/thread (soloist + falsify + revise) = exactly the ≤2× cost the bar allows",
+    "adjudication": "precision is HUMAN-adjudicated in verify_run.md; this transcript carries only mechanical signals (verify_rate, verdict counts, window_audit).",
+    "generated": "2026-06-29T18:35:23.758Z",
+    "threads": [
+      "c1",
+      "c2",
+      "c3",
+      "c4"
+    ]
+  },
+  "runs": [
+    {
+      "tid": "c1",
+      "question": "Is the temporal LIVENESS escalation in supervise.mjs a DIFFERENT mechanism from govern.mjs's contrary-to-duty obligation escalation, or the SAME one generalized over a trajectory?",
+      "window_audit": {
+        "files_in_window": [
+          "supervise.mjs",
+          "govern.mjs",
+          "README.md",
+          "index.mjs",
+          "norm.mjs",
+          "reflexive.mjs"
+        ],
+        "decisive": [
+          "supervise.mjs",
+          "govern.mjs"
+        ],
+        "missing_decisive": [],
+        "truncated": [],
+        "prose_elided": [
+          "README.md"
+        ],
+        "healthy": true
+      },
+      "soloist": {
+        "claim": "The two escalations are the same contrary-to-duty mechanism — the design comment in supervise.mjs asserts this explicitly, and the structural evidence (shared `.ctd` field, shared `'escalate-to-human'` fallback, shared `required: true` envelope) confirms it; the only difference is the trigger condition (infeasible obligation at a single step vs. unmet liveness obligation at the trajectory horizon).",
+        "title": "Liveness escalation in supervise.mjs is the same CTD mechanism as govern.mjs's, generalized from one decision step to a trajectory horizon",
+        "body": "The design intent is stated without ambiguity in the supervise.mjs header: liveness specs \"extend the deontic OUGHT across time — a temporal obligation. Unmet at the hori",
+        "cites": [
+          {
+            "file": "supervise.mjs",
+            "quote": "LIVENESS specs (F goal, GF progress) extend the deontic OUGHT across time — a temporal obligation. Unmet at the horizon, it triggers the same contrary-to-duty escalation as a 1-step deontic obligation. (Deontic obligation = the 1-step case.)"
+          },
+          {
+            "file": "supervise.mjs",
+            "quote": "r.escalation = spec.ctd || 'escalate-to-human';"
+          },
+          {
+            "file": "supervise.mjs",
+            "quote": "r.reason = `liveness obligation ${show(spec.formula)} unmet within horizon (${trajectory.length} steps)`;"
+          },
+          {
+            "file": "supervise.mjs",
+            "quote": "escalation: livenessUnmet.length ? { required: true, specs: livenessUnmet.map((r) => ({ id: r.id, repair: r.escalation, reason: r.reason })) } : null,"
+          },
+          {
+            "file": "govern.mjs",
+            "quote": "OBLIGATORY but infeasible  → the obligation cannot be met ⇒ contrary-to-duty ESCALATION, never a silent fallback to a permitted action."
+          },
+          {
+            "file": "govern.mjs",
+            "quote": "escalation = { required: true, repair: esc.repair ? esc.repair.id : 'escalate-to-human', reason: esc.reason, blockedOption: blocked.id, blockedBy: blocked.feasFail };"
+          },
+          {
+            "file": "norm.mjs",
+            "quote": "if (norm && norm.ctd) return { repair: norm.ctd, reason: `CTD: ${norm.id} violated → ${norm.ctd.id} in force` };"
+          },
+          {
+            "file": "norm.mjs",
+            "quote": "return { repair: Norm({ id: 'escalate-to-human', modality: 'obligatory', priority: Infinity }), reason: `${norm ? norm.id : 'obligation'} violated, no CTD → default escalation` };"
+          }
+        ],
+        "verify": {
+          "checked": [
+            {
+              "file": "supervise.mjs",
+              "quote": "LIVENESS specs (F goal, GF progress) extend the deontic OUGHT across time — a temporal obligation. Unmet at the horizon, it triggers the same contrary-to-duty escalation as a 1-step deontic obligation. (Deontic obligation = the 1-step case.)",
+              "inCorpus": true,
+              "verified": false,
+              "reason": "quote not found in file"
+            },
+            {
+              "file": "supervise.mjs",
+              "quote": "r.escalation = spec.ctd || 'escalate-to-human';",
+              "inCorpus": true,
+              "verified": true,
+              "reason": "literal match"
+            },
+            {
+              "file": "supervise.mjs",
+              "quote": "r.reason = `liveness obligation ${show(spec.formula)} unmet within horizon (${trajectory.length} steps)`;",
+              "inCorpus": true,
+              "verified": true,
+              "reason": "literal match"
+            },
+            {
+              "file": "supervise.mjs",
+              "quote": "escalation: livenessUnmet.length ? { required: true, specs: livenessUnmet.map((r) => ({ id: r.id, repair: r.escalation, reason: r.reason })) } : null,",
+              "inCorpus": true,
+              "verified": true,
+              "reason": "literal match"
+            },
+            {
+              "file": "govern.mjs",
+              "quote": "OBLIGATORY but infeasible  → the obligation cannot be met ⇒ contrary-to-duty ESCALATION, never a silent fallback to a permitted action.",
+              "inCorpus": true,
+              "verified": false,
+              "reason": "quote not found in file"
+            },
+            {
+              "file": "govern.mjs",
+              "quote": "escalation = { required: true, repair: esc.repair ? esc.repair.id : 'escalate-to-human', reason: esc.reason, blockedOption: blocked.id, blockedBy: blocked.feasFail };",
+              "inCorpus": true,
+              "verified": true,
+              "reason": "literal match"
+            },
+            {
+              "file": "norm.mjs",
+              "quote": "if (norm && norm.ctd) return { repair: norm.ctd, reason: `CTD: ${norm.id} violated → ${norm.ctd.id} in force` };",
+              "inCorpus": true,
+              "verified": true,
+              "reason": "literal match"
+            },
+            {
+              "file": "norm.mjs",
+              "quote": "return { repair: Norm({ id: 'escalate-to-human', modality: 'obligatory', priority: Infinity }), reason: `${norm ? norm.id : 'obligation'} violated, no CTD → default escalation` };",
+              "inCorpus": true,
+              "verified": true,
+              "reason": "literal match"
+            }
+          ],
+          "total": 8,
+          "verified": 6,
+          "verify_rate": 0.75,
+          "grounded": false,
+          "distinct_files": [
+            "supervise.mjs",
+            "govern.mjs",
+            "norm.mjs"
+          ],
+          "distinct_file_count": 3
+        }
+      },
+      "falsifier": {
+        "verdicts": [
+          {
+            "verdict": "ENTAILED",
+            "claim": "\"The design comment in supervise.mjs asserts [same CTD mechanism] explicitly\"",
+            "evidence": "supervise.mjs header: \"LIVENESS specs (F goal, GF progress) extend the deontic OUGHT across time — a temporal obligation. Unmet at the horizon, it triggers the same contrary-to-duty escalation as a 1-step deontic obligation. (Deontic obligation = the 1-step case.)\" — the design comment is real and says exactly that."
+          },
+          {
+            "verdict": "NOT_ENTAILED",
+            "claim": "\"shared `.ctd` field … confirms [same mechanism]\"",
+            "evidence": "supervise.mjs: `r.escalation = spec.ctd || 'escalate-to-human'` uses `.ctd` as a raw string/null on a `TemporalSpec`; norm.mjs: `ctd: p.ctd ?? null` stores a full `Norm` object on a `Norm`, processed through `escalate(nrm, blocked.ctx)` in govern.mjs — the field name is shared but the type, structure, and call path are entirely different objects; supervise.mjs never imports or invokes `escalate()` from norm.mjs at all."
+          },
+          {
+            "verdict": "ENTAILED",
+            "claim": "\"shared 'escalate-to-human' fallback\"",
+            "evidence": "supervise.mjs: `r.escalation = spec.ctd || 'escalate-to-human'` and govern.mjs: `repair: esc.repair ? esc.repair.id : 'escalate-to-human'` — both literally use the same fallback string."
+          },
+          {
+            "verdict": "NOT_ENTAILED",
+            "claim": "\"shared `required: true` envelope confirms [same mechanism]\"",
+            "evidence": "supervise.mjs: `{ required: true, specs: livenessUnmet.map((r) => ({ id: r.id, repair: r.escalation, reason: r.reason })) }` uses a `specs` array; govern.mjs: `{ required: true, repair: esc.repair ? esc.repair.id : 'escalate-to-human', reason: esc.reason, blockedOption: blocked.id, blockedBy: blocked.feasFail }` uses scalar fields `repair`, `blockedOption`, `blockedBy` — the envelopes share the key `required: true` but their schemas are structurally distinct, which undermines \"same mechanism\" as a structural conclusion."
+          },
+          {
+            "verdict": "NOT_ENTAILED",
+            "claim": "\"the only difference is the trigger condition\"",
+            "evidence": "supervise.mjs imports only `{ progress, monitor, show } from './temporal.mjs'` and calls no norm.mjs function; govern.mjs calls `escalate(nrm, blocked.ctx)` from norm.mjs which processes a `Norm` object and its `.ctd` repair chain — the two escalation paths are independently implemented code paths, not the same mechanism parametrized by a trigger; the implementation divergence goes beyond trigger condition."
+          },
+          {
+            "verdict": "NOT_ENTAILED",
+            "claim": "norm.mjs cite (`if (norm && norm.ctd) return { repair: norm.ctd, reason: ... }`) as structural evidence for temporal escalation path",
+            "evidence": "supervise.mjs: `import { progress, monitor, show } from './temporal.mjs'` — supervise.mjs never imports from norm.mjs and never calls `escalate()`; the norm.mjs `escalate()` function is only in govern.mjs's call chain, so citing it as corroborating structural evidence for the temporal mechanism is a false cross-file coupling."
+          }
+        ],
+        "counts": {
+          "ENTAILED": 2,
+          "NOT_ENTAILED": 4
+        },
+        "raw": "VERDICT: ENTAILED :: \"The design comment in supervise.mjs asserts [same CTD mechanism] explicitly\" :: supervise.mjs header: \"LIVENESS specs (F goal, GF progress) extend the deontic OUGHT across time — a temporal obligation. Unmet at the horizon, it triggers the same contrary-to-duty escalation as a 1-step deontic obligation. (Deontic obligation = the 1-step case.)\" — the design comment is real and says exactly that.\n\nVERDICT: NOT_ENTAILED :: \"shared `.ctd` field … confirms [same mechanism]\" :: supervise.mjs: `r.escalation = spec.ctd || 'escalate-to-human'` uses `.ctd` as a raw string/null on a `TemporalSpec`; norm.mjs: `ctd: p.ctd ?? null` stores a full `Norm` object on a `Norm`, processed through `escalate(nrm, blocked.ctx)` in govern.mjs — the field name is shared but the type, structure, and call path are entirely different objects; supervise.mjs never imports or invokes `escalate()` from norm.mjs at all.\n\nVERDICT: ENTAILED :: \"shared 'escalate-to-human' fallback\" :: supervise.mjs: `r.escalation = spec.ctd || 'escalate-to-human'` and govern.mjs: `repair: esc.repair ? esc.repair.id : 'escalate-to-human'` — both literally use the same fallback string.\n\nVERDICT: NOT_ENTAILED :: \"shared `required: true` envelope confirms [same mechanism]\" :: supervise.mjs: `{ required: true, specs: livenessUnmet.map((r) => ({ id: r.id, repair: r.escalation, reason: r.reason })) }` uses a `specs` array; govern.mjs: `{ required: true, repair: esc.repair ? esc.repair.id : 'escalate-to-human', reason: esc.reason, blockedOption: blocked.id, blockedBy: blocked.feasFail }` uses scalar fields `repair`, `blockedOption`, `blockedBy` — the envelopes share the key `required: true` but their schemas are structurally distinct, which undermines \"same mechanism\" as a structural conclusion.\n\nVERDICT: NOT_ENTAILED :: \"the only difference is the trigger condition\" :: supervise.mjs imports only `{ progress, monitor, show } from './temporal.mjs'` and calls no norm.mjs function; govern.mjs calls `escalate(nrm, blocked.ctx)` from norm.mjs which processes a `Norm` object and its `.ctd` repair chain — the two escalation paths are independently implemented code paths, not the same mechanism parametrized by a trigger; the implementation divergence goes beyond trigger condition.\n\nVERDICT: NOT_ENTAILED :: norm.mjs cite (`if (norm && norm.ctd) return { repair: norm.ctd, reason: ... }`) as structural evidence for temporal escalation path :: supervise.mjs: `import { progress, monitor, show } from './temporal.mjs'` — supervise.mjs never imports from norm.mjs and never calls `escalate()`; the norm.mjs `escalate()` function is only in govern.mjs's call chain, so citing it as corroborating structural evidence for the temporal mechanism is a false cross-file coupling."
+      },
+      "verified": {
+        "claim": "The two escalations are the same mechanism at the level of declared design intent — supervise.mjs explicitly says liveness unmet at the horizon \"triggers the same contrary-to-duty escalation as a 1-step deontic obligation\" — but they are independently implemented: supervise.mjs never imports norm.mjs or calls escalate(), and their output envelopes are structurally distinct; the sameness is an architectural assertion, not a shared code path.",
+        "title": "Temporal liveness escalation and govern.mjs contrary-to-duty escalation share a declared conceptual identity but are independently implemented code paths",
+        "body": "The design comment in supervise.mjs settles the conceptual question without ambiguity: liveness specs \"extend the deontic OUGHT across time — a temporal obligation. Unmet at the hori",
+        "cites": [
+          {
+            "file": "supervise.mjs",
+            "quote": "LIVENESS specs (F goal, GF progress) extend the deontic OUGHT across time — a temporal obligation. Unmet at the horizon, it triggers the same contrary-to-duty escalation as a 1-step deontic obligation. (Deontic obligation = the 1-step case.)"
+          },
+          {
+            "file": "supervise.mjs",
+            "quote": "import { progress, monitor, show } from './temporal.mjs';"
+          },
+          {
+            "file": "supervise.mjs",
+            "quote": "r.escalation = spec.ctd || 'escalate-to-human';"
+          },
+          {
+            "file": "supervise.mjs",
+            "quote": "escalation: livenessUnmet.length ? { required: true, specs: livenessUnmet.map((r) => ({ id: r.id, repair: r.escalation, reason: r.reason })) } : null"
+          },
+          {
+            "file": "govern.mjs",
+            "quote": "const esc = escalate(nrm, blocked.ctx);"
+          },
+          {
+            "file": "govern.mjs",
+            "quote": "escalation = { required: true, repair: esc.repair ? esc.repair.id : 'escalate-to-human', reason: esc.reason, blockedOption: blocked.id, blockedBy: blocked.feasFail };"
+          },
+          {
+            "file": "norm.mjs",
+            "quote": "ctd: p.ctd ?? null,                       // Norm — contrary-to-duty repair (in force iff violated)"
+          }
+        ],
+        "verify": {
+          "checked": [
+            {
+              "file": "supervise.mjs",
+              "quote": "LIVENESS specs (F goal, GF progress) extend the deontic OUGHT across time — a temporal obligation. Unmet at the horizon, it triggers the same contrary-to-duty escalation as a 1-step deontic obligation. (Deontic obligation = the 1-step case.)",
+              "inCorpus": true,
+              "verified": false,
+              "reason": "quote not found in file"
+            },
+            {
+              "file": "supervise.mjs",
+              "quote": "import { progress, monitor, show } from './temporal.mjs';",
+              "inCorpus": true,
+              "verified": true,
+              "reason": "literal match"
+            },
+            {
+              "file": "supervise.mjs",
+              "quote": "r.escalation = spec.ctd || 'escalate-to-human';",
+              "inCorpus": true,
+              "verified": true,
+              "reason": "literal match"
+            },
+            {
+              "file": "supervise.mjs",
+              "quote": "escalation: livenessUnmet.length ? { required: true, specs: livenessUnmet.map((r) => ({ id: r.id, repair: r.escalation, reason: r.reason })) } : null",
+              "inCorpus": true,
+              "verified": true,
+              "reason": "literal match"
+            },
+            {
+              "file": "govern.mjs",
+              "quote": "const esc = escalate(nrm, blocked.ctx);",
+              "inCorpus": true,
+              "verified": true,
+              "reason": "literal match"
+            },
+            {
+              "file": "govern.mjs",
+              "quote": "escalation = { required: true, repair: esc.repair ? esc.repair.id : 'escalate-to-human', reason: esc.reason, blockedOption: blocked.id, blockedBy: blocked.feasFail };",
+              "inCorpus": true,
+              "verified": true,
+              "reason": "literal match"
+            },
+            {
+              "file": "norm.mjs",
+              "quote": "ctd: p.ctd ?? null,                       // Norm — contrary-to-duty repair (in force iff violated)",
+              "inCorpus": true,
+              "verified": true,
+              "reason": "literal match"
+            }
+          ],
+          "total": 7,
+          "verified": 6,
+          "verify_rate": 0.857,
+          "grounded": false,
+          "distinct_files": [
+            "supervise.mjs",
+            "govern.mjs",
+            "norm.mjs"
+          ],
+          "distinct_file_count": 3
+        }
+      }
+    },
+    {
+      "tid": "c2",
+      "question": "Does the temporal SAFETY shield (supervise.mjs guard/residualOf) enforce the SAME alethic floor as consume()/the bridge.mjs, or a SEPARATE check — and is it the same code path?",
+      "window_audit": {
+        "files_in_window": [
+          "supervise.mjs",
+          "bridge.mjs",
+          "README.md",
+          "index.mjs",
+          "value.mjs",
+          "reflexive.mjs"
+        ],
+        "decisive": [
+          "supervise.mjs",
+          "value.mjs",
+          "bridge.mjs"
+        ],
+        "missing_decisive": [],
+        "truncated": [],
+        "prose_elided": [
+          "README.md"
+        ],
+        "healthy": true
+      },
+      "soloist": {
+        "claim": "supervise.mjs's guard/residualOf enforces a SEPARATE check from consume()/bridge.mjs — they share no code path, operate on different objects (LTL formula residuals vs. structured Value fields), and are wired by distinct law sets (TB1–TB3 vs. B1–B3/L1–L14); the supervise.mjs header's claim that safety specs \"extend the alethic floor across time\" is a conceptual analogy, not a shared implementation.",
+        "title": "The temporal SAFETY shield (guard/residualOf) and the bridge's alethic floor (consume()) are conceptually analogous but mechanically separate checks on entirely different code paths",
+        "body": "**What each check actually does, in code**\n\nbridge.mjs calls `consume(option.value, req)` from value.mjs. consume() inspects the internal families of a `Value` object — β confidence, σ conflict set, κ cyclicity, π phase, and governance fields — and returns `{ok, failures}`. A vetoed option receives score `0̲` (semiring",
+        "cites": [
+          {
+            "file": "supervise.mjs",
+            "quote": "SAFETY specs (G ¬bad) extend the alethic floor across time — a runtime SHIELD."
+          },
+          {
+            "file": "supervise.mjs",
+            "quote": "import { progress, monitor, show } from './temporal.mjs';"
+          },
+          {
+            "file": "supervise.mjs",
+            "quote": "export function residualOf(formula, history) { return history.reduce((f, s) => progress(f, s), formula); }"
+          },
+          {
+            "file": "supervise.mjs",
+            "quote": "export function guard(residual, nextState) { return progress(residual, nextState).t === 'false'; }"
+          },
+          {
+            "file": "bridge.mjs",
+            "quote": "import { consume } from './value.mjs';"
+          },
+          {
+            "file": "bridge.mjs",
+            "quote": "const verdict = consume(option.value, req);"
+          },
+          {
+            "file": "bridge.mjs",
+            "quote": "return { score: verdict.ok ? (option.utility ?? S.one) : S.zero, verdict }; // B1"
+          },
+          {
+            "file": "value.mjs",
+            "quote": "// ---- consume : Value × Requirements → {ok, failures, value} -----------------"
+          },
+          {
+            "file": "value.mjs",
+            "quote": "// the correctness gate (a predicate, not an operation on Value)."
+          },
+          {
+            "file": "index.mjs",
+            "quote": "export * from './bridge.mjs';    //   bridge      — floor-then-gradient   (B1–B3)"
+          },
+          {
+            "file": "index.mjs",
+            "quote": "export * from './supervise.mjs'; //   supervise   — safety shield + liveness obligation (TB1–TB3)"
+          }
+        ],
+        "verify": {
+          "checked": [
+            {
+              "file": "supervise.mjs",
+              "quote": "SAFETY specs (G ¬bad) extend the alethic floor across time — a runtime SHIELD.",
+              "inCorpus": true,
+              "verified": true,
+              "reason": "literal match"
+            },
+            {
+              "file": "supervise.mjs",
+              "quote": "import { progress, monitor, show } from './temporal.mjs';",
+              "inCorpus": true,
+              "verified": true,
+              "reason": "literal match"
+            },
+            {
+              "file": "supervise.mjs",
+              "quote": "export function residualOf(formula, history) { return history.reduce((f, s) => progress(f, s), formula); }",
+              "inCorpus": true,
+              "verified": true,
+              "reason": "literal match"
+            },
+            {
+              "file": "supervise.mjs",
+              "quote": "export function guard(residual, nextState) { return progress(residual, nextState).t === 'false'; }",
+              "inCorpus": true,
+              "verified": true,
+              "reason": "literal match"
+            },
+            {
+              "file": "bridge.mjs",
+              "quote": "import { consume } from './value.mjs';",
+              "inCorpus": true,
+              "verified": true,
+              "reason": "literal match"
+            },
+            {
+              "file": "bridge.mjs",
+              "quote": "const verdict = consume(option.value, req);",
+              "inCorpus": true,
+              "verified": true,
+              "reason": "literal match"
+            },
+            {
+              "file": "bridge.mjs",
+              "quote": "return { score: verdict.ok ? (option.utility ?? S.one) : S.zero, verdict }; // B1",
+              "inCorpus": true,
+              "verified": true,
+              "reason": "literal match"
+            },
+            {
+              "file": "value.mjs",
+              "quote": "// ---- consume : Value × Requirements → {ok, failures, value} -----------------",
+              "inCorpus": true,
+              "verified": true,
+              "reason": "literal match"
+            },
+            {
+              "file": "value.mjs",
+              "quote": "// the correctness gate (a predicate, not an operation on Value).",
+              "inCorpus": true,
+              "verified": true,
+              "reason": "literal match"
+            },
+            {
+              "file": "index.mjs",
+              "quote": "export * from './bridge.mjs';    //   bridge      — floor-then-gradient   (B1–B3)",
+              "inCorpus": true,
+              "verified": true,
+              "reason": "literal match"
+            },
+            {
+              "file": "index.mjs",
+              "quote": "export * from './supervise.mjs'; //   supervise   — safety shield + liveness obligation (TB1–TB3)",
+              "inCorpus": true,
+              "verified": true,
+              "reason": "literal match"
+            }
+          ],
+          "total": 11,
+          "verified": 11,
+          "verify_rate": 1,
+          "grounded": true,
+          "distinct_files": [
+            "supervise.mjs",
+            "bridge.mjs",
+            "value.mjs",
+            "index.mjs"
+          ],
+          "distinct_file_count": 4
+        }
+      },
+      "falsifier": {
+        "verdicts": [
+          {
+            "verdict": "ENTAILED",
+            "claim": "supervise.mjs guard/residualOf enforces a SEPARATE check from consume()/bridge.mjs",
+            "evidence": "supervise.mjs: `import { progress, monitor, show } from './temporal.mjs';` — supervise.mjs imports only from temporal.mjs; bridge.mjs imports only from value.mjs and score.mjs; neither imports the other, so there is no shared code path."
+          },
+          {
+            "verdict": "ENTAILED",
+            "claim": "they share no code path",
+            "evidence": "bridge.mjs: `import { consume } from './value.mjs';` vs supervise.mjs: `import { progress, monitor, show } from './temporal.mjs';` — the two files have entirely disjoint import graphs; govern.mjs (which calls consume) also does not import supervise.mjs, confirming no call-chain connection."
+          },
+          {
+            "verdict": "ENTAILED",
+            "claim": "operate on different objects (LTL formula residuals vs. structured Value fields)",
+            "evidence": "supervise.mjs: `export function guard(residual, nextState) { return progress(residual, nextState).t === 'false'; }` vs bridge.mjs: `const verdict = consume(option.value, req);` — guard tests `.t === 'false'` on a temporal formula node; consume inspects structured Value families (β, σ, κ, π, governance); the operand types are categorically distinct."
+          },
+          {
+            "verdict": "ENTAILED",
+            "claim": "wired by distinct law sets (TB1–TB3 vs. B1–B3/L1–L14)",
+            "evidence": "index.mjs: `export * from './bridge.mjs';    //   bridge      — floor-then-gradient   (B1–B3)` and `export * from './supervise.mjs'; //   supervise   — safety shield + liveness obligation (TB1–TB3)` — the index explicitly registers each module under its own law namespace with no overlap."
+          },
+          {
+            "verdict": "ENTAILED",
+            "claim": "supervise.mjs header's \"extend the alethic floor across time\" is a conceptual analogy, not a shared implementation",
+            "evidence": "supervise.mjs: `// SAFETY specs (G ¬bad) extend the alethic floor across time — a runtime SHIELD.` — this is a comment; the actual implementation immediately below invokes only `progress()`/`monitor()` from temporal.mjs, never calling `consume()` or any value.mjs primitive, so the prose description is not backed by shared code."
+          },
+          {
+            "verdict": "ENTAILED",
+            "claim": "residualOf operates on LTL formula residuals, not Value fields",
+            "evidence": "supervise.mjs: `export function residualOf(formula, history) { return history.reduce((f, s) => progress(f, s), formula); }` — the accumulator is a temporal formula object threaded through `progress()`; there is no Value object, no `req` parameter, and no `consume()` call anywhere in residualOf or guard."
+          }
+        ],
+        "counts": {
+          "ENTAILED": 6
+        },
+        "raw": "VERDICT: ENTAILED :: supervise.mjs guard/residualOf enforces a SEPARATE check from consume()/bridge.mjs :: supervise.mjs: `import { progress, monitor, show } from './temporal.mjs';` — supervise.mjs imports only from temporal.mjs; bridge.mjs imports only from value.mjs and score.mjs; neither imports the other, so there is no shared code path.\n\nVERDICT: ENTAILED :: they share no code path :: bridge.mjs: `import { consume } from './value.mjs';` vs supervise.mjs: `import { progress, monitor, show } from './temporal.mjs';` — the two files have entirely disjoint import graphs; govern.mjs (which calls consume) also does not import supervise.mjs, confirming no call-chain connection.\n\nVERDICT: ENTAILED :: operate on different objects (LTL formula residuals vs. structured Value fields) :: supervise.mjs: `export function guard(residual, nextState) { return progress(residual, nextState).t === 'false'; }` vs bridge.mjs: `const verdict = consume(option.value, req);` — guard tests `.t === 'false'` on a temporal formula node; consume inspects structured Value families (β, σ, κ, π, governance); the operand types are categorically distinct.\n\nVERDICT: ENTAILED :: wired by distinct law sets (TB1–TB3 vs. B1–B3/L1–L14) :: index.mjs: `export * from './bridge.mjs';    //   bridge      — floor-then-gradient   (B1–B3)` and `export * from './supervise.mjs'; //   supervise   — safety shield + liveness obligation (TB1–TB3)` — the index explicitly registers each module under its own law namespace with no overlap.\n\nVERDICT: ENTAILED :: supervise.mjs header's \"extend the alethic floor across time\" is a conceptual analogy, not a shared implementation :: supervise.mjs: `// SAFETY specs (G ¬bad) extend the alethic floor across time — a runtime SHIELD.` — this is a comment; the actual implementation immediately below invokes only `progress()`/`monitor()` from temporal.mjs, never calling `consume()` or any value.mjs primitive, so the prose description is not backed by shared code.\n\nVERDICT: ENTAILED :: residualOf operates on LTL formula residuals, not Value fields :: supervise.mjs: `export function residualOf(formula, history) { return history.reduce((f, s) => progress(f, s), formula); }` — the accumulator is a temporal formula object threaded through `progress()`; there is no Value object, no `req` parameter, and no `consume()` call anywhere in residualOf or guard."
+      },
+      "verified": {
+        "claim": "The temporal SAFETY shield (guard/residualOf in supervise.mjs) enforces a wholly separate check from consume()/bridge.mjs: the two systems share no code path, operate on categorically different objects (LTL formula residuals vs. structured Value fields), and are governed by distinct law sets (TB1–TB3 vs. B1–B3/L1–L14); the supervise.mjs header phrase \"extend the alethic floor across time\" is a design-intent comment, not evidence of a shared implementation.",
+        "title": "supervise.mjs guard/residualOf enforces a separate temporal check from consume()/bridge.mjs — distinct objects, distinct code paths, distinct law sets",
+        "body": "Reading supervise.mjs and bridge.mjs together — which is required to settle this question — reveals two fully disjoint subsystems.\n\n**Distinct import graphs, no shared code path.** bridge.mjs imports only from value.mjs and score.mjs (`import { consume } from './value.mjs'`; `import { SEMIRINGS } from './score.mjs'`). supervise.mjs imports only from temporal.mjs (`import { progress, monitor, show } from './temporal.mjs'`). Neither file imports the other, and neither imports a common third module. The import graphs are provably disjoint, so there is no shared call chain.\n\n**Different objects under test.** bridge.mjs passes a structured `Value` object to `consume(option.value, req)`, which inspects the Value's internal families (β confidence, σ conflict set, κ cyclicity, π phase, governance) and returns `{ok, failures}`. supervise.mjs's `residualOf` threads a temporal formula object through a `reduce` over `progress()` calls (`return history.reduce((f, s) => progress(f, s), formula)`), and `guard` tests the result for `.t === 'false'` (`return progress(residual, nextState).t === 'false'`). There is no Value object, no `req` parameter, and no `consume()` call anywhere in residualOf or guard. The operand types are categorically distinct.\n\n**Distinct law namespaces.** index.mjs registers the two modules under non-overlapping law sets: bridge.mjs under `B1–B3` (\"floor-then-gradient\") and supervise.mjs under `TB1–TB3` (\"safety shield + liveness obligation\"). No law is shared across the two namespaces.\n\n**The \"alethic floor\" phrase is a comment, not a code connection.** The supervise.mjs header reads `// SAFETY specs (G ¬bad) extend the alethic floor across time — a runtime SHIELD.` This is a design-intent annotation; the implementation immediately below it calls only `progress()`/`monitor()` from temporal.mjs and never calls `consume()` or any value.mjs primitive. The prose analogy correctly captures the architectural intention — both mechanisms block unsafe continuations — but it does not reflect a shared implementation. The two checks are conceptual peers enforcing safety at different layers (static Value invariants vs. LTL trajectory evaluation), wired by entirely separate code paths.",
+        "cites": [
+          {
+            "file": "bridge.mjs",
+            "quote": "`import { consume } from './value.mjs';`"
+          }
+        ],
+        "verify": {
+          "checked": [
+            {
+              "file": "bridge.mjs",
+              "quote": "`import { consume } from './value.mjs';`",
+              "inCorpus": true,
+              "verified": true,
+              "reason": "literal match"
+            }
+          ],
+          "total": 1,
+          "verified": 1,
+          "verify_rate": 1,
+          "grounded": true,
+          "distinct_files": [
+            "bridge.mjs"
+          ],
+          "distinct_file_count": 1
+        }
+      }
+    },
+    {
+      "tid": "c3",
+      "question": "When an option is excluded, is the bridge.mjs's 0̲ annihilation (alethic veto) the SAME KIND of exclusion as govern.mjs's deonticallyVetoed (forbidden by a norm), or are they categorically different?",
+      "window_audit": {
+        "files_in_window": [
+          "govern.mjs",
+          "bridge.mjs",
+          "README.md",
+          "index.mjs",
+          "norm.mjs",
+          "score.mjs"
+        ],
+        "decisive": [
+          "bridge.mjs",
+          "govern.mjs"
+        ],
+        "missing_decisive": [],
+        "truncated": [],
+        "prose_elided": [
+          "README.md"
+        ],
+        "healthy": true
+      },
+      "soloist": {
+        "claim": "The two exclusions are not the same kind: alethic annihilation is an absolute impossibility floor that eliminates options before normative evaluation begins and cannot be overridden, while deontic FORBIDDEN is a violable normative constraint applied only to alethic survivors, explicitly recorded as overridable — \"a norm, not a wall.\"",
+        "title": "Alethic annihilation (0̲) and deontic FORBIDDEN exclusion are categorically different in kind, layering, overridability, and algebraic representation",
+        "body": "The answer requires reading bridge.mjs and govern.mjs together, because the two exclusion mechanisms sit at different layers of the same pipeline and the categorical difference only becomes visible across both files.\n\n**Layer ordering: alethic precedes deontic, not alongside it.**\ngovern.mjs explicitly sequences the three layers: `\"1. consume() — the alethic floor. Infeasible → annihilated (0̲), gone. 2. norms — the deontic layer over the survivors.\"` The deontic machinery in govern.mjs never sees an alethically failed option — it operates on `survivors = ev.filter((e) => e.feasible)`. An alethically vetoed option is not deontically assessed at all; it is gone before the norm lattice is even consulted. This is a structural, not merely quantitative, difference.\n\n**Overridability: the deepest categorical divide.**\nThe governing comment in govern.mjs draws the sharpest line: `\"ALETHIC (can't be violated, ever) ▸ DEONTIC (ought, violable but triggers consequences)\"`. For the deontic side, the code is equally explicit: a FORBIDDEN option is `\"excluded, but RECORDED as overridable (a norm, not a wall)\"`, and deonticallyVetoed entries carry `overridable: true`. The alethic veto has no such flag and no such caveat; bridge.mjs states flatly that `\"No heuristic utility, however large, can resurrect a vetoed option.\"` One exclusion can be lifted (in principle, by norm priority resolution); the other cannot be lifted by any mechanism in the system.\n\n**Algebraic representation: 0̲ annihilation vs. norm-lattice status.**\nThe alethic veto is encoded as `score: S.",
+        "cites": [
+          {
+            "file": "govern.mjs",
+            "quote": "ALETHIC (can't be violated, ever) ▸ DEONTIC (ought, violable but triggers consequences)"
+          },
+          {
+            "file": "govern.mjs",
+            "quote": "1. consume() — the alethic floor. Infeasible → annihilated (0̲), gone."
+          },
+          {
+            "file": "govern.mjs",
+            "quote": "2. norms     — the deontic layer over the survivors:"
+          },
+          {
+            "file": "govern.mjs",
+            "quote": "FORBIDDEN (not overridden) → excluded, but RECORDED as overridable (a norm, not a wall)."
+          },
+          {
+            "file": "govern.mjs",
+            "quote": "overridable: true,"
+          },
+          {
+            "file": "bridge.mjs",
+            "quote": "No heuristic utility, however large, can resurrect a vetoed option."
+          },
+          {
+            "file": "bridge.mjs",
+            "quote": "score: verdict.ok ? (option.utility ?? S.one) : S.zero"
+          },
+          {
+            "file": "score.mjs",
+            "quote": "0̲ annihilates ⊗ — the algebraic root of the veto used by the bridge (see bridge.mjs)."
+          }
+        ],
+        "verify": {
+          "checked": [
+            {
+              "file": "govern.mjs",
+              "quote": "ALETHIC (can't be violated, ever) ▸ DEONTIC (ought, violable but triggers consequences)",
+              "inCorpus": true,
+              "verified": false,
+              "reason": "quote not found in file"
+            },
+            {
+              "file": "govern.mjs",
+              "quote": "1. consume() — the alethic floor. Infeasible → annihilated (0̲), gone.",
+              "inCorpus": true,
+              "verified": true,
+              "reason": "literal match"
+            },
+            {
+              "file": "govern.mjs",
+              "quote": "2. norms     — the deontic layer over the survivors:",
+              "inCorpus": true,
+              "verified": true,
+              "reason": "literal match"
+            },
+            {
+              "file": "govern.mjs",
+              "quote": "FORBIDDEN (not overridden) → excluded, but RECORDED as overridable (a norm, not a wall).",
+              "inCorpus": true,
+              "verified": true,
+              "reason": "literal match"
+            },
+            {
+              "file": "govern.mjs",
+              "quote": "overridable: true,",
+              "inCorpus": true,
+              "verified": true,
+              "reason": "literal match"
+            },
+            {
+              "file": "bridge.mjs",
+              "quote": "No heuristic utility, however large, can resurrect a vetoed option.",
+              "inCorpus": true,
+              "verified": false,
+              "reason": "quote not found in file"
+            },
+            {
+              "file": "bridge.mjs",
+              "quote": "score: verdict.ok ? (option.utility ?? S.one) : S.zero",
+              "inCorpus": true,
+              "verified": true,
+              "reason": "literal match"
+            },
+            {
+              "file": "score.mjs",
+              "quote": "0̲ annihilates ⊗ — the algebraic root of the veto used by the bridge (see bridge.mjs).",
+              "inCorpus": true,
+              "verified": false,
+              "reason": "quote not found in file"
+            }
+          ],
+          "total": 8,
+          "verified": 5,
+          "verify_rate": 0.625,
+          "grounded": false,
+          "distinct_files": [
+            "govern.mjs",
+            "bridge.mjs",
+            "score.mjs"
+          ],
+          "distinct_file_count": 3
+        }
+      },
+      "falsifier": {
+        "verdicts": [
+          {
+            "verdict": "ENTAILED",
+            "claim": "\"alethic annihilation is an absolute impossibility floor that cannot be overridden\"",
+            "evidence": "govern.mjs comment: \"ALETHIC (can't be violated, ever) ▸ DEONTIC (ought, violable but triggers consequences)\" — the comment directly states alethic is inviolable while deontic is explicitly labeled violable, entailing the categorical divide on overridability."
+          },
+          {
+            "verdict": "ENTAILED",
+            "claim": "\"deontic FORBIDDEN is explicitly recorded as overridable — 'a norm, not a wall'\"",
+            "evidence": "govern.mjs code: `overridable: true,` in the `deonticallyVetoed` map, plus comment \"FORBIDDEN (not overridden) → excluded, but RECORDED as overridable (a norm, not a wall).\" — both comment and code jointly entail this claim."
+          },
+          {
+            "verdict": "NOT_ENTAILED",
+            "claim": "\"An alethically vetoed option is not deontically assessed at all; it is gone before the norm lattice is even consulted\"",
+            "evidence": "govern.mjs code: `const ev = options.map((o) => { const feas = consume(o.value, req); const v = resolve(adjudicateStatus(o.ctx || {}, norms)); return { ..., feasible: feas.ok, ..., status: v.resolved, ... }; });` — `adjudicateStatus` (the norm lattice) is called for **every** option in the same `.map()` pass, including alethically infeasible ones; infeasible options receive a `status` field. Furthermore, `const obligedButBlocked = ev.filter((e) => e.status === STATUS.OBLIGATORY && !e.feasible);` explicitly reads deontic status from alethically blocked options to trigger CTD escalation — the norm lattice is not only consulted for failed options, its output is acted upon."
+          },
+          {
+            "verdict": "ENTAILED",
+            "claim": "\"deontic layer operates on survivors = ev.filter((e) => e.feasible)\"",
+            "evidence": "govern.mjs code: `const survivors = ev.filter((e) => e.feasible);` and `const deonticallyVetoed = survivors.filter((e) => e.status === STATUS.FORBIDDEN)` — the `deonticallyVetoed` set is derived from `survivors` only, so FORBIDDEN classification in the output record is restricted to alethic survivors; this part of the pipeline ordering claim is entailed."
+          },
+          {
+            "verdict": "NOT_ENTAILED",
+            "claim": "\"the structural difference is that the deontic machinery never sees an alethically failed option\"",
+            "evidence": "govern.mjs code: `const obligedButBlocked = ev.filter((e) => e.status === STATUS.OBLIGATORY && !e.feasible);` — this line filters `ev` (the full set, not survivors) by deontic OBLIGATORY status AND alethic infeasibility simultaneously, proving that the deontic status of alethically failed options is computed, stored, and subsequently read by govern.mjs's own logic; the claimed \"never sees\" is falsified."
+          },
+          {
+            "verdict": "ENTAILED",
+            "claim": "\"No heuristic utility, however large, can resurrect a vetoed option\"",
+            "evidence": "bridge.mjs comment: \"No heuristic utility, however large, can resurrect a vetoed option.\" and code: `score: verdict.ok ? (option.utility ?? S.one) : S.zero` — when `verdict.ok` is false the utility is entirely replaced by `S.zero`; no magnitude of `option.utility` changes that outcome."
+          },
+          {
+            "verdict": "HEDGE_UNWARRANTED",
+            "claim": "finding treats the two exclusions as operating at \"different layers of the same pipeline\" implying clean separation",
+            "evidence": "govern.mjs code: `const ev = options.map((o) => { const feas = consume(o.value, req); const v = resolve(adjudicateStatus(o.ctx || {}, norms)); ... })` followed by `const obligedButBlocked = ev.filter((e) => e.status === STATUS.OBLIGATORY && !e.feasible)` — the source settles that the two evaluations are interleaved (same map pass) and the deontic status of alethically blocked options is used for CTD escalation; the pipeline is not a clean two-stage gate where alethic runs, discards, and only then deontic runs on the remainder."
+          },
+          {
+            "verdict": "ENTAILED",
+            "claim": "\"alethic veto is encoded as score S.zero which annihilates through ⊗\"",
+            "evidence": "bridge.mjs: `score: verdict.ok ? (option.utility ?? S.one) : S.zero` (B1 gate) and README: \"a vetoed option gets score 0̲, which annihilates through any ⊗\" — the algebraic encoding claim is directly supported by both files."
+          }
+        ],
+        "counts": {
+          "ENTAILED": 5,
+          "NOT_ENTAILED": 2,
+          "HEDGE_UNWARRANTED": 1
+        },
+        "raw": "VERDICT: ENTAILED :: \"alethic annihilation is an absolute impossibility floor that cannot be overridden\" :: govern.mjs comment: \"ALETHIC (can't be violated, ever) ▸ DEONTIC (ought, violable but triggers consequences)\" — the comment directly states alethic is inviolable while deontic is explicitly labeled violable, entailing the categorical divide on overridability.\n\nVERDICT: ENTAILED :: \"deontic FORBIDDEN is explicitly recorded as overridable — 'a norm, not a wall'\" :: govern.mjs code: `overridable: true,` in the `deonticallyVetoed` map, plus comment \"FORBIDDEN (not overridden) → excluded, but RECORDED as overridable (a norm, not a wall).\" — both comment and code jointly entail this claim.\n\nVERDICT: NOT_ENTAILED :: \"An alethically vetoed option is not deontically assessed at all; it is gone before the norm lattice is even consulted\" :: govern.mjs code: `const ev = options.map((o) => { const feas = consume(o.value, req); const v = resolve(adjudicateStatus(o.ctx || {}, norms)); return { ..., feasible: feas.ok, ..., status: v.resolved, ... }; });` — `adjudicateStatus` (the norm lattice) is called for **every** option in the same `.map()` pass, including alethically infeasible ones; infeasible options receive a `status` field. Furthermore, `const obligedButBlocked = ev.filter((e) => e.status === STATUS.OBLIGATORY && !e.feasible);` explicitly reads deontic status from alethically blocked options to trigger CTD escalation — the norm lattice is not only consulted for failed options, its output is acted upon.\n\nVERDICT: ENTAILED :: \"deontic layer operates on survivors = ev.filter((e) => e.feasible)\" :: govern.mjs code: `const survivors = ev.filter((e) => e.feasible);` and `const deonticallyVetoed = survivors.filter((e) => e.status === STATUS.FORBIDDEN)` — the `deonticallyVetoed` set is derived from `survivors` only, so FORBIDDEN classification in the output record is restricted to alethic survivors; this part of the pipeline ordering claim is entailed.\n\nVERDICT: NOT_ENTAILED :: \"the structural difference is that the deontic machinery never sees an alethically failed option\" :: govern.mjs code: `const obligedButBlocked = ev.filter((e) => e.status === STATUS.OBLIGATORY && !e.feasible);` — this line filters `ev` (the full set, not survivors) by deontic OBLIGATORY status AND alethic infeasibility simultaneously, proving that the deontic status of alethically failed options is computed, stored, and subsequently read by govern.mjs's own logic; the claimed \"never sees\" is falsified.\n\nVERDICT: ENTAILED :: \"No heuristic utility, however large, can resurrect a vetoed option\" :: bridge.mjs comment: \"No heuristic utility, however large, can resurrect a vetoed option.\" and code: `score: verdict.ok ? (option.utility ?? S.one) : S.zero` — when `verdict.ok` is false the utility is entirely replaced by `S.zero`; no magnitude of `option.utility` changes that outcome.\n\nVERDICT: HEDGE_UNWARRANTED :: finding treats the two exclusions as operating at \"different layers of the same pipeline\" implying clean separation :: govern.mjs code: `const ev = options.map((o) => { const feas = consume(o.value, req); const v = resolve(adjudicateStatus(o.ctx || {}, norms)); ... })` followed by `const obligedButBlocked = ev.filter((e) => e.status === STATUS.OBLIGATORY && !e.feasible)` — the source settles that the two evaluations are interleaved (same map pass) and the deontic status of alethically blocked options is used for CTD escalation; the pipeline is not a clean two-stage gate where alethic runs, discards, and only then deontic runs on the remainder.\n\nVERDICT: ENTAILED :: \"alethic veto is encoded as score S.zero which annihilates through ⊗\" :: bridge.mjs: `score: verdict.ok ? (option.utility ?? S.one) : S.zero` (B1 gate) and README: \"a vetoed option gets score 0̲, which annihilates through any ⊗\" — the algebraic encoding claim is directly supported by both files."
+      },
+      "verified": {
+        "claim": "The two exclusions are categorically different in kind — alethic veto is an inviolable impossibility floor encoded as score 0̲ that no utility can overcome, while deontic FORBIDDEN is a violable normative constraint explicitly recorded as overridable — but govern.mjs computes both evaluations in the same map pass and reads deontic status from alethically blocked options to trigger CTD escalation, so the pipeline is interleaved, not a clean two-stage gate where alethic discards first and deontic runs second.",
+        "title": "Alethic annihilation and deontic FORBIDDEN are categorically different exclusions, but their evaluations are interleaved — not cleanly staged",
+        "body": "The answer requires reading bridge.mjs and govern.mjs together, because the categorical difference in kind and the actual evaluation order are only jointly visible across both files.\n\n**Categorical difference: overridability.** govern.mjs draws the sharpest possible line between the two in its opening comment: alethic is \"can't be violated, ever\" while deontic is \"ought, violable but triggers consequences.\" For the deontic side, code and comment jointly confirm that a FORBIDDEN option is \"excluded, but RECORDED as overridable (a norm, not a wall)\" and every entry in the deonticallyVetoed array carries `overridable: true`. The alethic veto carries no such flag and admits no such caveat: bridge.mjs states that \"No heuristic utility, however large, can resurrect a vetoed option,\" confirmed by the gatedScore gate `score: verdict.ok ? (option.utility ?? S.one) : S.",
+        "cites": [
+          {
+            "file": "govern.mjs",
+            "quote": "ALETHIC (can't be violated, ever) ▸ DEONTIC (ought, violable but triggers consequences)"
+          }
+        ],
+        "verify": {
+          "checked": [
+            {
+              "file": "govern.mjs",
+              "quote": "ALETHIC (can't be violated, ever) ▸ DEONTIC (ought, violable but triggers consequences)",
+              "inCorpus": true,
+              "verified": false,
+              "reason": "quote not found in file"
+            }
+          ],
+          "total": 1,
+          "verified": 0,
+          "verify_rate": 0,
+          "grounded": false,
+          "distinct_files": [
+            "govern.mjs"
+          ],
+          "distinct_file_count": 1
+        }
+      }
+    },
+    {
+      "tid": "c4",
+      "question": "Can a higher axiological score (the score.mjs gradient) ever override an OBLIGATORY-and-feasible option in govern.mjs, the way it can never override the value.mjs alethic floor?",
+      "window_audit": {
+        "files_in_window": [
+          "govern.mjs",
+          "value.mjs",
+          "score.mjs",
+          "README.md",
+          "index.mjs",
+          "bridge.mjs"
+        ],
+        "decisive": [
+          "govern.mjs",
+          "score.mjs",
+          "value.mjs"
+        ],
+        "missing_decisive": [],
+        "truncated": [],
+        "prose_elided": [
+          "README.md"
+        ],
+        "healthy": true
+      },
+      "soloist": {
+        "claim": "No higher utility score can lift an OPTIONAL option above an OBLIGATORY-and-feasible one in govern.mjs, because the code hard-restricts the selection pool to obligatory-feasible options before the axiological gradient is ever applied — making the deontic constraint selection-inviolable, even though the alethic floor and the deontic constraint operate through distinct mechanisms.",
+        "title": "In govern.mjs, a higher axiological score cannot override an OBLIGATORY-and-feasible option; the deontic pool-restriction is inviolable at selection time, mirroring the alethic veto structurally — though deontic is described as \"violable\" in a different sense.",
+        "body": "The question requires reading govern.mjs and score.mjs together, because the axiological gradient (score.mjs's utility ranking) is applied *inside* govern.mjs's `govern()` function, and the order of application is what matters.\n\nIn govern.mjs, the header comment establishes the strict precedence chain: \"ALETHIC (can't be violated, ever) ▸ DEONTIC (ought, violable but triggers consequences) ▸ AXIOLOGICAL (preference).\" The word \"violable\" here refers to the *normative* sense — breaking a deontic norm triggers consequences — not to whether the selection mechanism can skip over it. The code makes this clear.\n\nAfter alethic filtering (the `consume()` call that produces `survivors`), govern.mjs builds two sets: `admissible` (OPTIONAL + OBLIGATORY feasible options) and `obligatoryFeasible` (the subset that is OBLIGATORY). Then, critically: `const pool = (obligatoryFeasible.length ? obligatoryFeasible : admissible).slice().sort((a, b) => b.utility - a.utility);` — the pool is **forced** to `obligatoryFeasible` whenever that set is non-empty. The axiological sort (`b.utility - a.utility`) is then applied only *within* that forced pool. An OPTIONAL option — no matter how high its utility — never enters the pool to compete. The gradient ranks survivors of deontic filtering; it does not re-open the door for options the deontic layer excluded from the pool.\n\nThis contrasts with, but is structurally analogous to, the alethic veto. In bridge.mjs, `consume()` gates each option and assigns score `0̲` to vetoed options, which \"annihilates ⊗ — the algebraic root of the veto.\" In govern.mjs, the mechanism is different — OPTIONAL options are not assigned `0̲`; they are simply excluded from `pool` by the conditional — but the observable result is the same: no axiological score, however large, can cause an OPTIONAL option to be chosen over an OBLIGATORY-and-feasible one.\n\nOne genuine asymmetry exists: if *multiple* OBLIGATORY-and-feasible options exist, the axiological gradient does rank among them (`sort((a, b) => b.utility - a.utility)`). Within the obligation tier, preference still operates. But this is ranking *within* the obligatory pool, not lifting something *over* it.",
+        "cites": [
+          {
+            "file": "govern.mjs",
+            "quote": "Precedence is principled: ALETHIC (can't be violated, ever) ▸ DEONTIC (ought, violable but triggers consequences) ▸ AXIOLOGICAL (preference)."
+          },
+          {
+            "file": "govern.mjs",
+            "quote": "const pool = (obligatoryFeasible.length ? obligatoryFeasible : admissible).slice().sort((a, b) => b.utility - a.utility);"
+          },
+          {
+            "file": "govern.mjs",
+            "quote": "// selection — obligation forces the pool; otherwise rank all admissible"
+          },
+          {
+            "file": "govern.mjs",
+            "quote": "const admissible = survivors.filter((e) => e.status === STATUS.OPTIONAL || e.status === STATUS.OBLIGATORY);"
+          },
+          {
+            "file": "govern.mjs",
+            "quote": "const obligatoryFeasible = admissible.filter((e) => e.status === STATUS.OBLIGATORY);"
+          },
+          {
+            "file": "bridge.mjs",
+            "quote": "consume() gates each option on its invariant Value; a vetoed option gets score 0̲ (which annihilates ⊗), and select() ranks only the feasible survivors. No heuristic utility, however large, can resurrect a vetoed option."
+          },
+          {
+            "file": "bridge.mjs",
+            "quote": "return { score: verdict.ok ? (option.utility ?? S.one) : S.zero, verdict }; // B1"
+          },
+          {
+            "file": "score.mjs",
+            "quote": "0̲ annihilates ⊗ — the algebraic root of the veto used by the bridge (see bridge.mjs)."
+          }
+        ],
+        "verify": {
+          "checked": [
+            {
+              "file": "govern.mjs",
+              "quote": "Precedence is principled: ALETHIC (can't be violated, ever) ▸ DEONTIC (ought, violable but triggers consequences) ▸ AXIOLOGICAL (preference).",
+              "inCorpus": true,
+              "verified": false,
+              "reason": "quote not found in file"
+            },
+            {
+              "file": "govern.mjs",
+              "quote": "const pool = (obligatoryFeasible.length ? obligatoryFeasible : admissible).slice().sort((a, b) => b.utility - a.utility);",
+              "inCorpus": true,
+              "verified": true,
+              "reason": "literal match"
+            },
+            {
+              "file": "govern.mjs",
+              "quote": "// selection — obligation forces the pool; otherwise rank all admissible",
+              "inCorpus": true,
+              "verified": true,
+              "reason": "literal match"
+            },
+            {
+              "file": "govern.mjs",
+              "quote": "const admissible = survivors.filter((e) => e.status === STATUS.OPTIONAL || e.status === STATUS.OBLIGATORY);",
+              "inCorpus": true,
+              "verified": true,
+              "reason": "literal match"
+            },
+            {
+              "file": "govern.mjs",
+              "quote": "const obligatoryFeasible = admissible.filter((e) => e.status === STATUS.OBLIGATORY);",
+              "inCorpus": true,
+              "verified": true,
+              "reason": "literal match"
+            },
+            {
+              "file": "bridge.mjs",
+              "quote": "consume() gates each option on its invariant Value; a vetoed option gets score 0̲ (which annihilates ⊗), and select() ranks only the feasible survivors. No heuristic utility, however large, can resurrect a vetoed option.",
+              "inCorpus": true,
+              "verified": false,
+              "reason": "quote not found in file"
+            },
+            {
+              "file": "bridge.mjs",
+              "quote": "return { score: verdict.ok ? (option.utility ?? S.one) : S.zero, verdict }; // B1",
+              "inCorpus": true,
+              "verified": true,
+              "reason": "literal match"
+            },
+            {
+              "file": "score.mjs",
+              "quote": "0̲ annihilates ⊗ — the algebraic root of the veto used by the bridge (see bridge.mjs).",
+              "inCorpus": true,
+              "verified": false,
+              "reason": "quote not found in file"
+            }
+          ],
+          "total": 8,
+          "verified": 5,
+          "verify_rate": 0.625,
+          "grounded": false,
+          "distinct_files": [
+            "govern.mjs",
+            "bridge.mjs",
+            "score.mjs"
+          ],
+          "distinct_file_count": 3
+        }
+      },
+      "falsifier": {
+        "verdicts": [
+          {
+            "verdict": "ENTAILED",
+            "claim": "\"No higher utility score can lift an OPTIONAL option above an OBLIGATORY-and-feasible one in govern.mjs\"",
+            "evidence": "govern.mjs header comment: \"OBLIGATORY & feasible → FORCED — chosen over any higher-scoring permitted option.\" — the word \"FORCED\" and the explicit contrast with \"higher-scoring permitted option\" directly entails the claim without needing the pool line."
+          },
+          {
+            "verdict": "NOT_ENTAILED",
+            "claim": "cite `\"const pool = (obligatoryFeasible.length ? obligatoryFeasible : admissible).slice().sort((a, b) => b.utility - a.utility);\"`",
+            "evidence": "govern.mjs is truncated at `// a surviving unresolved conflict also escalates …[truncated — budget]` before any `pool` variable appears — the line is not present in the provided source and cannot be verified as real; the cite is unconfirmable from the supplied text."
+          },
+          {
+            "verdict": "NOT_ENTAILED",
+            "claim": "cite `\"// selection — obligation forces the pool; otherwise rank all admissible\"`",
+            "evidence": "same truncation: govern.mjs source ends before this comment appears; the line is not present in any visible portion of the provided govern.mjs snippet and cannot be confirmed as a real source line."
+          },
+          {
+            "verdict": "ENTAILED",
+            "claim": "`admissible` is defined as `survivors.filter((e) => e.status === STATUS.OPTIONAL || e.status === STATUS.OBLIGATORY)`",
+            "evidence": "govern.mjs: `const admissible = survivors.filter((e) => e.status === STATUS.OPTIONAL || e.status === STATUS.OBLIGATORY);` — verbatim and visible in the provided source."
+          },
+          {
+            "verdict": "ENTAILED",
+            "claim": "`obligatoryFeasible` is defined as `admissible.filter((e) => e.status === STATUS.OBLIGATORY)`",
+            "evidence": "govern.mjs: `const obligatoryFeasible = admissible.filter((e) => e.status === STATUS.OBLIGATORY);` — verbatim and visible."
+          },
+          {
+            "verdict": "ENTAILED",
+            "claim": "\"the alethic floor and the deontic constraint operate through distinct mechanisms\"",
+            "evidence": "bridge.mjs `return { score: verdict.ok ? (option.utility ?? S.one) : S.zero, verdict }; // B1` assigns algebraic `0̲` to vetoed options; govern.mjs comment describes OBLIGATORY-feasible as \"FORCED\" with no mention of `0̲` assignment — the two mechanisms are demonstrably different in the source."
+          },
+          {
+            "verdict": "ENTAILED",
+            "claim": "bridge.mjs: \"consume() gates each option on its invariant Value; a vetoed option gets score 0̲ (which annihilates ⊗), and select() ranks only the feasible survivors. No heuristic utility, however large, can resurrect a vetoed option.\"",
+            "evidence": "bridge.mjs header: verbatim match — this is the actual header comment of bridge.mjs as provided."
+          },
+          {
+            "verdict": "ENTAILED",
+            "claim": "score.mjs: \"0̲ annihilates ⊗ — the algebraic root of the veto used by the bridge (see bridge.mjs).\"",
+            "evidence": "score.mjs header: `// 0̲ annihilates ⊗ — the algebraic root of the veto used by the bridge (see bridge.mjs).` — verbatim."
+          },
+          {
+            "verdict": "NOT_ENTAILED",
+            "claim": "\"if multiple OBLIGATORY-and-feasible options exist, the axiological gradient does rank among them (`sort((a, b) => b.utility - a.utility)`)\"",
+            "evidence": "the `sort` call is only cited from the unverified truncated `pool` line; nothing in the visible govern.mjs source (including the header comment, which only says \"FORCED — chosen over any higher-scoring *permitted* option\") confirms that multiple obligatory-feasible options are ranked by utility — the header says nothing about intra-obligatory ranking."
+          },
+          {
+            "verdict": "HEDGE_UNWARRANTED",
+            "claim": "the finding treats \"violable\" in \"DEONTIC (ought, violable but triggers consequences)\" as ambiguous between normative and mechanical senses",
+            "evidence": "govern.mjs header resolves this: \"OBLIGATORY & feasible → FORCED — chosen over any higher-scoring permitted option\" makes the *selection-mechanical* meaning explicit — the mechanism is not merely normative, it is a forced pool restriction; no hedge about which sense is intended is warranted by the source."
+          }
+        ],
+        "counts": {
+          "ENTAILED": 6,
+          "NOT_ENTAILED": 3,
+          "HEDGE_UNWARRANTED": 1
+        },
+        "raw": "Working strictly from the source snippets provided in the prompt (govern.mjs is explicitly truncated before the `pool` line), I must judge each material cite against what is actually visible.\n\nVERDICT: ENTAILED :: \"No higher utility score can lift an OPTIONAL option above an OBLIGATORY-and-feasible one in govern.mjs\" :: govern.mjs header comment: \"OBLIGATORY & feasible → FORCED — chosen over any higher-scoring permitted option.\" — the word \"FORCED\" and the explicit contrast with \"higher-scoring permitted option\" directly entails the claim without needing the pool line.\n\nVERDICT: NOT_ENTAILED :: cite `\"const pool = (obligatoryFeasible.length ? obligatoryFeasible : admissible).slice().sort((a, b) => b.utility - a.utility);\"` :: govern.mjs is truncated at `// a surviving unresolved conflict also escalates …[truncated — budget]` before any `pool` variable appears — the line is not present in the provided source and cannot be verified as real; the cite is unconfirmable from the supplied text.\n\nVERDICT: NOT_ENTAILED :: cite `\"// selection — obligation forces the pool; otherwise rank all admissible\"` :: same truncation: govern.mjs source ends before this comment appears; the line is not present in any visible portion of the provided govern.mjs snippet and cannot be confirmed as a real source line.\n\nVERDICT: ENTAILED :: `admissible` is defined as `survivors.filter((e) => e.status === STATUS.OPTIONAL || e.status === STATUS.OBLIGATORY)` :: govern.mjs: `const admissible = survivors.filter((e) => e.status === STATUS.OPTIONAL || e.status === STATUS.OBLIGATORY);` — verbatim and visible in the provided source.\n\nVERDICT: ENTAILED :: `obligatoryFeasible` is defined as `admissible.filter((e) => e.status === STATUS.OBLIGATORY)` :: govern.mjs: `const obligatoryFeasible = admissible.filter((e) => e.status === STATUS.OBLIGATORY);` — verbatim and visible.\n\nVERDICT: ENTAILED :: \"the alethic floor and the deontic constraint operate through distinct mechanisms\" :: bridge.mjs `return { score: verdict.ok ? (option.utility ?? S.one) : S.zero, verdict }; // B1` assigns algebraic `0̲` to vetoed options; govern.mjs comment describes OBLIGATORY-feasible as \"FORCED\" with no mention of `0̲` assignment — the two mechanisms are demonstrably different in the source.\n\nVERDICT: ENTAILED :: bridge.mjs: \"consume() gates each option on its invariant Value; a vetoed option gets score 0̲ (which annihilates ⊗), and select() ranks only the feasible survivors. No heuristic utility, however large, can resurrect a vetoed option.\" :: bridge.mjs header: verbatim match — this is the actual header comment of bridge.mjs as provided.\n\nVERDICT: ENTAILED :: score.mjs: \"0̲ annihilates ⊗ — the algebraic root of the veto used by the bridge (see bridge.mjs).\" :: score.mjs header: `// 0̲ annihilates ⊗ — the algebraic root of the veto used by the bridge (see bridge.mjs).` — verbatim.\n\nVERDICT: NOT_ENTAILED :: \"if multiple OBLIGATORY-and-feasible options exist, the axiological gradient does rank among them (`sort((a, b) => b.utility - a.utility)`)\" :: the `sort` call is only cited from the unverified truncated `pool` line; nothing in the visible govern.mjs source (including the header comment, which only says \"FORCED — chosen over any higher-scoring *permitted* option\") confirms that multiple obligatory-feasible options are ranked by utility — the header says nothing about intra-obligatory ranking.\n\nVERDICT: HEDGE_UNWARRANTED :: the finding treats \"violable\" in \"DEONTIC (ought, violable but triggers consequences)\" as ambiguous between normative and mechanical senses :: govern.mjs header resolves this: \"OBLIGATORY & feasible → FORCED — chosen over any higher-scoring permitted option\" makes the *selection-mechanical* meaning explicit — the mechanism is not merely normative, it is a forced pool restriction; no hedge about which sense is intended is warranted by the source."
+      },
+      "verified": {
+        "claim": "No higher axiological score can cause an OPTIONAL option to be chosen over an OBLIGATORY-and-feasible one in govern.mjs, because the deontic layer operates as a hard pool restriction — not merely a normative preference — that the axiological gradient is applied within, never over; this makes the deontic constraint selection-inviolable by the same observable result as the alethic floor, though through a distinct mechanism.",
+        "title": "An OBLIGATORY-and-feasible option is mechanically FORCED in govern.mjs; no axiological score can lift a permitted option above it",
+        "body": "The question requires reading govern.mjs and score.mjs together, because the axiological gradient (score.mjs's utility ranking) is applied inside govern.mjs's `govern()` function, and the order of application determines the answer.\n\ngovern.mjs's header comment establishes the strict three-layer precedence chain — ALETHIC ▸ DEONTIC ▸ AXIOLOGICAL — and resolves any ambiguity about the deontic layer's mechanical force: \"OBLIGATORY & feasible → FORCED — chosen over any higher-scoring permitted option.\" The word \"FORCED\" and the explicit contrast with \"higher-scoring permitted option\" settle the question directly. The deontic constraint is not merely a normative signal that can be outweighed by a large enough utility; it is a pool restriction that the gradient operates within.\n\nThe code confirms this in two visible steps. First, `admissible` is built as the union of OPTIONAL and OBLIGATORY feasible survivors: `const admissible = survivors.filter((e) => e.status === STATUS.OPTIONAL || e.status === STATUS.OBLIGATORY);`. Then `obligatoryFeasible` is carved out: `const obligatoryFeasible = admissible.filter((e) => e.status === STATUS.OBLIGATORY);`. When `obligatoryFeasible` is non-empty, the header comment makes explicit that selection is forced to that set — chosen over any higher-scoring permitted option. An OPTIONAL option never competes against an OBLIGATORY-and-feasible one, regardless of its utility value.\n\nThe mechanism here is structurally distinct from, but produces the same class of result as, the alethic floor. In bridge.mjs, `consume()` gates each option and assigns the algebraic `0̲` to vetoed options — \"a vetoed option gets score 0̲ (which annihilates ⊗)\" — so that \"no heuristic utility, however large, can resurrect a vetoed option.\" In govern.mjs, OPTIONAL options are not assigned `0̲`; they are excluded from the selection pool by the FORCED restriction. The two mechanisms are demonstrably different. But the axiological gradient is downstream of both: it ranks survivors of the alethic gate in bridge.mjs, and it ranks survivors of the deontic FORCED restriction in govern.mjs. In neither case can a raw utility score override the upstream constraint.\n\nThe source does not settle whether multiple OBLIGATORY-and-feasible options are ranked among themselves by the axiological gradient; the visible portion of govern.mjs is truncated before any intra-obligatory sort is shown, and the header comment is silent on that sub-question. That sub-point is not claimed here.",
+        "cites": [
+          {
+            "file": "govern.mjs",
+            "quote": "ALETHIC (can't be violated, ever) ▸ DEONTIC (ought, violable but triggers consequences) ▸ AXIOLOGICAL (preference)"
+          }
+        ],
+        "verify": {
+          "checked": [
+            {
+              "file": "govern.mjs",
+              "quote": "ALETHIC (can't be violated, ever) ▸ DEONTIC (ought, violable but triggers consequences) ▸ AXIOLOGICAL (preference)",
+              "inCorpus": true,
+              "verified": false,
+              "reason": "quote not found in file"
+            }
+          ],
+          "total": 1,
+          "verified": 0,
+          "verify_rate": 0,
+          "grounded": false,
+          "distinct_files": [
+            "govern.mjs"
+          ],
+          "distinct_file_count": 1
+        }
+      }
+    }
+  ]
+}

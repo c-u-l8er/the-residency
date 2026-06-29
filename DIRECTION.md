@@ -45,15 +45,35 @@ names**. Map, don't rebuild:
 | research loop, daily rhythm, phase sequencing | **PULSE** (retrieve▸route▸act▸learn▸consolidate) |
 | findings-as-objects, living papers, composition | **[&]** |
 
-The residency builds **only** the part none of these cover: a multi-resident
-**deliberation board** + **findings as first-class objects with provenance** + a
-**living-paper update loop**. That is the only layer none of the existing portfolio
-components address.
+The residency builds **only** the part none of these cover: a **verified-findings
+pipeline** — a single grounded **producer**, an **entailment-verification gate**,
+**findings as first-class objects with provenance**, and a **living-paper update
+loop**. That is the only layer none of the existing portfolio components address.
+
+> **Gate 0 result (2026-06, closed negative).** The residency was originally *designed
+> around* a multi-resident **deliberation board**, on the premise it would beat a single
+> strong critic at verified findings. Five hand-adjudicated runs (Gate 0 → 0.4, see
+> `EVIDENCE/`) falsified that premise: board − single `finding_precision` ran −0.33,
+> −0.25, +0.125 (a lone, non-replicating flip), 0.0, 0.0 — never a reliable win, even on
+> threads *built* to favor the board's last theory of advantage (H4, coverage — also
+> falsified; the single critic out-covered the panel). The one component that helped
+> *every* time it ran was a stance-free **entailment audit** (H3): "does this source line
+> *entail* this claim?", not "does a quoted string exist?" — worth +0.125–0.25 wherever
+> applied. That audit is **not** a board feature; it runs on any producer. So the
+> validated mechanism is **`producer + verification gate`**, shipped as
+> `EVIDENCE/verify-entailment.mjs` (pinned by `verify-entailment.test.mjs`). The board is
+> retained behind a research flag only. **Caveat:** every agent ran on one model
+> (`claude-sonnet-4-6`) via one local harness — so this is a verdict on a model *debating
+> itself*, which a verification pass beats anyway; it is **not** a verdict on heterogeneous
+> multi-agent (different models, decorrelated errors), which the zero-budget constraint
+> puts out of scope to test.
 
 **Findings are the API of the residency; everything else is implementation.**
 Whether the residency uses agents, a single critic, symbolic reasoning, TRVM, or
 something not yet invented is an implementation detail. The product is *verified
-findings* — so that is the only thing the architecture must keep stable.
+findings* — so that is the only thing the architecture must keep stable. Gate 0 *is*
+this thesis honored: when the board (one implementation) lost to a single critic plus a
+verifier (another), we kept the findings and swapped the implementation.
 
 ### 2. Sovereign-by-default, with a tiered fallback for execution
 
@@ -152,6 +172,13 @@ Only if precision *and* utility are high enough to be worth a human's review tim
 does the residency graduate from "promising demo" to "product." Everything past
 Phase 1 below is gated on passing this.
 
+> **Update (Gate 0, closed).** The *first* sub-question above — does the multi-resident
+> board beat a single critic on precision? — has now been run to ground over five corpora
+> (`EVIDENCE/gate0*.md`) and answered **no** (see the Gate 0 callout under Principle 1).
+> The keeper is the entailment-verification gate, not the board. The remaining gate
+> metrics (utility, dedup, citation soundness, time-to-value) are still open and still
+> the bar for graduating to Phase 2.
+
 ---
 
 ## Scoped plan
@@ -163,7 +190,10 @@ export.
 **Phase 1 — make the findings loop trustworthy (the only thing worth doing now).**
 - Findings as first-class objects (claim · evidence refs · status · supersedes).
 - A dedup pass so near-duplicate proposals collapse before they reach a human.
-- A citation-verification step (flag model-asserted section/theorem numbers).
+- A citation-/entailment-verification step — flag model-asserted section/theorem
+  numbers AND audit whether each cited line actually *entails* its claim. **Shipped:
+  `EVIDENCE/verify-entailment.mjs`** (the Gate 0 keeper, H3 falsify + H6 commit-revise),
+  pinned by `EVIDENCE/verify-entailment.test.mjs`; acceptance harness `EVIDENCE/verify_run.mjs`.
 - Optional one-way export of accepted findings to Graphonomous *when reachable*.
 - Run the **validation gate** above.
 

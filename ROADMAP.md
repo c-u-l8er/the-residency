@@ -142,6 +142,15 @@ gate0:
   #   "structure converts fabrication->abstention" edge was largely a truncation-bug artifact. See gate0_4.md.
   #   VERDICT after 3 runs (precision -0.33->-0.25->+0.125->0.0->0.0): GATE 0 CLOSES NEGATIVE. Do not harden
   #   the board. Keep H3 as the one validated lever but apply it to the SOLOIST's findings, not to prop a board.
+  # KEEPER (post-Gate-0, Action 1+4): promoted H3 out of the board path into a standalone, corpus-agnostic
+  #   stage EVIDENCE/verify-entailment.mjs (H3 falsify + H6 commit-revise), pinned by verify-entailment.test.mjs
+  #   (the source-truncation regression: 9/9), acceptance harness verify_run.mjs. ACCEPTANCE RUN (soloist+H3,
+  #   NO board, box-and-box c1-c4, n=4): finding_precision soloist 0.75 -> verified 1.0 = VERIFY LIFT +0.25,
+  #   ZERO over-deny regression (c2/c4 already 1.0 left untouched). Quality bar PASS. Cost: always-revise = 3x;
+  #   revise now GATED on a flagged audit -> clean findings 2x, flagged 3x (avg 2.75x here). Bonus fix: pin
+  #   files the question names by filename -> bridge.mjs back in c2, score.mjs in c4 (Gate 0.4 selection
+  #   crowding partly explains the c2 "before the bridge runs" fabrication — that file was never in-window).
+  #   See EVIDENCE/verify_run.md. Default mechanism is now producer+verify-entailment; board stays research-only.
 gate1:
   finding_precision:  ">= 0.75   # findings that survive human verification"
   citation_accuracy:  ">= 0.95   # references that check out as stated"
