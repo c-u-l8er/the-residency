@@ -159,6 +159,23 @@ gate0:
   #   with NO model and OVERRIDE the model verdict (would have caught the c1 "imports norm.mjs" fabrication
   #   deterministically). Closes the Claude-grades-Claude loop where it matters. Tests now 23/23.
   #   See EVIDENCE/verify_run.md. Default mechanism is now producer+verify-entailment; board stays research-only.
+  # ALGEBRA FINDING (post-Gate-0, the [&]-stack falsification gate): pointed the residency's
+  #   FALSIFICATION discipline (not the board) at the box-and-box composition algebra and produced
+  #   ONE concrete bug a PROPERTY LAW catches that the example tests (CP1-CP4) MISS — non-circular
+  #   (no model judged it; the kernel's own isZero contradicts its own docstring). BUG: the |>
+  #   (pipeline) floor is NOT association-invariant. chain() (value.mjs:60) refuses a backward phase
+  #   step on the IMMEDIATE pair, but sets the composite exit phase to the LATER stage (value.mjs:64),
+  #   and a Value carries a SINGLE pi — so a|>(b|>c) collapses (b|>c) to its exit phase and the outer
+  #   guard never sees b's earlier entry phase. Counterexample π=[act,retrieve,consolidate]:
+  #   (a|>b)|>c = 0̲ (floor fires) but a|>(b|>c) = LIVE (floor BYPASSED) — a real backward pipeline
+  #   survives. CP1 misses it because it draws phases SORTED non-decreasing (both groupings always
+  #   feasible); no stated law asserts association-invariance. NEW property laws CP5 (floor
+  #   association-invariant) + CP6 (no backward step survives either association) FALSIFY @2000 trials
+  #   while CP1 on the SAME unsorted bricks still HOLDS 2000/2000. Executable falsifier hydrates the
+  #   kernel from REF 353d1679 and RUNS it. FIX is a maintainer DECISION (not applied): (1) Value
+  #   carries [entry,exit] phase interval + chain refuses downstream-entry < upstream-exit, OR
+  #   (2) narrow CP1's associativity claim to left-fold-only. CP5/CP6 belong in compose-laws.mjs
+  #   either way. See EVIDENCE/algebra-finding.md + algebra_probe.mjs.
 gate1:
   finding_precision:  ">= 0.75   # findings that survive human verification"
   citation_accuracy:  ">= 0.95   # references that check out as stated"
