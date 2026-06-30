@@ -4,10 +4,10 @@
  * ONE concrete bug a property law catches that the hand-written example tests (CP1–CP4) miss.
  *
  * THE FINDING (deterministic, NO model in the loop — the non-circular signal):
- *   The |> (pipeline) operator's documented guarantee — value.mjs:56-58 "Defined only when
- *   phase(a) ≤ phase(b)… a backward step is REFUSED" — is NOT STABLE UNDER RE-ASSOCIATION.
- *   chain() sets the composite's exit phase to the LATER phase (value.mjs:64
- *   `r.pi = firstNonNull(b.pi, a.pi)`), but its backward-step guard (value.mjs:60) only
+ *   The |> (pipeline) operator's documented guarantee — value.mjs:54-56 @REF 353d1679 "Defined
+ *   only when phase(a) ≤ phase(b)… a backward step is REFUSED" — is NOT STABLE UNDER RE-ASSOCIATION.
+ *   chain() sets the composite's exit phase to the LATER phase (value.mjs:62 @REF 353d1679
+ *   `r.pi = firstNonNull(b.pi, a.pi)`), but its backward-step guard (value.mjs:58 @REF) only
  *   compares the IMMEDIATE pair. So a |> (b |> c) collapses (b|>c) to its EXIT phase and the
  *   outer guard never sees b's (earlier) ENTRY phase — an internal backward edge slips through
  *   the floor that (a |> b) |> c correctly refuses.
@@ -24,7 +24,11 @@
  * Two property laws below catch it. Same harness idiom as test/compose-laws.mjs (trial/N=2000):
  *   CP5  the floor is ASSOCIATION-INVARIANT:  isZero((a|>b)|>c) === isZero(a|>(b|>c))  ∀ a,b,c
  *   CP6  NO BACKWARD execution step survives:  any descent in [πa,πb,πc] ⇒ BOTH groupings 0̲
- * Both are FALSIFIED; CP1 (re-run here on the SAME unsorted bricks) still cannot see it.
+ * Both are FALSIFIED; CP1 here draws its OWN sorted phases (as the original does) — that sorting
+ * is exactly why it can't see the bug, and it HOLDS 2000/2000 because of it. (CP1 is NOT run on
+ * unsorted bricks: by construction it never receives them; fed unsorted, the backward grouping
+ * would floor and CP1 would hit 'unexpectedly-zero' and FAIL — structural blindness, not luck.)
+ * All in-comment line numbers are REF 353d1679 coordinates (the SHA this falsifier hydrates).
  *
  * Reproducible: hydrates the kernel from the pinned public REF and RUNS it (executable falsifier,
  * not a quote). $0 — no harness, no model, no network beyond the one pinned raw fetch.

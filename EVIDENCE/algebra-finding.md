@@ -11,23 +11,27 @@ the real kernel hydrated from the pinned public REF; $0, no harness, no model.
 ## Claim
 
 The `|>` (pipeline) operator's documented guarantee — *"Defined only when phase(a) ≤ phase(b)…
-a backward step is REFUSED"* (`value.mjs:56-58`) — **is not stable under re-association.** The same
+a backward step is REFUSED"* (`value.mjs:54-56`) — **is not stable under re-association.** The same
 three stages, regrouped, change whether the "un-weakenable safety floor" fires. A pipeline that
 executes a genuine backward phase step survives the floor when right-associated.
 
 ## Mechanism (grounded)
 
-`chain()` (`value.mjs:59-66`) does two things that disagree:
+`chain()` (`value.mjs:57-65`) does two things that disagree:
 
-- **the guard** (`:60`) refuses a backward step by comparing the *immediate pair*: `phaseIdx(a.pi) > phaseIdx(b.pi)`.
-- **the exit phase** (`:64`) collapses the composite to the *later* stage: `r.pi = firstNonNull(b.pi, a.pi)`.
+- **the guard** (`:58`) refuses a backward step by comparing the *immediate pair*: `phaseIdx(a.pi) > phaseIdx(b.pi)`.
+- **the exit phase** (`:62`) collapses the composite to the *later* stage: `r.pi = firstNonNull(b.pi, a.pi)`.
 
 A `Value` carries a **single** `pi`. So a composite `(b |> c)` remembers only its *exit* phase
 (`c`'s), not its *entry* phase (`b`'s). When that composite is then fed as the right operand of an
 outer `|>`, the outer guard checks the upstream stage against the composite's **exit** phase and
 never sees the composite's earlier **entry** stage — so an internal backward edge slips through.
-`compose.mjs:191-198` (`composePipe`) lifts this directly: the `chained.error` branch (`:196`) is
+`compose.mjs:166-181` (`composePipe`) lifts this directly: the `chained.error` branch (`:170`) is
 the only backward-step floor, and it inherits `chain()`'s single-phase blind spot.
+
+*(All line numbers above are REF `353d1679` coordinates — the SHA this finding pins to and the
+falsifier hydrates. The local working copy has since drifted ~+2 lines in value.mjs and ~+25 in
+compose.mjs from added imports/content; cite the REF, not the working tree.)*
 
 ## Minimal counterexample (deterministic, executable)
 
@@ -63,8 +67,12 @@ written *not* to visit.
 - **CP6 — no backward execution step survives, in either association:** any descent in
   `[πa,πb,πc]` ⇒ both groupings `0̲`. *FALSIFIED* (e.g. `π=[act, retrieve, consolidate]`).
 
-Re-running **CP1 on the same (unsorted) bricks** still **HOLDS 2000/2000** — proof the existing
-law cannot see what CP5/CP6 catch.
+**CP1 only ever draws sorted phases** (`[i,j,k]` sorted non-decreasing) — that sorting is
+*precisely* why it cannot see the bug, and it **HOLDS 2000/2000** because of it. (CP1 is not run
+on unsorted bricks: by construction it never receives them, and if it did, the backward grouping
+would floor and CP1 would hit its `'unexpectedly-zero'` branch and *fail* — not silently miss the
+bug. The point is structural blindness, not a passing test on adversarial input.) CP5/CP6 draw
+*unsorted* phases and that is the entire difference.
 
 ```
 EXISTING example-style law (sorted phases):
@@ -84,15 +92,29 @@ honest framings, and the fixes they imply:
    refuse when the downstream operand's *entry* precedes the upstream operand's *exit*. Then CP5
    and CP6 both hold and `|>` is a genuine partial monoid with a stable zero. (Smallest sound fix;
    touches `value.mjs` chain/V0 and ripples to `consume`'s phase checks.)
-2. **It is an over-strong stated law — `|>` is only a *left-associated* fold.** If pipelines are
-   always built left-to-right (`composeTree` folds that way), then `a |> (b |> c)` is simply not a
-   legal expression and CP1's "associative" claim is too strong; restate it as *left-fold
-   feasibility* and document that the floor is only defined on left-associated chains.
+2. **It is an over-strong stated law — `|>` should be a *left-associated* fold only.** Restate
+   CP1's "associative" claim as *left-fold feasibility* and document that the floor is defined only
+   on left-associated chains. **But this is NOT available as the kernel stands** — and that resolves
+   the judgment call the way Option 1 needs it to. The public AST folder `composeTree`
+   (`compose.mjs`) recurses on `node.a` and `node.b` and evaluates **arbitrary tree shapes**; there
+   is no left-only builder, so `a |> (b |> c)` is a legal, supported, reachable expression. Verified
+   directly: a **right-leaning** `composeTree({op:'|>', a, b:{op:'|>', a:b, b:c}})` on
+   `π=[act,retrieve,consolidate]` returns a **LIVE** brick — the bypass fires through the public API,
+   not just through manual nesting. So "we only build left-leaning trees in practice" is an
+   *unstated precondition the docstring doesn't mention* and a *mitigation*, not a refutation. Taking
+   Option 2 still requires a **code change** — adding and enforcing a left-association invariant
+   (reject right-leaning `|>` trees in `composeTree`) plus documenting it.
 
-Option 1 preserves the advertised monoid/associativity; option 2 honestly narrows the advertised
-guarantee. Either way **the kernel as written today violates its own docstring** and CP1's
-associativity claim, and the property laws above belong in `test/compose-laws.mjs` as CP5/CP6
-regardless of which fix is chosen.
+Option 1 preserves the advertised monoid/associativity; Option 2 honestly narrows the advertised
+guarantee **but is itself a kernel change** (the "it's just an over-strong law" framing does not get
+anyone out of touching the code). So this is a **code-level soundness gap, full stop**: the [&]
+stack's single strongest advertised claim — an *un-weakenable* governance floor utility can't
+resurrect — is, as written, weakenable by re-grouping, reachable through a public API. The property
+laws above belong in `test/compose-laws.mjs` as CP5/CP6 regardless of which fix is chosen.
+
+**Recommended lean: Option 1** (carry the `[entry, exit]` interval). It preserves the monoid;
+Option 2 amounts to quietly narrowing a guarantee the original [&] material actively sold, so if
+anyone reaches for it, it should be a conscious walk-back, not a convenience.
 
 ## Caveats (honesty)
 
