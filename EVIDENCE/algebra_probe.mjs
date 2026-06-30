@@ -30,6 +30,32 @@
  * would floor and CP1 would hit 'unexpectedly-zero' and FAIL — structural blindness, not luck.)
  * All in-comment line numbers are REF 353d1679 coordinates (the SHA this falsifier hydrates).
  *
+ * THE ROOT CAUSE (deepening — pointed the same kit at &, the sibling operator):
+ *   "|> is non-associative" was a SYMPTOM, not the disease. The disease is Value.pi: a SINGLE-slot
+ *   phase carrier set ORDER-DEPENDENTLY by combine()'s `firstNonNull(a.pi, b.pi)` (value.mjs) and
+ *   READ by |>'s floor. That one root cause produces (at least) TWO distinct soundness symptoms:
+ *     · symptom 1 — |> re-association (CP5/CP6 above)
+ *     · symptom 2 — &-operand order leaking into a downstream |> floor (CP7 below)
+ *   & is advertised COMMUTATIVE/idempotent. Its OWN floor IS commutative — isZero(a&b)==isZero(b&a)
+ *   HOLDS 2000/2000 (floor reads only commutative inputs: certified AND, costClass max, sigma-set,
+ *   kappa OR — NOT pi/authority/audit), so & in isolation has NO |>-class bug. We BANK that as a
+ *   passing anchor (AC-COMM). But combine() still picks pi order-dependently, and |>'s floor reads
+ *   pi, so the asymmetry LEAKS:
+ *     CP7  &-operand order must not change a downstream |> floor:
+ *          isZero((a&b)|>c) === isZero((b&a)|>c)               ∀ a,b,c        — FALSIFIED
+ *     witness a@consolidate b@retrieve c@act:  (a&b) carries π=consolidate ⇒ (a&b)|>c = 0̲ (floor
+ *          fires) but (b&a) carries π=retrieve ⇒ (b&a)|>c = LIVE.  Swapping two operands of a
+ *          "commutative" operator turns a forbidden pipeline feasible. Ordinary inputs, fully reachable.
+ *   CONSEQUENCE FOR THE FIX: this BREAKS Option 2. Option 2 ("declare |> left-fold-only, narrow the
+ *   docstring") does nothing here — CP7 uses a SINGLE, un-re-associated |> on a commuted &; there is
+ *   no |> re-grouping to outlaw. Only Option 1 — carry an [entry,exit] phase INTERVAL instead of one
+ *   pi, floor checks the interval — fixes the carrier and kills BOTH symptoms.
+ *   HONESTY: idempotence of & is left UNADJUDICATED (a naive a&a probe is vacuous on zero-quantity
+ *   bricks, and the ⊗ quantity semiring is SUPPOSED to accumulate cost/confidence, so a&a doubling n
+ *   may be by design). And CP7 needs MIXED-phase & operands; if coalitions are always phase-
+ *   homogeneous in practice it never fires — but that is an unenforced, undocumented precondition the
+ *   kernel does not check, which is the same Option-2-shaped gap again.
+ *
  * Reproducible: hydrates the kernel from the pinned public REF and RUNS it (executable falsifier,
  * not a quote). $0 — no harness, no model, no network beyond the one pinned raw fetch.
  *
@@ -74,7 +100,7 @@ function trial(n, body) {
 const main = async () => {
   const { value, compose } = await hydrateKernel();
   const { V, PHASES, phaseIdx } = value;
-  const { Brick, isZero, composePipe } = compose;
+  const { Brick, isZero, composePipe, composeAnd } = compose;
 
   // a FEASIBLE certified brick pinned to a phase; wild contracts (no type-mismatch floor); the
   // floor passes (sigma empty, kappa false). Only the phase varies — exactly CP1's free variable.
@@ -114,6 +140,22 @@ const main = async () => {
       : `${cexTag(...ps)} has a backward step yet survives:  (a|>b)|>c ${isZero(left) ? '0̲' : 'LIVE'}, a|>(b|>c) ${isZero(right) ? '0̲' : 'LIVE'}`;
   });
 
+  // ---- AC-COMM — &'s OWN floor IS commutative (the green anchor: pins what is SOUND about &)
+  const ACcomm = (n) => trial(n, () => {
+    const a = brickAt(randPhase(), 'a'), b = brickAt(randPhase(), 'b');
+    return isZero(composeAnd(a, b)) === isZero(composeAnd(b, a)) ? true
+      : `π=[${a.value.pi}, ${b.value.pi}] a&b ${isZero(composeAnd(a, b)) ? '0̲' : 'live'} but b&a ${isZero(composeAnd(b, a)) ? '0̲' : 'live'}`;
+  });
+
+  // ---- CP7 — &-operand order must NOT change a downstream |> floor (the LEAK: symptom 2 of the root cause)
+  const CP7 = (n) => trial(n, () => {
+    const pa = randPhase(), pb = randPhase(), pc = randPhase();
+    const a = brickAt(pa, 'a'), b = brickAt(pb, 'b'), c = brickAt(pc, 'c');
+    const l = composePipe(composeAnd(a, b), c), r = composePipe(composeAnd(b, a), c);
+    return isZero(l) === isZero(r) ? true
+      : `π=[${pa}, ${pb}, ${pc}]  →  (a&b)|>c ${isZero(l) ? '0̲' : 'LIVE'}  but  (b&a)|>c ${isZero(r) ? '0̲' : 'LIVE'}  (& is "commutative")`;
+  });
+
   // ---- CP1 (re-run, sorted phases) — the EXISTING law; PASSES, proving example-style tests miss it
   const valEqPi = (l, r) => l.value.pi === r.value.pi; // narrow: the phase carrier CP1 also checks
   const CP1sorted = (n) => trial(n, () => {
@@ -136,18 +178,28 @@ const main = async () => {
   console.log(`\n[&] composition-algebra falsifier · box-and-box @ ${REF.slice(0, 7)} · ${N} trials/law\n${'─'.repeat(72)}`);
   console.log('EXISTING example-style law (sorted phases) — expected to PASS and miss the bug:');
   const r1 = run('CP1', '|> associative where feasible (phases sorted non-decreasing)', CP1sorted, true);
-  console.log('\nNEW property laws (unsorted phases) — expected to FALSIFY the floor:');
+  console.log('\nNEW property laws (unsorted phases) — expected to FALSIFY the floor (symptom 1: |> re-assoc):');
   const r5 = run('CP5', 'the floor is ASSOCIATION-INVARIANT: isZero((a|>b)|>c) == isZero(a|>(b|>c))', CP5, true);
   const r6 = run('CP6', 'NO backward execution step survives, in either association', CP6, true);
+  console.log('\nROOT-CAUSE DEEPENING — & (sibling operator); green anchor + symptom 2 (&→|> operand-order leak):');
+  const rAC = run('AC-COMM', "&'s OWN floor is commutative: isZero(a&b) == isZero(b&a)  (EXPECT HOLD — & in isolation is sound)", ACcomm, true);
+  const r7 = run('CP7', '&-operand order must not change a downstream |> floor: isZero((a&b)|>c) == isZero((b&a)|>c)', CP7, true);
+  // deterministic named witness for CP7 (no RNG) — the receipt the maintainer can paste
+  const wa = brickAt('consolidate', 'a'), wb = brickAt('retrieve', 'b'), wc = brickAt('act', 'c');
+  const wl = composePipe(composeAnd(wa, wb), wc), wr = composePipe(composeAnd(wb, wa), wc);
+  console.log(`      witness a@consolidate b@retrieve c@act:  (a&b) π=${composeAnd(wa, wb).value?.pi} ⇒ (a&b)|>c ${isZero(wl) ? '0̲ (floor fires)' : 'LIVE'};  (b&a) π=${composeAnd(wb, wa).value?.pi} ⇒ (b&a)|>c ${isZero(wr) ? '0̲' : 'LIVE (BYPASSED)'}`);
   console.log('─'.repeat(72));
 
   const cp1Passed = r1.pass, cp5Failed = !r5.pass, cp6Failed = !r6.pass;
-  if (cp1Passed && cp5Failed && cp6Failed) {
-    console.log('RESULT: CP1 (sorted/example-style) HOLDS while CP5 & CP6 FALSIFY the SAME operator.');
-    console.log('A property law over UNSORTED phases catches a floor-bypass bug example tests miss. ✓ gate met.\n');
+  const acHeld = rAC.pass, cp7Failed = !r7.pass;
+  if (cp1Passed && cp5Failed && cp6Failed && acHeld && cp7Failed) {
+    console.log('RESULT: CP1 (sorted/example-style) HOLDS while CP5 & CP6 FALSIFY the SAME operator (symptom 1).');
+    console.log('        AC-COMM HOLDS (& floor is sound) yet CP7 FALSIFIES (symptom 2: the order-dependent π');
+    console.log('        carrier leaks through |>). Root cause = Value.pi single-slot carrier; only Option 1 closes both.');
+    console.log('A property kit catches a floor-bypass bug example tests miss, AND locates the root cause. ✓ gate met.\n');
     process.exit(0);
   }
-  console.log('RESULT: unexpected — the bug may have been fixed at this REF, or the probe is wrong. Investigate.\n');
+  console.log('RESULT: unexpected — a law may have been fixed at this REF, or the probe is wrong. Investigate.\n');
   process.exit(1);
 };
 

@@ -1,4 +1,12 @@
-# Finding — the `|>` floor is not association-invariant (box-and-box @353d167)
+# Finding — the order-dependent `Value.pi` carrier weakens the [&] floor (box-and-box @353d167)
+
+> **Headline.** What first looked like "`|>` is non-associative" is one *symptom* of a single root
+> cause: `Value.pi` is a **single-slot phase carrier set order-dependently** (`combine`'s
+> `firstNonNull`) and **read by the floor**. That root cause produces (at least) **two** soundness
+> symptoms — `|>` re-association (CP5/CP6) and `&`-operand-order leaking into a downstream `|>`
+> (CP7) — and it **kills fix Option 2**, leaving **Option 1 (carry an `[entry,exit]` interval)** as
+> the only fix that closes both. All five laws below were re-run against the real kernel @REF; the
+> floor's own `isZero` is the verdict, no model in the loop.
 
 **Gate.** After Gate 0 closed negative, the standing recommendation was to point the
 residency's *falsification discipline* (not the board) at the **[&] composition algebra** and
@@ -76,11 +84,52 @@ bug. The point is structural blindness, not a passing test on adversarial input.
 
 ```
 EXISTING example-style law (sorted phases):
-  ✓ CP1  |> associative where feasible           HOLDS (2000/2000)
-NEW property laws (unsorted phases):
-  ✗ CP5  floor is association-invariant           FALSIFIED @trial 21  π=[route, retrieve, consolidate]
-  ✗ CP6  no backward execution step survives      FALSIFIED @trial 9   π=[act, retrieve, consolidate]
+  ✓ CP1      |> associative where feasible             HOLDS (2000/2000)
+NEW property laws (unsorted phases) — symptom 1, |> re-association:
+  ✗ CP5      floor is association-invariant             FALSIFIED @trial 10  π=[learn, retrieve, consolidate]
+  ✗ CP6      no backward execution step survives        FALSIFIED @trial 5   π=[learn, retrieve, learn]
+ROOT-CAUSE DEEPENING — & (sibling operator):
+  ✓ AC-COMM  &'s OWN floor is commutative               HOLDS (2000/2000)   ← & in isolation is sound
+  ✗ CP7      &-order doesn't change a downstream |>      FALSIFIED @trial 3   π=[learn, route, route]
+             witness a@consolidate b@retrieve c@act:  (a&b)|>c 0̲  but  (b&a)|>c LIVE
 ```
+
+## Root cause + second symptom — pointing the same kit at `&`
+
+`|>` non-associativity was the *symptom*; the *disease* is the carrier. `combine()` (`value.mjs`)
+sets `pi`, `iota`, `psi` via `firstNonNull(a.*, b.*)` and concatenates `authority`/`audit` in
+operand order — all **order-dependent** — and `composeAnd` lifts it directly. `&` is advertised
+**commutative**. So the obvious skeptic's question is whether `&` has a bug of the same class. Run
+it, don't guess:
+
+- **AC-COMM — `&`'s OWN floor is commutative:** `isZero(a&b) === isZero(b&a)`. **HOLDS 2000/2000.**
+  Whether a coalition annihilates does *not* depend on operand order, because the floor reads only
+  commutative inputs (`certified` AND, `costClass` max-like, `sigma`-emptiness, `kappa` OR) — it
+  does **not** read `pi`/`authority`/`audit`. So **`&` in isolation has no `|>`-class bug.** Bank
+  this as a *passing* anchor: a green law pinning what *is* sound is as valuable as the red ones.
+- **CP7 — `&`-operand order must not change a downstream `|>` floor:**
+  `isZero((a&b)|>c) === isZero((b&a)|>c)`. **FALSIFIED.** `combine` still picks `pi`
+  order-dependently, and `|>`'s floor *reads* `pi`, so the asymmetry **leaks downstream**.
+  Deterministic witness `a@consolidate, b@retrieve, c@act`:
+
+  ```
+  (a&b) carries π=consolidate  →  (a&b) |> c  ⇒  0̲     (floor fires — correct)
+  (b&a) carries π=retrieve     →  (b&a) |> c  ⇒  live   (floor BYPASSED)
+  ```
+
+  A forbidden pipeline becomes feasible purely by **swapping the two operands of a "commutative"
+  operator** — the most basic thing one can do — and the kernel accepts mixed-phase `&` without
+  complaint. Random probe also falsifies (e.g. `π=[learn, route, route]`).
+
+The point is not "two bugs." It is that the first finding's *diagnosis* was incomplete: the root
+cause is `Value.pi` (single-slot, chosen order-dependently, read by the floor), and it has at least
+two distinct triggers. This **breaks Option 2** below.
+
+*Honesty on this run:* idempotence of `&` is left **unadjudicated** — a naive `a&a` probe is vacuous
+on zero-quantity bricks, and the `⊗` quantity semiring is *supposed* to accumulate cost/confidence,
+so `a&a` doubling `n` may be by design. And CP7 needs **mixed-phase** `&` operands; if coalitions are
+always phase-homogeneous in practice it never fires — but that is an *unenforced, undocumented*
+precondition the kernel does not check, which is the same Option-2-shaped gap again.
 
 ## Fix options (a DECISION for the maintainer — NOT applied here)
 
@@ -105,16 +154,22 @@ honest framings, and the fixes they imply:
    Option 2 still requires a **code change** — adding and enforcing a left-association invariant
    (reject right-leaning `|>` trees in `composeTree`) plus documenting it.
 
-Option 1 preserves the advertised monoid/associativity; Option 2 honestly narrows the advertised
-guarantee **but is itself a kernel change** (the "it's just an over-strong law" framing does not get
-anyone out of touching the code). So this is a **code-level soundness gap, full stop**: the [&]
-stack's single strongest advertised claim — an *un-weakenable* governance floor utility can't
-resurrect — is, as written, weakenable by re-grouping, reachable through a public API. The property
-laws above belong in `test/compose-laws.mjs` as CP5/CP6 regardless of which fix is chosen.
+**The `&` finding settles it: Option 2 is dead.** Option 2 only narrows the *re-association* of
+`|>`. But CP7 leaks through a **single, un-re-associated `|>`** on a **commuted `&`** — there is no
+`|>` re-grouping to outlaw, so a left-fold-only `|>` does nothing here. Only **Option 1** — carry an
+`[entry, exit]` phase interval instead of one `pi`, and have the floor check the interval — fixes the
+*carrier*, and therefore kills **both** symptoms at once. So the recommendation is no longer merely
+"Option 1 is cleaner"; it is "**Option 1 is the only one of the two that closes both holes**, and
+here is the `&`→`|>` witness that a left-fold patch would ship still leaking."
 
-**Recommended lean: Option 1** (carry the `[entry, exit]` interval). It preserves the monoid;
-Option 2 amounts to quietly narrowing a guarantee the original [&] material actively sold, so if
-anyone reaches for it, it should be a conscious walk-back, not a convenience.
+This is a **code-level soundness gap, full stop**: the [&] stack's single strongest advertised claim
+— an *un-weakenable* governance floor a utility can't resurrect — is, as written, weakenable two ways
+(by re-grouping `|>`, and by commuting `&`), both reachable through ordinary public-API inputs.
+
+**Recommended: Option 1** (carry the `[entry, exit]` interval). For the suite, land alongside
+CP5/CP6 a third xfail — **CP7: `&`-operand order does not change a downstream `|>` floor** — and keep
+**AC-COMM (`&`-floor commutativity) as a *passing* law**: a green anchor pinning what is sound belongs
+next to the red ones that pin what isn't.
 
 ## Caveats (honesty)
 
@@ -123,8 +178,9 @@ anyone reaches for it, it should be a conscious walk-back, not a convenience.
 - "Bug in code" vs "over-strong law" is a genuine judgment call (see fix options); what is **not**
   a judgment call is that the documented "backward step is REFUSED" guarantee and CP1's
   associativity claim are *both* violated by the kernel's own execution.
-- Scope: this probes only the `|>` phase floor. It does **not** claim anything about `&`, the
-  cost-class lattice, the CC2 quantity semiring, or the 8-rung bridge — those CX/CA laws were not
-  re-derived here.
+- Scope: this probes the `|>` phase floor and the `&`→`|>` `pi`-carrier leak. `&`'s **own** floor is
+  *cleared* (AC-COMM holds). It does **not** claim anything about the cost-class lattice, the CC2
+  quantity semiring, `&` idempotence (left unadjudicated above), or the 8-rung bridge — those laws
+  were not re-derived here.
 - Non-circular by construction: the verdict is the kernel's own `isZero`, run on the real code at
   REF `353d1679`. No LLM adjudicated it.
