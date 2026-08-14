@@ -217,4 +217,10 @@ const main = async () => {
   console.log('(decode: echo "<b64>" | base64 -d)\n');
 };
 
-main().catch((e) => { console.error('gate error:', e.message); process.exit(2); });
+// reusable pieces (single source of truth for the trace + clause checker; judge_containment.mjs imports these)
+export { emitTrace, arms, scoreArm, splitClauses, classifyClause, REF };
+
+// run the gate only when invoked directly (importing this module must NOT run main)
+if (import.meta.url === pathToFileURL(process.argv[1] || '').href) {
+  main().catch((e) => { console.error('gate error:', e.message); process.exit(2); });
+}
